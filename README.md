@@ -1,8 +1,9 @@
-# 5G-MAG Reference Tools: Sample 5G-MAG Player
+# 5G-MAG Reference Tools: Applications
 
+## Sample 5G-MAG Player
 Only for initial testing purposes
 
-## Testing with AS
+### Testing with AS
 The app can be tested as is against the following ContentHostingConfiguration_tv_pull-ingest.json:
 ```
 {
