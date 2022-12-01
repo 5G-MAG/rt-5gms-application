@@ -45,10 +45,11 @@ public class MainActivity extends AppCompatActivity {
             // Create a player instance.
             ExoPlayer fivegmagplayer = new ExoPlayer.Builder(this).build();
 
-          //  videoURL = "https://rtvelivestream.akamaized.net/segments/24h/24h_main_dvr.m3u8";
-          //  videoURL = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
-          //  videoURL = "http://localhost/m4d/provisioning-session-d54a1fcc-d411-4e32-807b-2c60dbaeaf5f/BigBuckBunny_4s_simple_2014_05_09.mpd";
-            videoURL = "http://10.0.2.2:80/m4d/provisioning-session-d54a1fcc-d411-4e32-807b-2c60dbaeaf5f/playlist.m3u8";
+         // videoURL = "http://10.0.2.2/m4d/provisioning-session-d54a1fcc-d411-4e32-807b-2c60dbaeaf5f/BigBuckBunny_4s_simple_2014_05_09.mpd";
+         // videoURL = "http://10.0.2.2/m4d/provisioning-session-d54a1fcc-d411-4e32-807b-2c60dbaeaf5f/playlist.m3u8";
+         // videoURL = "http://10.0.2.2/m4d/provisioning-session-d54a1fcc-d411-4e32-807b-2c60dbaeaf5f/master.m3u8";
+         // videoURL = "http://10.0.2.2/m4d/provisioning-session-d54a1fcc-d411-4e32-807b-2c60dbaeaf5f/test5hd.mpd";
+            videoURL = "http://10.0.2.2/m4d/provisioning-session-d54a1fcc-d411-4e32-807b-2c60dbaeaf5f/manifest.mpd";
 
             //OPTION 1: Using MediaItem (https://exoplayer.dev/hls.html or https://exoplayer.dev/dash.html)
             MediaItem mediaItem = MediaItem.fromUri(videoURL);
