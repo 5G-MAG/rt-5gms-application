@@ -1,0 +1,12 @@
+Edited patch/AndroidManifest.xml:
+•	A new activity called WebviewActivity has been added to the manifest. This activity is now handling the MAIN and the LAUNCHER intents.
+
+Created patch/WebviewActivity.java class:
+•	fetches the provided url and displays the DVB-I frontend to the user, allowing the selection of available test streams
+•	sends test stream url to Exoplayer for playback
+
+Created patch/NetworkOps.java class
+•	triggers an asynchronous task to download Sofia Digital service list file in the app cache memory
+
+Edited patch/PlayerActivity.java class
+•	edited the OnNewIntent method to avoid sending multiple playback requests to the player instance 
