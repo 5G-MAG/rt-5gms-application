@@ -4,3 +4,7 @@
 	url = https://github.com/google/ExoPlayer.git
 	branch = dev-v2
 	
+[submodule "ExoPlayer"]
+	path = ExoPlayer
+	url = https://github.com/google/ExoPlayer.git
+	branch = dev-v2
