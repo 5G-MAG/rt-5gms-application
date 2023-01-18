@@ -1,29 +1,9 @@
 # 5G-MAG Reference Tools: Applications
 
-## Sample 5G-MAG Player
-Only for initial testing purposes
+This repository holds applications that can be used to test and demo other 5G-MAG Reference Tools.
 
-### Testing with AS
-The app can be tested as is against the following ContentHostingConfiguration_tv_pull-ingest.json:
-```
-{
-  "name": "playlist",
-  "ingestConfiguration": {
-    "pull": true,
-    "protocol": "urn:3gpp:5gms:content-protocol:http-pull-ingest",
-    "entryPoint": "https://euronews-euronews-spanish-2-mx.samsung.wurl.com/"
-  },
-  "distributionConfigurations": [
-    {
-      "canonicalDomainName": "10.0.2.2",
-      "domainNameAlias": "",
-      "pathRewriteRules": [
-	{
-	  "requestPattern": "^/m4d/provisioning-session-[^/]*/",
-	  "mappedPath": "/manifest/"
-	}
-      ]
-    }
-  ]
-}
-```
+## Current Applications and Folders
+
+Each folder within the repository contains a different application with its own code, documentation and license file.
+This is a list of the current applications available:
+* [Sample 5G-MAG Player](https://github.com/5G-MAG/rt-5gms-application/tree/main/fivegmag_sampleplayer) (5G-MAG Public License v1.0): an application for initial testing purposes which integrates an instance of Exoplayer and a hard-coded URL
