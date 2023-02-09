@@ -51,7 +51,7 @@ python3 replace.py
 Enter the Exoplayer folder and build the project:
 ```
 cd Exoplayer
-gradlew assembleRelease
+./gradlew assembleRelease
 ```
 
 Find the built .apk files in the Exoplayer folder:
@@ -60,3 +60,13 @@ Find the built .apk files in the Exoplayer folder:
 ```
 
 Pick the desired .apk (Debug/Release version, with/without Decoder Extensions) and install on your target device via e.g. ADB
+
+In case of an error ```SDK location not found```, add a ```local.properties``` file to the Exoplayer directory specifying the path to the Android SDK. For instance, on a MAC: 
+```
+sdk.dir=/Users/<username>/Library/Android/sdk
+```
+
+To install the APK on a device run:  
+```
+adb -s <deviceID> install -r noDecoderExtensionsDvbiapp/release/demo-noDecoderExtensions-dvbiapp-release.apk
+```
