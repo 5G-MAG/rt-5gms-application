@@ -42,7 +42,14 @@ Clone the repository, including submodules
 git clone --recurse-submodules git@github.com:5G-MAG/rt-5gms-application.git
 ```
 
-Apply the patch available inside the ```patch``` folder into Exoplayer. Then enter the Exoplayer folder and build the project:
+Copy the patch available inside the ```patch``` folder into the Exoplayer project, then apply it:
+```
+copy rt-5gms-application\fivegmag_ExoDvbi_player\patch\Exoplayer.patch rt-5gms-application\fivegmag_ExoDvbi_player\Exoplayer\
+cd rt-5gms-application\fivegmag_ExoDvbi_player\Exoplayer\
+git apply Exoplayer.patch
+```
+
+Build the patched Exoplayer project:
 ```
 ./gradlew assembleRelease
 ```
