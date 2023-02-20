@@ -1,0 +1,5 @@
+
+[submodule "fivegmag_ExoDvbi_player/ExoPlayer"]
+	path = fivegmag_ExoDvbi_player/ExoPlayer
+	url = https://github.com/google/ExoPlayer.git
+	branch = dev-v2

@@ -1,0 +1,9 @@
+5G-MAG DVB-I/ExoPlayer uses the following open source software:
+
+- ExoPlayer 
+  ExoPlayer modules can be obtained from the Google Maven repository. https://developer.android.com/studio/build/dependencies#google-maven
+  Licensed under Apache Software License v2.0 terms (https://www.apache.org/licenses/LICENSE-2.0)
+
+- DVB-I Reference Application
+  The DVB-I reference aplication front end is available from the Git repository: https://github.com/DVBproject/DVB-I-Reference-Client
+  Licensed under MIT License terms (https://github.com/DVBProject/DVB-I-Reference-Client/blob/master/LICENSE) 
