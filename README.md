@@ -1,4 +1,4 @@
-# 5G-MAG Reference Tools: Applications
+# 5G-MAG Reference Tools: 5G Media Streaming Aware Applications
 
 This repository holds applications that can be used to test and demo other 5G-MAG Reference Tools.
 
