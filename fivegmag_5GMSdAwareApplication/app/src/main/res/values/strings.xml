@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">5GMS Aware Application</string>
+    <string name="textview">5G-MAG Reference Tools</string>
+    <string name="labelStreamSelection">Select a stream</string>
+</resources>

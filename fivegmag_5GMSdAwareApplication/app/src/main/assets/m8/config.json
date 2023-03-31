@@ -1,0 +1,17 @@
+{
+  "m5Url": "http://10.147.67.179:3003/3gpp-m5/v2/",
+  "serviceAccessInformation": [
+    {
+      "provisioningSessionId": "d54a1fcc-d411-4e32-807b-2c60dbaeaf5f",
+      "streamingAccess": {
+        "mediaPlayerEntry": "https://dash.akamaized.net/envivio/EnvivioDash3/manifest.mpd"
+      }
+    },
+    {
+      "provisioningSessionId": "e54a1fcc-d411-4e32-807b-2c60dbaeaf5f",
+      "streamingAccess": {
+        "mediaPlayerEntry": "https://livesim.dashif.org/livesim/testpic_2s/Manifest.mpd"
+      }
+    }
+  ]
+}

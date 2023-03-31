@@ -1,0 +1,31 @@
+{
+  "m5Url": "http://10.147.67.179:3003/3gpp-m5/v2/",
+  "serviceList": [
+    {
+      "provisioningSessionId": "3",
+      "name": "BBC",
+      "entryPoints": [
+        {
+          "locator": "https://rdmedia.bbc.co.uk/testcard/vod/manifests/avc-full.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        }
+      ]
+    },
+    {
+      "provisioningSessionId": "3",
+      "name": "AWS",
+      "entryPoints": [
+        {
+          "locator": "https://d24rwxnt7vw9qb.cloudfront.net/v1/dash/e6d234965645b411ad572802b6c9d5a10799c9c1/All_Reference_Streams/4577dca5f8a44756875ab5cc913cd1f1/index.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        }
+      ]
+    }
+  ]
+}
