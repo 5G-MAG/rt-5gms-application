@@ -1,5 +1,5 @@
 {
-  "m5Url": "http://10.147.67.179:3003/3gpp-m5/v2/",
+  "m5BaseUrl": "http://10.147.67.179:3003/3gpp-m5/v2/",
   "serviceList": [
     {
       "provisioningSessionId": "1",

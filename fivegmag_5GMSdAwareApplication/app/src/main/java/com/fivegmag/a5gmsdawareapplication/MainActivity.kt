@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun onM8DataChanged() {
-        mediaSessionHandlerAdapter.setM5Endpoint(m8Data.m5Url)
+        mediaSessionHandlerAdapter.setM5Endpoint(m8Data.m5BaseUrl)
         populateSpinner()
     }
 
@@ -148,9 +148,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     if (resource != null) {
                         val jsonObject: JsonObject =
                             Json.parseToJsonElement(resource).jsonObject
-                        val m5Url: String = replaceDoubleTicks(jsonObject.get("m5Url").toString())
+                        val m5BaseUrl: String = replaceDoubleTicks(jsonObject.get("m5BaseUrl").toString())
                         val jsonServiceList = jsonObject.get("serviceList")?.jsonArray
-                        m8Data = jsonServiceList?.let { createM8Model(m5Url, it) }!!
+                        m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
                         onM8DataChanged()
                     }
                 }
@@ -170,16 +170,16 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val inputStream: InputStream = assets.open(url)
             json = inputStream.bufferedReader().use { it.readText() }
             val jsonObject: JsonObject = Json.parseToJsonElement(json).jsonObject
-            val m5Url: String = replaceDoubleTicks(jsonObject.get("m5Url").toString())
+            val m5BaseUrl: String = replaceDoubleTicks(jsonObject.get("m5BaseUrl").toString())
             val jsonServiceList = jsonObject.get("serviceList")?.jsonArray
-            m8Data = jsonServiceList?.let { createM8Model(m5Url, it) }!!
+            m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
             onM8DataChanged()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun createM8Model(m5Url: String, jsonServiceList: JsonArray): M8Model {
+    private fun createM8Model(m5BaseUrl: String, jsonServiceList: JsonArray): M8Model {
         val serviceList = ArrayList<ServiceListEntry>()
 
         for (serviceListEntry in jsonServiceList) {
@@ -223,7 +223,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             serviceList.add(entry)
         }
 
-        return M8Model(m5Url, serviceList)
+        return M8Model(m5BaseUrl, serviceList)
     }
 
     private fun replaceDoubleTicks(value: String): String {
