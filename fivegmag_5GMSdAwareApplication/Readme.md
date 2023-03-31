@@ -17,13 +17,13 @@ Client and Network functions via the interfaces and APIs defined in the 5GMS arc
 ## Downloading
 
 Release versions can be downloaded from
-the [releases](https://github.com/5G-MAG/rt-5gms-aware-application/releases) page.
+the [releases](https://github.com/5G-MAG/rt-5gms-application/releases) page.
 
 The source can be obtained by cloning the github repository.
 
 ```
 cd ~
-git clone https://github.com/5G-MAG/rt-5gms-aware-application.git
+git clone https://github.com/5G-MAG/rt-5gms-application/releases
 ```
 
 ## Building
@@ -31,11 +31,12 @@ git clone https://github.com/5G-MAG/rt-5gms-aware-application.git
 Call the following command in order to generate the `apk` bundles.
 
 ````
+cd fivegmag_5GMSdAwareApplication/
 ./gradlew assemble
 ````
 
-The resulting `apk` bundles can be found in `app/build/outputs/apk`. The debug build is located
-in `debug` folder the release build in the `release` folder.
+The resulting `apk` bundles can be found in `fivegmag_5GMSdAwareApplication/app/build/outputs/apk`.
+The debug build is located in `debug` folder the release build in the `release` folder.
 
 ## Install
 
@@ -51,8 +52,9 @@ CQ30022U4R	device
 ````
 
 3. Install the `apk` on the target
-   device: `adb -s <deviceID> install -r app/build/outputs/apk/release/app-debug.apk`. Using `-r`
-   we reinstall an existing app, keeping its data.
+   device: `adb -s <deviceID> install -r app/build/outputs/apk/debug/app-debug.apk`. Using `-r`
+   we reinstall an existing app, keeping its data. In the example above replace `<deviceId>`
+   with `CQ30022U4R`.
 
 ## Running
 
@@ -88,7 +90,8 @@ ApplicationFunction to provide valid `mediaPlayerEntry` values for playback.
 `config_multi_media.js` uses the same `provisioningSessionId` for multiple assets which is why
 the `mediaPlayerEntry` values are directly provided.
 
-For more information about the different M8 formats refer to the [Github discussion](https://github.com/5G-MAG/rt-5gms-application/discussions/6)
+For more information about the different M8 formats refer to
+the [Github discussion](https://github.com/5G-MAG/rt-5gms-application/discussions/6)
 
 ## Development
 
