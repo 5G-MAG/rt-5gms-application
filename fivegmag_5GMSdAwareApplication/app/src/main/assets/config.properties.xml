@@ -1,0 +1,6 @@
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+   <entry key="m8LocalSingleMedia">m8/config_single_media.json</entry>
+   <entry key="m8LocalMultiMedia">m8/config_multi_media.json</entry>
+   <entry key="m8Hosted">https://rt.5g-mag.com/</entry>
+</properties>
