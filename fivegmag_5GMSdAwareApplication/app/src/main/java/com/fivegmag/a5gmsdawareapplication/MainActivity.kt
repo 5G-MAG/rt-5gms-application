@@ -9,7 +9,7 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication
 
-import android.net.Uri
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -17,7 +17,9 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
-import com.fivegmag.a5gmscommonlibrary.models.*
+import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
+import com.fivegmag.a5gmscommonlibrary.models.M8Model
+import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmsdawareapplication.network.M8InterfaceApi
 import com.fivegmag.a5gmsmediastreamhandler.ExoPlayerAdapter
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
@@ -32,6 +34,7 @@ import java.io.InputStream
 import java.net.URI
 import java.util.*
 
+
 const val TAG = "5GMS Aware Application"
 
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
@@ -39,7 +42,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
     private var currentSelectedStreamIndex: Int = 0
-    private lateinit var currentSelectedM8Url: URI
+    private lateinit var currentSelectedM8Key: String
     private lateinit var m8InterfaceApi: M8InterfaceApi
     private lateinit var m8Data: M8Model
     private lateinit var exoPlayerView: StyledPlayerView
@@ -48,11 +51,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        loadConfiguration()
-        populateM8SelectionSpinner()
-        exoPlayerView = findViewById(R.id.idExoPlayerVIew)
 
         try {
+            loadConfiguration()
+            populateM8SelectionSpinner()
+            exoPlayerView = findViewById(R.id.idExoPlayerVIew)
             registerButtonListener()
             mediaSessionHandlerAdapter.initialize(
                 this,
@@ -88,7 +91,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val propertyNames = configProperties.propertyNames()
 
             while (propertyNames.hasMoreElements()) {
-                spinnerOptions.add(configProperties.getProperty(propertyNames.nextElement() as String?))
+                spinnerOptions.add(propertyNames.nextElement() as String)
             }
 
             val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
@@ -154,54 +157,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         mediaSessionHandlerAdapter.initializePlaybackByServiceListEntry(serviceListEntry)
     }
 
-
-    private fun createM8Model(m5BaseUrl: String, jsonServiceList: JsonArray): M8Model {
-        val serviceList = ArrayList<ServiceListEntry>()
-
-        for (serviceListEntry in jsonServiceList) {
-            val itemAsJsonObject = Json.parseToJsonElement(serviceListEntry.toString()).jsonObject
-            var name: String =
-                replaceDoubleTicks(itemAsJsonObject["name"].toString())
-            var provisioningSessionId =
-                replaceDoubleTicks(itemAsJsonObject["provisioningSessionId"].toString())
-
-            val entryPoints = ArrayList<EntryPoint>()
-            val entryPointList = itemAsJsonObject.get("entryPoints")?.jsonArray
-
-            if (entryPointList != null) {
-                for (entryPoint in entryPointList) {
-                    val entryPointAsJsonObject =
-                        Json.parseToJsonElement(entryPoint.toString()).jsonObject
-                    val locator = replaceDoubleTicks(entryPointAsJsonObject["locator"].toString())
-                    val contentType =
-                        replaceDoubleTicks(entryPointAsJsonObject["contentType"].toString())
-                    val profiles = ArrayList<String>()
-                    val profileList = entryPointAsJsonObject.get("profiles")?.jsonArray
-                    if (profileList != null) {
-                        for (profileEntry in profileList) {
-                            profiles.add(profileEntry.toString())
-                        }
-                    }
-                    entryPoints.add(
-                        EntryPoint(
-                            locator,
-                            contentType,
-                            profiles
-                        )
-                    )
-                }
-            }
-            val entry = ServiceListEntry(
-                provisioningSessionId,
-                name,
-                entryPoints
-            )
-            serviceList.add(entry)
-        }
-
-        return M8Model(m5BaseUrl, serviceList)
-    }
-
     private fun replaceDoubleTicks(value: String): String {
         return value.replace("\"", "");
     }
@@ -213,11 +168,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     currentSelectedStreamIndex = position
                 }
                 R.id.idM8Spinner -> {
-                    currentSelectedM8Url = URI(parent.selectedItem as String)
-                    if(currentSelectedM8Url.isAbsolute) {
-                        setM8DataViaEndpoint(currentSelectedM8Url.toString())
+                    currentSelectedM8Key = parent.selectedItem as String
+                    val selectedUri = URI(configProperties.getProperty(currentSelectedM8Key))
+                    if(selectedUri.isAbsolute) {
+                        setM8DataViaEndpoint(selectedUri.toString())
                     } else {
-                        setM8DataViaJson(currentSelectedM8Url.toString())
+                        setM8DataViaJson(selectedUri.toString())
                     }
                 }
                 else -> { // Note the block
@@ -270,6 +226,53 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun createM8Model(m5BaseUrl: String, jsonServiceList: JsonArray): M8Model {
+        val serviceList = ArrayList<ServiceListEntry>()
+
+        for (serviceListEntry in jsonServiceList) {
+            val itemAsJsonObject = Json.parseToJsonElement(serviceListEntry.toString()).jsonObject
+            var name: String =
+                replaceDoubleTicks(itemAsJsonObject["name"].toString())
+            var provisioningSessionId =
+                replaceDoubleTicks(itemAsJsonObject["provisioningSessionId"].toString())
+
+            val entryPoints = ArrayList<EntryPoint>()
+            val entryPointList = itemAsJsonObject.get("entryPoints")?.jsonArray
+
+            if (entryPointList != null) {
+                for (entryPoint in entryPointList) {
+                    val entryPointAsJsonObject =
+                        Json.parseToJsonElement(entryPoint.toString()).jsonObject
+                    val locator = replaceDoubleTicks(entryPointAsJsonObject["locator"].toString())
+                    val contentType =
+                        replaceDoubleTicks(entryPointAsJsonObject["contentType"].toString())
+                    val profiles = ArrayList<String>()
+                    val profileList = entryPointAsJsonObject.get("profiles")?.jsonArray
+                    if (profileList != null) {
+                        for (profileEntry in profileList) {
+                            profiles.add(profileEntry.toString())
+                        }
+                    }
+                    entryPoints.add(
+                        EntryPoint(
+                            locator,
+                            contentType,
+                            profiles
+                        )
+                    )
+                }
+            }
+            val entry = ServiceListEntry(
+                provisioningSessionId,
+                name,
+                entryPoints
+            )
+            serviceList.add(entry)
+        }
+
+        return M8Model(m5BaseUrl, serviceList)
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {

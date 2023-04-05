@@ -11,7 +11,7 @@
         android:id="@+id/imageView"
         android:layout_width="71dp"
         android:layout_height="74dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -19,19 +19,19 @@
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="194dp"
-        android:layout_height="31dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="36dp"
+        android:layout_width="231dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="40dp"
         android:text="@string/headline"
-        android:textSize="16sp"
+        android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.exoplayer2.ui.StyledPlayerView
         android:id="@+id/idExoPlayerVIew"
-        android:layout_width="346dp"
-        android:layout_height="241dp"
+        android:layout_width="355dp"
+        android:layout_height="200dp"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -80,8 +80,8 @@
         android:id="@+id/loadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="54dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="28dp"
         android:text="@string/startPlaybackButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />

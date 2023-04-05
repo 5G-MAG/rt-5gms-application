@@ -3,4 +3,5 @@
    <entry key="m8LocalSingleMedia">m8/config_single_media.json</entry>
    <entry key="m8LocalMultiMedia">m8/config_multi_media.json</entry>
    <entry key="m8Hosted">https://rt.5g-mag.com/</entry>
+   <entry key="m8DummyHost">http://10.147.67.179:3003/m8/</entry>
 </properties>
