@@ -23,7 +23,7 @@ The source can be obtained by cloning the github repository.
 
 ```
 cd ~
-git clone https://github.com/5G-MAG/rt-5gms-application/releases
+git clone https://github.com/5G-MAG/rt-5gms-application.git
 ```
 
 ## Building
