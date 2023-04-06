@@ -71,14 +71,21 @@ example M8 configuration JSON files.
 
 ### M8 endpoint configuration
 
-The base URL to the hosted M8 endpoint and the two local M8 example files can be configured
-in `src/main/assets/config.properties`:
+The URL to the M8 endpoints can be configured in `src/main/assets/config.properties`:
 
 ```` 
-m8StaticSingleJsonUrl = m8/config_single_media.json
-m8StaticMultiJsonUrl = m8/config_multi_media.json
-m8HostingEndpoint = https://rt.5g-mag.com/
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+   <entry key="m8LocalSingleMedia">m8/config_single_media.json</entry>
+   <entry key="m8LocalMultiMedia">m8/config_multi_media.json</entry>
+   <entry key="m85GMAGHost">https://rt.5g-mag.com/</entry>
+   <entry key="m8LocalDummyHost">http://10.147.67.179:3003/m8/</entry>
+</properties>
 ````
+
+Each entry needs to have a unique `key` that is used to populate the selection spinner in the Main Acitivity. The
+URL to the to the M8 JSON file can either be relative pointing to a local file in the `assets`
+folder or absolute pointing to a server side endpoint.
 
 ### Local M8 examples
 
