@@ -9,7 +9,6 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication
 
-import android.app.ProgressDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
