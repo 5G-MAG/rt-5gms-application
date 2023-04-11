@@ -1,0 +1,18 @@
+{
+  "m5BaseUrl": "http://192.168.178.55:7778/3gpp-m5/v2/",
+  "serviceList": [
+    {
+      "provisioningSessionId": "02e1666e-d5dc-41ed-bd6a-e18ff9b9dd14",
+      "name": "Big Buck Bunny",
+      "entryPoints": [
+        {
+          "locator": "http://192.168.178.55/m4d/provisioning-session-02e1666e-d5dc-41ed-bd6a-e18ff9b9dd14/BigBuckBunny_4s_onDemand_2014_05_09.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        }
+      ]
+    }
+  ]
+}

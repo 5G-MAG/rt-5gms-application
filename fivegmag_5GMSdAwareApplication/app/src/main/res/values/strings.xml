@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">5GMS Aware Application</string>
+    <string name="headline">5G-MAG Reference Tools</string>
+    <string name="labelM8Selection">Select M8 Input</string>
+    <string name="labelStreamSelection">Select a Stream</string>
+    <string name="startPlaybackButton">Start Playback</string>
+</resources>

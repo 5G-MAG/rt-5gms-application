@@ -1,0 +1,13 @@
+{
+  "m5BaseUrl": "http://10.147.67.179:3003/3gpp-m5/v2/",
+  "serviceList": [
+    {
+      "provisioningSessionId": "1",
+      "name": "DASH-IF LiveSim"
+    },
+    {
+      "provisioningSessionId": "2",
+      "name": "Envivio"
+    }
+  ]
+}
