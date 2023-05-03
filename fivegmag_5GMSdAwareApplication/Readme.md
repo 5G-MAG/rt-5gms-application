@@ -26,6 +26,24 @@ cd ~
 git clone https://github.com/5G-MAG/rt-5gms-application.git
 ```
 
+## Install dependencies
+The 5GMSd Aware Application requires the [Common Android Library](https://github.com/5G-MAG/rt-5gms-common-android-library) and the [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handler) to run.
+
+Both are included as Maven dependencies in the `build.gradle`:
+
+````
+dependencies {
+   implementation 'com.fivegmag:a5gmscommonlibrary:1.0.0'
+   implementation 'com.fivegmag:a5gmsmediastreamhandler:1.0.0'
+}
+````
+
+To install these two dependencies follow the corresponding installation guides in the Readme documentation of both projects. Make sure to publish both of them to a local Maven repository:
+
+* [Common Android Library](https://github.com/5G-MAG/rt-5gms-common-android-library#publish-to-local-maven-repository)
+* [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handler#publish-to-local-maven-repository)
+
+
 ## Building
 
 Call the following command in order to generate the `apk` bundles.
