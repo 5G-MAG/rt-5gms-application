@@ -1,18 +1,18 @@
-# 5G-MAG Reference Tools: 5GMSd Aware Application
+# 5G-MAG Reference Tools: 5GMSd-Aware Application
 
-This repository holds the 5GMSd Aware Application implementation of the 5G-MAG Reference Tools.
+This repository holds the 5GMSd-Aware Application implementation of the 5G-MAG Reference Tools.
 
 ## Introduction
 
-The 5GMSd Aware Application is an Android application that serves as a reference implementation for
+The 5GMSd-Aware Application is an Android application that serves as a reference implementation for
 5GMS downlink media streaming. It uses
 the [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handle) for playback and
 communication with
 the [Media Session Handler](https://github.com/5G-MAG/rt-5gms-media-session-handler).
 
-The 5GMSd Aware Application is an application in the UE, provided by the 5GMS Application Provider,
-that contains the service logic of the 5GMS application service, and interacts with other 5GMS
-Client and Network functions via the interfaces and APIs defined in the 5GMS architecture.
+The 5GMSd-Aware Application is an application in the UE, provided by the 5GMS Application Provider,
+that contains the service logic of the 5GMS application, and interacts with other 5GMS
+client and network functions via the interfaces and APIs defined in the 5GMS architecture.
 
 ## Downloading
 
@@ -27,7 +27,7 @@ git clone https://github.com/5G-MAG/rt-5gms-application.git
 ```
 
 ## Install dependencies
-The 5GMSd Aware Application requires the [Common Android Library](https://github.com/5G-MAG/rt-5gms-common-android-library) and the [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handler) to run.
+The 5GMSd-Aware Application requires the [Common Android Library](https://github.com/5G-MAG/rt-5gms-common-android-library) and the [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handler) to run.
 
 Both are included as Maven dependencies in the `build.gradle`:
 
@@ -76,16 +76,29 @@ CQ30022U4R	device
 
 ## Running
 
-After installing the 5GMSd Aware Application it can be started from the Android app selection
+After installing the 5GMSd-Aware Application it can be started from the Android app selection
 screen.
 
-As an alternative we can also run the app from the command
+As an alternative, the app can also be run from the command
 line: `adb shell am start -n com.fivegmag.a5gmsdawareapplication/com.fivegmag.a5gmsdawareapplication.MainActivity `
 
 ## Configuration
 
-The 5GMSd Aware Application ships with a configuration file for the M8 interface and two static
-example M8 configuration JSON files.
+The 5GMSd-Aware Application is configured with a set of JSON-based configurations - M8 configurations - that
+populate its user interface with content selections. Each M8 configuration corresponds to a different content
+catalogue and is described in a JSON document which may either point to a local file distributed with the `apk` or
+to URLs on an external M8 server. The items listed in the M8 configuration are used to populate the lower menu in
+the user interface of the 5GMSd-Aware Applicaion and allow selection of individual content items by the user.
+
+The list of M8 configurations is configured in an XML file distributed with the `apk`. These are used to populate
+the upper menu in the user interface of the 5GMSd-Aware Application and allow the user to switch between
+different available content catalogues.
+
+The 5GMSd-Aware Application ships with an M8 configuration file and two static example M8 configuration JSON files.
+
+The format of the M8 configuration is not standardised by 3GPP, and so the following is provided as an example
+only. A real 5GMSd-Aware Application is expected to communicate with its own back-end content catalogue at
+reference point M8 using an application-specific format.
 
 ### M8 endpoint configuration
 
