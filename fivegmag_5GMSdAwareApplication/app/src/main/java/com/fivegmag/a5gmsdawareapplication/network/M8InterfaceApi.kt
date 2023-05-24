@@ -9,7 +9,6 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication.network
 
-import com.fivegmag.a5gmscommonlibrary.models.ServiceAccessInformation
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.GET
