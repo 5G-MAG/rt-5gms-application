@@ -3,10 +3,11 @@
 This repository holds the 5GMSd-Aware Application implementation of the 5G-MAG Reference Tools.
 
 ## Introduction
+
 The 5GMSd-Aware Application is an application in the UE, provided by the 5GMSd Application Provider,
 that contains the service logic of the 5GMSd application service, and interacts with other 5GMSd
 Client and Network functions via the interfaces and APIs defined in the 5GMSd architecture.
-The 5GMSd-Aware Application controls the Media Session Handler via a UE-internal API defined at reference point M6d. This reference point could, for example, be realized as a JavaScript API in a web browser or via Inter Process Communication (IPC) for native Android applications.
+The 5GMSd-Aware Application controls the Media Session Handler via a UE-internal API defined at reference point M6d. This reference point could, for example, be realized as a JavaScript API in a web browser or via Inter Process Communication (IPC) for native Android applications. The 5GMSd-Aware Application controls the Media Player via a UE-internal API defined at reference point M7.
 
 ### About the implementation
 
