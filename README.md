@@ -1,4 +1,4 @@
-# 5G-MAG Reference Tools: 5G Downlink Media Streaming Aware Applications
+# 5GMSd-Aware Applications
 
 This repository holds applications that can be used to test and demo other 5G-MAG Reference Tools related to 5GMSd.
 
