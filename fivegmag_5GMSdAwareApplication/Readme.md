@@ -1,18 +1,33 @@
-# 5G-MAG Reference Tools: 5GMSd-Aware Application
+# 5GMSd-Aware Application
 
 This repository holds the 5GMSd-Aware Application implementation of the 5G-MAG Reference Tools.
 
 ## Introduction
 
+The 5GMSd-Aware Application is an application in the UE, provided by the 5GMSd Application Provider,
+that contains the service logic of the 5GMSd application service, and interacts with other 5GMSd
+Client and Network functions via the interfaces and APIs defined in the 5GMSd architecture.
+The 5GMSd-Aware Application controls the Media Session Handler via a UE-internal API defined at reference point M6d. This reference point could, for example, be realized as a JavaScript API in a web browser or via Inter Process Communication (IPC) for native Android applications. The 5GMSd-Aware Application controls the Media Player via a UE-internal API defined at reference point M7.
+
+### About the implementation
+
 The 5GMSd-Aware Application is an Android application that serves as a reference implementation for
-5GMS downlink media streaming. It uses
+5G Downlink Media Streaming. It uses
 the [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handle) for playback and
 communication with
 the [Media Session Handler](https://github.com/5G-MAG/rt-5gms-media-session-handler).
 
-The 5GMSd-Aware Application is an application in the UE, provided by the 5GMS Application Provider,
-that contains the service logic of the 5GMS application, and interacts with other 5GMS
-client and network functions via the interfaces and APIs defined in the 5GMS architecture.
+### Specifications
+
+A list of specification related to this repository is available in the [Standards Wiki](https://github.com/5G-MAG/Standards/wiki/5G-Downlink-Media-Streaming-Architecture-(5GMSd):-Relevant-Specifications).
+
+
+
+
+
+
+
+
 
 ## Downloading
 
