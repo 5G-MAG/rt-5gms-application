@@ -1,6 +1,6 @@
-# 5GMSd-Aware Applications
+# 5GMS-Aware Applications
 
-This repository holds applications that can be used to test and demo other 5G-MAG Reference Tools related to 5GMSd.
+This repository holds applications that can be used to test and demonstrate other 5G-MAG Reference Tools related to 5GMS.
 
 ## Current Applications and Folders
 
