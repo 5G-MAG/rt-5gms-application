@@ -71,7 +71,7 @@ const val TAG = "5GMS Aware Application"
     override fun onStop() {
         super.onStop()
         // Unbind from the service
-        mediaSessionHandlerAdapter.reset(this)
+        mediaSessionHandlerAdapter.unbind(this)
     }
 
     private fun loadConfiguration() {
