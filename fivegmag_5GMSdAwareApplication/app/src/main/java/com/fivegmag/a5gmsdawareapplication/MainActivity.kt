@@ -9,21 +9,23 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.PlayerView
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmsdawareapplication.network.M8InterfaceApi
 import com.fivegmag.a5gmsmediastreamhandler.ExoPlayerAdapter
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
-import androidx.media3.ui.PlayerView
 import kotlinx.serialization.json.*
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -33,12 +35,13 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.InputStream
 import java.net.URI
-import java.util.*
+import java.util.Properties
 
 
 const val TAG = "5GMS Aware Application"
 
-@UnstableApi class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+@UnstableApi
+class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
@@ -58,6 +61,12 @@ const val TAG = "5GMS Aware Application"
             populateM8SelectionSpinner()
             exoPlayerView = findViewById(R.id.idExoPlayerVIew)
             registerButtonListener()
+
+            val versionName = getVersionName()
+            val versionTextView = findViewById<TextView>(R.id.versionNumber)
+            val versionText = getString(R.string.versionTextField, versionName)
+            versionTextView.text = versionText
+
             mediaSessionHandlerAdapter.initialize(
                 this,
                 exoPlayerAdapter,
@@ -168,22 +177,24 @@ const val TAG = "5GMS Aware Application"
                 R.id.idStreamSpinner -> {
                     currentSelectedStreamIndex = position
                 }
+
                 R.id.idM8Spinner -> {
                     currentSelectedM8Key = parent.selectedItem as String
                     val selectedUri = URI(configProperties.getProperty(currentSelectedM8Key))
-                    if(selectedUri.isAbsolute) {
+                    if (selectedUri.isAbsolute) {
                         setM8DataViaEndpoint(selectedUri.toString())
                     } else {
                         setM8DataViaJson(selectedUri.toString())
                     }
                 }
+
                 else -> { // Note the block
                 }
             }
         }
     }
 
-    private fun setM8DataViaEndpoint(m8HostingEndpoint : String) {
+    private fun setM8DataViaEndpoint(m8HostingEndpoint: String) {
         try {
             initializeRetrofitForM8InterfaceApi(m8HostingEndpoint)
             val call: Call<ResponseBody>? =
@@ -274,6 +285,16 @@ const val TAG = "5GMS Aware Application"
         }
 
         return M8Model(m5BaseUrl, serviceList)
+    }
+
+    private fun getVersionName(): String? {
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            return packageInfo.versionName
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {

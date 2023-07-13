@@ -22,7 +22,7 @@
         android:layout_width="231dp"
         android:layout_height="33dp"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="28dp"
         android:text="@string/headline"
         android:textSize="20sp"
         app:layout_constraintStart_toEndOf="@+id/imageView"
@@ -85,6 +85,18 @@
         android:text="@string/startPlaybackButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
+
+    <TextView
+        android:id="@+id/versionNumber"
+        android:layout_width="101dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/versionTextField"
+        app:layout_constraintBottom_toTopOf="@+id/idExoPlayerVIew"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        app:layout_constraintVertical_bias="1.0" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

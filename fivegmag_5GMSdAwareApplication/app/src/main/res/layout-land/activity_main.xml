@@ -85,5 +85,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
 
+    <TextView
+        android:id="@+id/versionNumber"
+        android:layout_width="97dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="188dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/versionTextField"
+        app:layout_constraintBottom_toTopOf="@+id/idExoPlayerVIew"
+        app:layout_constraintStart_toEndOf="@+id/textView2" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
