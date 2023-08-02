@@ -16,16 +16,18 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.util.UnstableApi
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmsdawareapplication.network.M8InterfaceApi
 import com.fivegmag.a5gmsmediastreamhandler.ExoPlayerAdapter
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import androidx.media3.ui.PlayerView
 import kotlinx.serialization.json.*
 import okhttp3.ResponseBody
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -36,7 +38,7 @@ import java.util.*
 
 const val TAG = "5GMS Aware Application"
 
-class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+@UnstableApi class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
@@ -44,7 +46,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private lateinit var currentSelectedM8Key: String
     private lateinit var m8InterfaceApi: M8InterfaceApi
     private lateinit var m8Data: M8Model
-    private lateinit var exoPlayerView: StyledPlayerView
+    private lateinit var exoPlayerView: PlayerView
     private lateinit var configProperties: Properties
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -186,7 +188,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             initializeRetrofitForM8InterfaceApi(m8HostingEndpoint)
             val call: Call<ResponseBody>? =
                 m8InterfaceApi.fetchServiceAccessInformationList()
-            call?.enqueue(object : retrofit2.Callback<ResponseBody?> {
+            call?.enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(
                     call: Call<ResponseBody?>,
                     response: Response<ResponseBody?>

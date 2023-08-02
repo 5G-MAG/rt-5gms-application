@@ -28,7 +28,7 @@
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.exoplayer2.ui.StyledPlayerView
+    <androidx.media3.ui.PlayerView
         android:id="@+id/idExoPlayerVIew"
         android:layout_width="355dp"
         android:layout_height="200dp"
