@@ -15,6 +15,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
@@ -26,6 +27,7 @@ import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
 import androidx.media3.ui.PlayerView
 import kotlinx.serialization.json.*
 import okhttp3.ResponseBody
+import org.greenrobot.eventbus.EventBus
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -38,10 +40,12 @@ import java.util.*
 
 const val TAG = "5GMS Aware Application"
 
-@UnstableApi class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+@UnstableApi
+class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
+    private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
     private var currentSelectedStreamIndex: Int = 0
     private lateinit var currentSelectedM8Key: String
     private lateinit var m8InterfaceApi: M8InterfaceApi
@@ -63,15 +67,23 @@ const val TAG = "5GMS Aware Application"
                 exoPlayerAdapter,
                 ::onConnectionToMediaSessionHandlerEstablished
             )
+            val representationInfoTextView = findViewById<TextView>(R.id.representationInfo)
+            mediaStreamHandlerEventHandler.initialize(representationInfoTextView, this)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     override fun onStop() {
+        EventBus.getDefault().unregister(mediaStreamHandlerEventHandler);
         super.onStop()
         // Unbind from the service
         mediaSessionHandlerAdapter.reset(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(mediaStreamHandlerEventHandler);
     }
 
     private fun loadConfiguration() {
@@ -168,22 +180,24 @@ const val TAG = "5GMS Aware Application"
                 R.id.idStreamSpinner -> {
                     currentSelectedStreamIndex = position
                 }
+
                 R.id.idM8Spinner -> {
                     currentSelectedM8Key = parent.selectedItem as String
                     val selectedUri = URI(configProperties.getProperty(currentSelectedM8Key))
-                    if(selectedUri.isAbsolute) {
+                    if (selectedUri.isAbsolute) {
                         setM8DataViaEndpoint(selectedUri.toString())
                     } else {
                         setM8DataViaJson(selectedUri.toString())
                     }
                 }
+
                 else -> { // Note the block
                 }
             }
         }
     }
 
-    private fun setM8DataViaEndpoint(m8HostingEndpoint : String) {
+    private fun setM8DataViaEndpoint(m8HostingEndpoint: String) {
         try {
             initializeRetrofitForM8InterfaceApi(m8HostingEndpoint)
             val call: Call<ResponseBody>? =
