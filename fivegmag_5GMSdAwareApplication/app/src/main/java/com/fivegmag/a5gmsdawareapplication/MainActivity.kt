@@ -9,6 +9,7 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -61,6 +62,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             loadConfiguration()
             populateM8SelectionSpinner()
             exoPlayerView = findViewById(R.id.idExoPlayerVIew)
+            setVersionNumber()
             registerButtonListener()
             mediaSessionHandlerAdapter.initialize(
                 this,
@@ -84,6 +86,18 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     override fun onStart() {
         super.onStart()
         EventBus.getDefault().register(mediaStreamHandlerEventHandler);
+    }
+
+    private fun setVersionNumber() {
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            val versionName = packageInfo.versionName
+            val versionTextView = findViewById<TextView>(R.id.versionNumber)
+            val versionText = getString(R.string.versionTextField, versionName)
+            versionTextView.text = versionText
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+        }
     }
 
     private fun loadConfiguration() {

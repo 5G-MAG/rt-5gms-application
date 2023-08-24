@@ -5,6 +5,6 @@
     <!--<entry key="m8LocalAfAndAs">m8/config_local_af.json</entry>-->
     <entry key="m85GMAGHost">https://rt.5g-mag.com/</entry>
     <!-- <entry key="m8LocalDummyHost">http://10.147.67.179:3003/m8/</entry>-->
-    <entry key="m8LocalDummyHost">http://192.168.178.78:3003/m8/</entry>
+    <entry key="m8LocalDummyHost">http://192.168.2.1:3003/m8/</entry>
     <!-- <entry key="m8LocalDummyHost">http://194.95.175.90:3003/m8/</entry> -->
 </properties>
