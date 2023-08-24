@@ -40,7 +40,8 @@ const val TAG = "5GMS Aware Application"
 
 @UnstableApi class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
-    private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
+    // test first commit
+	private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
     private var currentSelectedStreamIndex: Int = 0
     private lateinit var currentSelectedM8Key: String
