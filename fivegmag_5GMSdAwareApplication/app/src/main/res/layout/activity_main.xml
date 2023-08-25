@@ -95,5 +95,15 @@
         app:layout_constraintStart_toStartOf="@+id/idExoPlayerVIew"
         app:layout_constraintTop_toTopOf="@+id/idExoPlayerVIew" />
 
+    <TextView
+        android:id="@+id/versionNumber"
+        android:layout_width="162dp"
+        android:layout_height="23dp"
+        android:layout_marginBottom="20dp"
+        android:text="@string/versionTextField"
+        android:textAlignment="textEnd"
+        app:layout_constraintBottom_toTopOf="@+id/representationInfo"
+        app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
