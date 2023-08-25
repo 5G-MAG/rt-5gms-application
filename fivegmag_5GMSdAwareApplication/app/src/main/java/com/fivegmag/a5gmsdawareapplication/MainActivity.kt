@@ -11,6 +11,7 @@ package com.fivegmag.a5gmsdawareapplication
 
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -39,7 +40,7 @@ import java.net.URI
 import java.util.*
 
 
-const val TAG = "5GMS Aware Application"
+const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
 @UnstableApi
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
@@ -62,7 +63,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             loadConfiguration()
             populateM8SelectionSpinner()
             exoPlayerView = findViewById(R.id.idExoPlayerVIew)
-            setVersionNumber()
+            setApplicationVersionNumber()
+            printDependenciesVersionNumbers()
             registerButtonListener()
             mediaSessionHandlerAdapter.initialize(
                 this,
@@ -77,7 +79,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onStop() {
-        EventBus.getDefault().unregister(mediaStreamHandlerEventHandler);
+        EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
         super.onStop()
         // Unbind from the service
         mediaSessionHandlerAdapter.reset(this)
@@ -85,10 +87,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     override fun onStart() {
         super.onStart()
-        EventBus.getDefault().register(mediaStreamHandlerEventHandler);
+        EventBus.getDefault().register(mediaStreamHandlerEventHandler)
     }
 
-    private fun setVersionNumber() {
+    private fun setApplicationVersionNumber() {
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
             val versionName = packageInfo.versionName
@@ -98,6 +100,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
         }
+    }
+
+    private fun printDependenciesVersionNumbers() {
+        Log.d(TAG_AWARE_APPLICATION, "5GMS Common Library Version: ${BuildConfig.LIB_VERSION_a5gmscommonlibrary}")
+        Log.d(TAG_AWARE_APPLICATION, "5GMS Media Stream Handler Version: ${BuildConfig.LIB_VERSION_a5gmsmediastreamhandler}")
     }
 
     private fun loadConfiguration() {
@@ -185,7 +192,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun replaceDoubleTicks(value: String): String {
-        return value.replace("\"", "");
+        return value.replace("\"", "")
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -262,9 +269,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         for (serviceListEntry in jsonServiceList) {
             val itemAsJsonObject = Json.parseToJsonElement(serviceListEntry.toString()).jsonObject
-            var name: String =
+            val name: String =
                 replaceDoubleTicks(itemAsJsonObject["name"].toString())
-            var provisioningSessionId =
+            val provisioningSessionId =
                 replaceDoubleTicks(itemAsJsonObject["provisioningSessionId"].toString())
 
             val entryPoints = ArrayList<EntryPoint>()
