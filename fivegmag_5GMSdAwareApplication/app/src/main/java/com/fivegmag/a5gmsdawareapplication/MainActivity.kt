@@ -9,6 +9,8 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication
 
+import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +20,9 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.media3.common.util.UnstableApi
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
@@ -58,7 +62,36 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        requestUserPermissions()
+    }
 
+    private fun requestUserPermissions() {
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { _: Boolean ->
+                initialize()
+            }
+
+        // Register the cell info callback
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissionLauncher.launch(
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        } else {
+            initialize()
+        }
+    }
+
+    /**
+     * Initialization is performed after the user permissions have been requested.
+     *
+     */
+    private fun initialize() {
         try {
             loadConfiguration()
             populateM8SelectionSpinner()
@@ -77,7 +110,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             e.printStackTrace()
         }
     }
-
     override fun onStop() {
         EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
         super.onStop()
@@ -103,8 +135,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun printDependenciesVersionNumbers() {
-        Log.d(TAG_AWARE_APPLICATION, "5GMS Common Library Version: ${BuildConfig.LIB_VERSION_a5gmscommonlibrary}")
-        Log.d(TAG_AWARE_APPLICATION, "5GMS Media Stream Handler Version: ${BuildConfig.LIB_VERSION_a5gmsmediastreamhandler}")
+        Log.d(
+            TAG_AWARE_APPLICATION,
+            "5GMS Common Library Version: ${BuildConfig.LIB_VERSION_a5gmscommonlibrary}"
+        )
+        Log.d(
+            TAG_AWARE_APPLICATION,
+            "5GMS Media Stream Handler Version: ${BuildConfig.LIB_VERSION_a5gmsmediastreamhandler}"
+        )
     }
 
     private fun loadConfiguration() {
