@@ -6,4 +6,5 @@
     <string name="startPlaybackButton">Start Playback</string>
     <string name="representationInfo">%1$s kbit/s - Rep ID: %2$s</string>
     <string name="versionTextField">Version: %s</string>
+    <string name="linkurl"><a href="https://developer.5g-mag.com">developer.5g-mag.com</a></string>
 </resources>

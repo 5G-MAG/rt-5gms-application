@@ -9,24 +9,13 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="71dp"
-        android:layout_height="74dp"
+        android:layout_width="171dp"
+        android:layout_height="55dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/referencetools" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="231dp"
-        android:layout_height="33dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
-        android:text="@string/headline"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:srcCompat="@drawable/logo_5g_mag_reference_tools" />
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/idExoPlayerVIew"
@@ -46,7 +35,6 @@
         android:text="@string/labelM8Selection"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
-
 
     <Spinner
         android:id="@+id/idM8Spinner"
@@ -104,6 +92,16 @@
         android:textAlignment="textEnd"
         app:layout_constraintBottom_toTopOf="@+id/representationInfo"
         app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew" />
+
+    <TextView
+        android:id="@+id/textview2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:autoLink="web"
+        android:text="@string/linkurl"
+        android:textColorLink="@color/fivegmag_blue"
+        app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"
+        app:layout_constraintTop_toTopOf="@+id/imageView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
