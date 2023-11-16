@@ -28,7 +28,7 @@
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.exoplayer2.ui.StyledPlayerView
+    <androidx.media3.ui.PlayerView
         android:id="@+id/idExoPlayerVIew"
         android:layout_width="355dp"
         android:layout_height="200dp"
@@ -85,6 +85,25 @@
         android:text="@string/startPlaybackButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
+
+    <TextView
+        android:id="@+id/representationInfo"
+        android:layout_width="352dp"
+        android:layout_height="23dp"
+        android:text=""
+        android:textColor="#FFFFFF"
+        app:layout_constraintStart_toStartOf="@+id/idExoPlayerVIew"
+        app:layout_constraintTop_toTopOf="@+id/idExoPlayerVIew" />
+
+    <TextView
+        android:id="@+id/versionNumber"
+        android:layout_width="162dp"
+        android:layout_height="23dp"
+        android:layout_marginBottom="20dp"
+        android:text="@string/versionTextField"
+        android:textAlignment="textEnd"
+        app:layout_constraintBottom_toTopOf="@+id/representationInfo"
+        app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

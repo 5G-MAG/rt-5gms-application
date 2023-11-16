@@ -9,23 +9,29 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication
 
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.util.UnstableApi
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmsdawareapplication.network.M8InterfaceApi
 import com.fivegmag.a5gmsmediastreamhandler.ExoPlayerAdapter
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
-import com.google.android.exoplayer2.ui.StyledPlayerView
+import androidx.media3.ui.PlayerView
 import kotlinx.serialization.json.*
 import okhttp3.ResponseBody
+import org.greenrobot.eventbus.EventBus
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -34,17 +40,19 @@ import java.net.URI
 import java.util.*
 
 
-const val TAG = "5GMS Aware Application"
+const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
+@UnstableApi
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
+    private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
     private var currentSelectedStreamIndex: Int = 0
     private lateinit var currentSelectedM8Key: String
     private lateinit var m8InterfaceApi: M8InterfaceApi
     private lateinit var m8Data: M8Model
-    private lateinit var exoPlayerView: StyledPlayerView
+    private lateinit var exoPlayerView: PlayerView
     private lateinit var configProperties: Properties
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,21 +63,48 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             loadConfiguration()
             populateM8SelectionSpinner()
             exoPlayerView = findViewById(R.id.idExoPlayerVIew)
+            setApplicationVersionNumber()
+            printDependenciesVersionNumbers()
             registerButtonListener()
             mediaSessionHandlerAdapter.initialize(
                 this,
                 exoPlayerAdapter,
                 ::onConnectionToMediaSessionHandlerEstablished
             )
+            val representationInfoTextView = findViewById<TextView>(R.id.representationInfo)
+            mediaStreamHandlerEventHandler.initialize(representationInfoTextView, this)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     override fun onStop() {
+        EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
         super.onStop()
         // Unbind from the service
         mediaSessionHandlerAdapter.reset(this)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(mediaStreamHandlerEventHandler)
+    }
+
+    private fun setApplicationVersionNumber() {
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            val versionName = packageInfo.versionName
+            val versionTextView = findViewById<TextView>(R.id.versionNumber)
+            val versionText = getString(R.string.versionTextField, versionName)
+            versionTextView.text = versionText
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun printDependenciesVersionNumbers() {
+        Log.d(TAG_AWARE_APPLICATION, "5GMS Common Library Version: ${BuildConfig.LIB_VERSION_a5gmscommonlibrary}")
+        Log.d(TAG_AWARE_APPLICATION, "5GMS Media Stream Handler Version: ${BuildConfig.LIB_VERSION_a5gmsmediastreamhandler}")
     }
 
     private fun loadConfiguration() {
@@ -157,7 +192,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun replaceDoubleTicks(value: String): String {
-        return value.replace("\"", "");
+        return value.replace("\"", "")
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -166,27 +201,29 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 R.id.idStreamSpinner -> {
                     currentSelectedStreamIndex = position
                 }
+
                 R.id.idM8Spinner -> {
                     currentSelectedM8Key = parent.selectedItem as String
                     val selectedUri = URI(configProperties.getProperty(currentSelectedM8Key))
-                    if(selectedUri.isAbsolute) {
+                    if (selectedUri.isAbsolute) {
                         setM8DataViaEndpoint(selectedUri.toString())
                     } else {
                         setM8DataViaJson(selectedUri.toString())
                     }
                 }
+
                 else -> { // Note the block
                 }
             }
         }
     }
 
-    private fun setM8DataViaEndpoint(m8HostingEndpoint : String) {
+    private fun setM8DataViaEndpoint(m8HostingEndpoint: String) {
         try {
             initializeRetrofitForM8InterfaceApi(m8HostingEndpoint)
             val call: Call<ResponseBody>? =
                 m8InterfaceApi.fetchServiceAccessInformationList()
-            call?.enqueue(object : retrofit2.Callback<ResponseBody?> {
+            call?.enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(
                     call: Call<ResponseBody?>,
                     response: Response<ResponseBody?>
@@ -232,9 +269,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         for (serviceListEntry in jsonServiceList) {
             val itemAsJsonObject = Json.parseToJsonElement(serviceListEntry.toString()).jsonObject
-            var name: String =
+            val name: String =
                 replaceDoubleTicks(itemAsJsonObject["name"].toString())
-            var provisioningSessionId =
+            val provisioningSessionId =
                 replaceDoubleTicks(itemAsJsonObject["provisioningSessionId"].toString())
 
             val entryPoints = ArrayList<EntryPoint>()
