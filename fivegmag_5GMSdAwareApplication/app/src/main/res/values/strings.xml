@@ -4,4 +4,6 @@
     <string name="labelM8Selection">Select M8 Input</string>
     <string name="labelStreamSelection">Select a Stream</string>
     <string name="startPlaybackButton">Start Playback</string>
+    <string name="representationInfo">%1$s kbit/s - Rep ID: %2$s</string>
+    <string name="versionTextField">Version: %s</string>
 </resources>
