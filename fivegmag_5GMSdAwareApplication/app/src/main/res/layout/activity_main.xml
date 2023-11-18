@@ -92,7 +92,7 @@
         android:layout_height="23dp"
         android:layout_marginBottom="16dp"
         android:text="@string/versionTextField"
-        android:textAlignment="textEnd"
+        android:textAlignment="viewEnd"
         app:layout_constraintBottom_toTopOf="@+id/representationInfo"
         app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew" />
 
@@ -103,6 +103,7 @@
         android:autoLink="web"
         android:text="http://developer.5g-mag.com"
         android:textColorLink="@color/fivegmag_blue"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"
         app:layout_constraintTop_toBottomOf="@+id/loadButton" />
 
