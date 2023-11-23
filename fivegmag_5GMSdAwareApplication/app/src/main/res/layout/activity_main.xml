@@ -13,6 +13,7 @@
         android:layout_height="75dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:contentDescription="@string/_5g_mag_logo_description"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/logo_5g_mag_reference_tools" />
@@ -32,7 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="24dp"
-        android:text="@string/labelM8Selection"
+        android:text="@string/label_M8_selection"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
 
@@ -52,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="32dp"
-        android:text="@string/labelStreamSelection"
+        android:text="@string/label_stream_selection"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idM8Spinner" />
 
@@ -71,14 +72,14 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="28dp"
-        android:text="@string/startPlaybackButton"
+        android:text="@string/start_playback_button"
         android:backgroundTint="@color/fivegmag_blue"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
 
     <TextView
-        android:id="@+id/representationInfo"
+        android:id="@+id/representation_info"
         android:layout_width="352dp"
         android:layout_height="23dp"
         android:text=""
@@ -91,9 +92,9 @@
         android:layout_width="162dp"
         android:layout_height="23dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/versionTextField"
+        android:text="@string/version_text_field"
         android:textAlignment="viewEnd"
-        app:layout_constraintBottom_toTopOf="@+id/representationInfo"
+        app:layout_constraintBottom_toTopOf="@+id/representation_info"
         app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew" />
 
     <TextView
@@ -101,7 +102,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:autoLink="web"
-        android:text="http://developer.5g-mag.com"
+        android:text="@string/_5gmag_developer_link"
         android:textColorLink="@color/fivegmag_blue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"

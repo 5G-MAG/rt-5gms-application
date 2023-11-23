@@ -34,7 +34,7 @@ class MediaStreamHandlerEventHandler {
             val kbitsPerSecond =
                 event.mediaLoadData.trackFormat?.peakBitrate?.div(1000).toString()
             val id = event.mediaLoadData.trackFormat?.id.toString()
-            val text = context.getString(R.string.representationInfo, kbitsPerSecond, id)
+            val text = context.getString(R.string.representation_info, kbitsPerSecond, id)
             representationInfoTextView.text = text
         }
     }
