@@ -9,33 +9,23 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="52dp"
-        android:layout_height="50dp"
+        android:layout_width="215dp"
+        android:layout_height="57dp"
         android:layout_marginStart="20dp"
         android:layout_marginTop="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/referencetools" />
+        app:srcCompat="@drawable/logo_5g_mag_reference_tools" />
 
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="273dp"
-        android:layout_height="49dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
-        android:text="@string/headline"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/idExoPlayerVIew"
         android:layout_width="351dp"
         android:layout_height="197dp"
         android:layout_marginStart="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/idM8Spinner"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <Spinner
         android:id="@+id/idM8Spinner"
@@ -82,6 +72,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="20dp"
         android:text="@string/startPlaybackButton"
+        android:backgroundTint="@color/fivegmag_blue"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
 
@@ -102,7 +94,20 @@
         android:text="@string/versionTextField"
         android:textAlignment="textEnd"
         app:layout_constraintBottom_toTopOf="@+id/idExoPlayerVIew"
-        app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew" />
+        app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"
+        app:layout_constraintTop_toTopOf="@+id/imageView" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:autoLink="web"
+        android:text="http://developer.5g-mag.com"
+        android:textColorLink="@color/fivegmag_blue"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"
+        app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

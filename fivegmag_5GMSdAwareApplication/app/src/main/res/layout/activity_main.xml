@@ -9,24 +9,13 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="71dp"
-        android:layout_height="74dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="250dp"
+        android:layout_height="75dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/referencetools" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="231dp"
-        android:layout_height="33dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="40dp"
-        android:text="@string/headline"
-        android:textSize="20sp"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:srcCompat="@drawable/logo_5g_mag_reference_tools" />
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/idExoPlayerVIew"
@@ -83,6 +72,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="28dp"
         android:text="@string/startPlaybackButton"
+        android:backgroundTint="@color/fivegmag_blue"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
 
@@ -99,11 +90,22 @@
         android:id="@+id/versionNumber"
         android:layout_width="162dp"
         android:layout_height="23dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/versionTextField"
-        android:textAlignment="textEnd"
+        android:textAlignment="viewEnd"
         app:layout_constraintBottom_toTopOf="@+id/representationInfo"
         app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:autoLink="web"
+        android:text="http://developer.5g-mag.com"
+        android:textColorLink="@color/fivegmag_blue"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"
+        app:layout_constraintTop_toBottomOf="@+id/loadButton" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
