@@ -16,6 +16,12 @@
         android:theme="@style/Theme.5GMSdAwareApplication"
         tools:targetApi="31">
         <activity
+            android:name=".AboutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LicenseActivity"
+            android:exported="false" />
+        <activity
             android:name="com.fivegmag.a5gmsdawareapplication.MainActivity"
             android:exported="true">
             <intent-filter>
