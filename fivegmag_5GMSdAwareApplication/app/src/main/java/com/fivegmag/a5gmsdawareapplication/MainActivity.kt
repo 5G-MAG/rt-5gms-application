@@ -83,6 +83,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             requestPermissionLauncher.launch(
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
+        } else if(ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_PHONE_NUMBERS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissionLauncher.launch(
+                Manifest.permission.READ_PHONE_NUMBERS
+            )
         } else {
             initialize()
         }
