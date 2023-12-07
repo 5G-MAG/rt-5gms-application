@@ -56,7 +56,6 @@ const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 @UnstableApi
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
-    // test first commit
 	private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
     private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
@@ -172,10 +171,17 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun requestUserPermissions() {
+        var needReqPermission: Boolean = false
+        var idx: Int = 0
+        val permissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_PHONE_NUMBERS
+        )
+
         val requestPermissionLauncher =
             registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { _: Boolean ->
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { //_: Boolean ->
                 initialize()
             }
 
@@ -185,18 +191,25 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            requestPermissionLauncher.launch(
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        } else if(ActivityCompat.checkSelfPermission(
+            permissions[idx++] = Manifest.permission.ACCESS_FINE_LOCATION
+            needReqPermission = true
+        }
+
+        if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_PHONE_NUMBERS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            requestPermissionLauncher.launch(
-                Manifest.permission.READ_PHONE_NUMBERS
-            )
-        } else {
+            permissions[idx] = Manifest.permission.READ_PHONE_NUMBERS
+            needReqPermission = true
+        }
+
+        if (needReqPermission)
+        {
+            requestPermissionLauncher.launch(permissions)
+        }
+        else
+        {
             initialize()
         }
     }
