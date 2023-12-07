@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
-            ) { //_: Boolean ->
+            ) { 
                 initialize()
             }
 
