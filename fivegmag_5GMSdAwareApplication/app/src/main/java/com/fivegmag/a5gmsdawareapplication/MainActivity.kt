@@ -27,7 +27,7 @@ import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.media3.common.util.UnstableApi
@@ -56,7 +56,7 @@ const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 @UnstableApi
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
-    private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
+	private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
     private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
     private var currentSelectedStreamIndex: Int = 0
@@ -171,10 +171,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun requestUserPermissions() {
+        val permissionLst = arrayListOf<String>()
+
         val requestPermissionLauncher =
             registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { _: Boolean ->
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { 
                 initialize()
             }
 
@@ -184,10 +186,23 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            requestPermissionLauncher.launch(
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        } else {
+            permissionLst.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_PHONE_NUMBERS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionLst.add(Manifest.permission.READ_PHONE_NUMBERS)
+        }
+
+        if (permissionLst.size > 0)
+        {
+            requestPermissionLauncher.launch(permissionLst.toTypedArray())
+        }
+        else
+        {
             initialize()
         }
     }
@@ -257,7 +272,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             configProperties.loadFromXML(inputStream)
             inputStream.close()
         } catch (e: Exception) {
-
+            Log.d(
+                TAG_AWARE_APPLICATION,
+                "loadConfiguration Exception: $e"
+            )
         }
     }
 
