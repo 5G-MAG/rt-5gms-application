@@ -27,7 +27,7 @@ import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity;
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.media3.common.util.UnstableApi
@@ -199,7 +199,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
         if (permissionLst.size > 0)
         {
-            requestPermissionLauncher.launch(permissionLst.toArray() as Array<String>?)
+            requestPermissionLauncher.launch(permissionLst.toTypedArray())
         }
         else
         {
@@ -272,7 +272,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             configProperties.loadFromXML(inputStream)
             inputStream.close()
         } catch (e: Exception) {
-
+            Log.d(
+                TAG_AWARE_APPLICATION,
+                "loadConfiguration Exception: $e"
+            )
         }
     }
 
