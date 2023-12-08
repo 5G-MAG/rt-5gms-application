@@ -171,12 +171,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun requestUserPermissions() {
-        var needReqPermission: Boolean = false
-        var idx: Int = 0
-        val permissions = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.READ_PHONE_NUMBERS
-        )
+        val permissionLst = arrayListOf<String>()
 
         val requestPermissionLauncher =
             registerForActivityResult(
@@ -191,8 +186,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            permissions[idx++] = Manifest.permission.ACCESS_FINE_LOCATION
-            needReqPermission = true
+            permissionLst.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
 
         if (ActivityCompat.checkSelfPermission(
@@ -200,13 +194,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 Manifest.permission.READ_PHONE_NUMBERS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            permissions[idx] = Manifest.permission.READ_PHONE_NUMBERS
-            needReqPermission = true
+            permissionLst.add(Manifest.permission.READ_PHONE_NUMBERS)
         }
 
-        if (needReqPermission)
+        if (permissionLst.size > 0)
         {
-            requestPermissionLauncher.launch(permissions)
+            requestPermissionLauncher.launch(permissionLst.toArray() as Array<String>?)
         }
         else
         {
