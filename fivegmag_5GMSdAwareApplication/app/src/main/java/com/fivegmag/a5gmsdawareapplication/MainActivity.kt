@@ -9,16 +9,27 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication
 
+import android.Manifest
+import android.app.AlertDialog
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.text.Html
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.media3.common.util.UnstableApi
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
@@ -45,7 +56,7 @@ const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 @UnstableApi
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
-    private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
+	private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
     private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
     private var currentSelectedStreamIndex: Int = 0
@@ -58,7 +69,149 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        requestUserPermissions()
+    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.actionLicense -> {
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.activity_license, null)
+                val textView = dialogView.findViewById<TextView>(R.id.licenseTextView)
+                val formattedText = getString(R.string.license_text)
+                textView.text = Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
+                val builder = AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                val dialog = builder.create()
+                dialog.show()
+                return true
+            }
+
+            R.id.actionAbout -> {
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.activity_about, null)
+                addVersionNumber(dialogView)
+                setClickListeners(dialogView)
+                formatAboutText(dialogView)
+                val builder = AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                val dialog = builder.create()
+                dialog.show()
+                return true
+            }
+
+            R.id.actionAttribution -> {
+                OssLicensesMenuActivity.setActivityTitle(getString(R.string.action_attribution_notice))
+                val licensesIntent = Intent(this, OssLicensesMenuActivity::class.java)
+                startActivity(licensesIntent)
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun addVersionNumber(dialogView: View) {
+        val packageInfo = packageManager.getPackageInfo(packageName, 0)
+        val versionName = packageInfo.versionName
+        val versionTextView = dialogView.findViewById<TextView>(R.id.versionNumberView)
+        val versionText = getString(R.string.version_text_field, versionName)
+        versionTextView.text = versionText
+    }
+
+    private fun setClickListeners(dialogView: View) {
+
+        val githubTextView = dialogView.findViewById<TextView>(R.id.githubLink)
+        githubTextView.setOnClickListener {
+            val url = getString(R.string.github_url)
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+
+        val twitterTextView = dialogView.findViewById<TextView>(R.id.twitterLink)
+        twitterTextView.setOnClickListener {
+            val url = getString(R.string.twitter_url)
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+
+        val linkedInView = dialogView.findViewById<TextView>(R.id.linkedInLink)
+        linkedInView.setOnClickListener {
+            val url = getString(R.string.linked_in_url)
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+
+        val slackView = dialogView.findViewById<TextView>(R.id.slackLink)
+        slackView.setOnClickListener {
+            val url = getString(R.string.slack_url)
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+
+        val websiteView = dialogView.findViewById<TextView>(R.id.websiteLink)
+        websiteView.setOnClickListener {
+            val url = getString(R.string.website_url)
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        }
+    }
+
+    private fun formatAboutText(dialogView: View) {
+        val textView = dialogView.findViewById<TextView>(R.id.descriptionText)
+        val formattedText = getString(R.string.description_text)
+        textView.text = Html.fromHtml(formattedText, Html.FROM_HTML_MODE_LEGACY)
+    }
+
+    private fun requestUserPermissions() {
+        val permissionLst = arrayListOf<String>()
+
+        val requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) { 
+                initialize()
+            }
+
+        // Register the cell info callback
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionLst.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_PHONE_NUMBERS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionLst.add(Manifest.permission.READ_PHONE_NUMBERS)
+        }
+
+        if (permissionLst.size > 0)
+        {
+            requestPermissionLauncher.launch(permissionLst.toTypedArray())
+        }
+        else
+        {
+            initialize()
+        }
+    }
+
+    /**
+     * Initialization is performed after the user permissions have been requested.
+     *
+     */
+    private fun initialize() {
         try {
             loadConfiguration()
             populateM8SelectionSpinner()
@@ -71,13 +224,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 exoPlayerAdapter,
                 ::onConnectionToMediaSessionHandlerEstablished
             )
-            val representationInfoTextView = findViewById<TextView>(R.id.representationInfo)
+            val representationInfoTextView = findViewById<TextView>(R.id.representation_info)
             mediaStreamHandlerEventHandler.initialize(representationInfoTextView, this)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
-
     override fun onStop() {
         EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
         super.onStop()
@@ -95,7 +247,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
             val versionName = packageInfo.versionName
             val versionTextView = findViewById<TextView>(R.id.versionNumber)
-            val versionText = getString(R.string.versionTextField, versionName)
+            val versionText = getString(R.string.version_text_field, versionName)
             versionTextView.text = versionText
         } catch (e: PackageManager.NameNotFoundException) {
             e.printStackTrace()
@@ -103,8 +255,14 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun printDependenciesVersionNumbers() {
-        Log.d(TAG_AWARE_APPLICATION, "5GMS Common Library Version: ${BuildConfig.LIB_VERSION_a5gmscommonlibrary}")
-        Log.d(TAG_AWARE_APPLICATION, "5GMS Media Stream Handler Version: ${BuildConfig.LIB_VERSION_a5gmsmediastreamhandler}")
+        Log.d(
+            TAG_AWARE_APPLICATION,
+            "5GMS Common Library Version: ${BuildConfig.LIB_VERSION_a5gmscommonlibrary}"
+        )
+        Log.d(
+            TAG_AWARE_APPLICATION,
+            "5GMS Media Stream Handler Version: ${BuildConfig.LIB_VERSION_a5gmsmediastreamhandler}"
+        )
     }
 
     private fun loadConfiguration() {
@@ -114,7 +272,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             configProperties.loadFromXML(inputStream)
             inputStream.close()
         } catch (e: Exception) {
-
+            Log.d(
+                TAG_AWARE_APPLICATION,
+                "loadConfiguration Exception: $e"
+            )
         }
     }
 
