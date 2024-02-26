@@ -71,6 +71,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         setContentView(R.layout.activity_main)
         requestUserPermissions()
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -176,7 +177,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
-            ) { 
+            ) {
                 initialize()
             }
 
@@ -197,12 +198,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             permissionLst.add(Manifest.permission.READ_PHONE_NUMBERS)
         }
 
-        if (permissionLst.size > 0)
-        {
+        if (permissionLst.size > 0) {
             requestPermissionLauncher.launch(permissionLst.toTypedArray())
-        }
-        else
-        {
+        } else {
             initialize()
         }
     }
@@ -230,6 +228,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             e.printStackTrace()
         }
     }
+
     override fun onStop() {
         EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
         super.onStop()
