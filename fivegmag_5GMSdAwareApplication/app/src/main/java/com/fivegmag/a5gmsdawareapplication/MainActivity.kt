@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
      */
     private fun initialize() {
         try {
-            loadConfiguration()
+            configProperties = loadConfiguration("config.properties.xml")
             populateM8SelectionSpinner()
             exoPlayerView = findViewById(R.id.idExoPlayerVIew)
             setApplicationVersionNumber()
@@ -265,10 +265,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         )
     }
 
-    private fun loadConfiguration() {
+    private fun loadConfiguration(file: String) : Properties{
+        val configProperties =  Properties()
         try {
-            val inputStream: InputStream = this.assets.open("config.properties.xml")
-            configProperties = Properties()
+            val inputStream: InputStream = this.assets.open(file)
             configProperties.loadFromXML(inputStream)
             inputStream.close()
         } catch (e: Exception) {
@@ -277,6 +277,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 "loadConfiguration Exception: $e"
             )
         }
+
+        return  configProperties
     }
 
     private fun populateM8SelectionSpinner() {
@@ -322,7 +324,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun onM8DataChanged() {
-        mediaSessionHandlerAdapter.setM5Endpoint(m8Data.m5BaseUrl)
+        val configPropertiesDefualtTimer : Properties = loadConfiguration("config.propertiesTimer.xml")
+
+        val defaultTimerVal: Long = configPropertiesDefualtTimer.getProperty("defaultServiceAccessInformationTimerVal").toLong()
+
+        mediaSessionHandlerAdapter.setM5Endpoint(m8Data.m5BaseUrl, defaultTimerVal)
         populateStreamSelectionSpinner()
     }
 
@@ -394,8 +400,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                         val jsonObject: JsonObject =
                             Json.parseToJsonElement(resource).jsonObject
                         val m5BaseUrl: String =
-                            replaceDoubleTicks(jsonObject.get("m5BaseUrl").toString())
-                        val jsonServiceList = jsonObject.get("serviceList")?.jsonArray
+                            replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
+                        val jsonServiceList = jsonObject["serviceList"]?.jsonArray
                         m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
                         onM8DataChanged()
                     }
@@ -416,8 +422,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val inputStream: InputStream = assets.open(url)
             json = inputStream.bufferedReader().use { it.readText() }
             val jsonObject: JsonObject = Json.parseToJsonElement(json).jsonObject
-            val m5BaseUrl: String = replaceDoubleTicks(jsonObject.get("m5BaseUrl").toString())
-            val jsonServiceList = jsonObject.get("serviceList")?.jsonArray
+            val m5BaseUrl: String = replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
+            val jsonServiceList = jsonObject["serviceList"]?.jsonArray
             m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
             onM8DataChanged()
         } catch (e: Exception) {
@@ -436,7 +442,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 replaceDoubleTicks(itemAsJsonObject["provisioningSessionId"].toString())
 
             val entryPoints = ArrayList<EntryPoint>()
-            val entryPointList = itemAsJsonObject.get("entryPoints")?.jsonArray
+            val entryPointList = itemAsJsonObject["entryPoints"]?.jsonArray
 
             if (entryPointList != null) {
                 for (entryPoint in entryPointList) {
@@ -446,7 +452,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     val contentType =
                         replaceDoubleTicks(entryPointAsJsonObject["contentType"].toString())
                     val profiles = ArrayList<String>()
-                    val profileList = entryPointAsJsonObject.get("profiles")?.jsonArray
+                    val profileList = entryPointAsJsonObject["profiles"]?.jsonArray
                     if (profileList != null) {
                         for (profileEntry in profileList) {
                             profiles.add(profileEntry.toString())
