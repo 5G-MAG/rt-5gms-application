@@ -49,14 +49,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.InputStream
 import java.net.URI
 import java.util.*
-
+import com.fivegmag.a5gmscommonlibrary.helpers.Utils
 
 const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
 @UnstableApi
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
-
-	private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
+    private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
     private val exoPlayerAdapter = ExoPlayerAdapter()
     private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
     private var currentSelectedStreamIndex: Int = 0
@@ -213,7 +212,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
      */
     private fun initialize() {
         try {
-            configProperties = loadConfiguration("config.properties.xml")
+            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
             populateM8SelectionSpinner()
             exoPlayerView = findViewById(R.id.idExoPlayerVIew)
             setApplicationVersionNumber()
@@ -265,22 +264,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         )
     }
 
-    private fun loadConfiguration(file: String) : Properties{
-        val configProperties =  Properties()
-        try {
-            val inputStream: InputStream = this.assets.open(file)
-            configProperties.loadFromXML(inputStream)
-            inputStream.close()
-        } catch (e: Exception) {
-            Log.d(
-                TAG_AWARE_APPLICATION,
-                "loadConfiguration Exception: $e"
-            )
-        }
-
-        return  configProperties
-    }
-
     private fun populateM8SelectionSpinner() {
         try {
             val spinner: Spinner = findViewById(R.id.idM8Spinner)
@@ -324,11 +307,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun onM8DataChanged() {
-        val configPropertiesDefualtTimer : Properties = loadConfiguration("config.propertiesTimer.xml")
-
-        val defaultTimerVal: Long = configPropertiesDefualtTimer.getProperty("defaultServiceAccessInformationTimerVal").toLong()
-
-        mediaSessionHandlerAdapter.setM5Endpoint(m8Data.m5BaseUrl, defaultTimerVal)
+        mediaSessionHandlerAdapter.setM5Endpoint(m8Data.m5BaseUrl)
         populateStreamSelectionSpinner()
     }
 
