@@ -49,7 +49,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.io.InputStream
 import java.net.URI
 import java.util.*
-
+import com.fivegmag.a5gmscommonlibrary.helpers.Utils
 
 const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
@@ -211,7 +211,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
      */
     private fun initialize() {
         try {
-            loadConfiguration()
+            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
             populateM8SelectionSpinner()
             exoPlayerView = findViewById(R.id.idExoPlayerVIew)
             setApplicationVersionNumber()
@@ -262,20 +262,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             TAG_AWARE_APPLICATION,
             "5GMS Media Stream Handler Version: ${BuildConfig.LIB_VERSION_a5gmsmediastreamhandler}"
         )
-    }
-
-    private fun loadConfiguration() {
-        try {
-            val inputStream: InputStream = this.assets.open("config.properties.xml")
-            configProperties = Properties()
-            configProperties.loadFromXML(inputStream)
-            inputStream.close()
-        } catch (e: Exception) {
-            Log.d(
-                TAG_AWARE_APPLICATION,
-                "loadConfiguration Exception: $e"
-            )
-        }
     }
 
     private fun populateM8SelectionSpinner() {
@@ -393,8 +379,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                         val jsonObject: JsonObject =
                             Json.parseToJsonElement(resource).jsonObject
                         val m5BaseUrl: String =
-                            replaceDoubleTicks(jsonObject.get("m5BaseUrl").toString())
-                        val jsonServiceList = jsonObject.get("serviceList")?.jsonArray
+                            replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
+                        val jsonServiceList = jsonObject["serviceList"]?.jsonArray
                         m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
                         onM8DataChanged()
                     }
@@ -415,8 +401,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val inputStream: InputStream = assets.open(url)
             json = inputStream.bufferedReader().use { it.readText() }
             val jsonObject: JsonObject = Json.parseToJsonElement(json).jsonObject
-            val m5BaseUrl: String = replaceDoubleTicks(jsonObject.get("m5BaseUrl").toString())
-            val jsonServiceList = jsonObject.get("serviceList")?.jsonArray
+            val m5BaseUrl: String = replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
+            val jsonServiceList = jsonObject["serviceList"]?.jsonArray
             m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
             onM8DataChanged()
         } catch (e: Exception) {
@@ -435,7 +421,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 replaceDoubleTicks(itemAsJsonObject["provisioningSessionId"].toString())
 
             val entryPoints = ArrayList<EntryPoint>()
-            val entryPointList = itemAsJsonObject.get("entryPoints")?.jsonArray
+            val entryPointList = itemAsJsonObject["entryPoints"]?.jsonArray
 
             if (entryPointList != null) {
                 for (entryPoint in entryPointList) {
@@ -445,7 +431,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     val contentType =
                         replaceDoubleTicks(entryPointAsJsonObject["contentType"].toString())
                     val profiles = ArrayList<String>()
-                    val profileList = entryPointAsJsonObject.get("profiles")?.jsonArray
+                    val profileList = entryPointAsJsonObject["profiles"]?.jsonArray
                     if (profileList != null) {
                         for (profileEntry in profileList) {
                             profiles.add(profileEntry.toString())
