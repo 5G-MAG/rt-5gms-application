@@ -35,7 +35,7 @@ import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmsdawareapplication.network.M8InterfaceApi
-import com.fivegmag.a5gmsmediastreamhandler.ExoPlayerAdapter
+import com.fivegmag.a5gmsmediastreamhandler.player.exoplayer.ExoPlayerAdapter
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
 import androidx.media3.ui.PlayerView
 import kotlinx.serialization.json.*
@@ -55,10 +55,11 @@ const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
 @UnstableApi
 class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+
     private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
-    private val exoPlayerAdapter = ExoPlayerAdapter()
     private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
     private var currentSelectedStreamIndex: Int = 0
+    private lateinit var exoPlayerAdapter: ExoPlayerAdapter
     private lateinit var currentSelectedM8Key: String
     private lateinit var m8InterfaceApi: M8InterfaceApi
     private lateinit var m8Data: M8Model
@@ -70,6 +71,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         setContentView(R.layout.activity_main)
         requestUserPermissions()
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
         return true
@@ -175,7 +177,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         val requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestMultiplePermissions()
-            ) { 
+            ) {
                 initialize()
             }
 
@@ -196,12 +198,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             permissionLst.add(Manifest.permission.READ_PHONE_NUMBERS)
         }
 
-        if (permissionLst.size > 0)
-        {
+        if (permissionLst.size > 0) {
             requestPermissionLauncher.launch(permissionLst.toTypedArray())
-        }
-        else
-        {
+        } else {
             initialize()
         }
     }
@@ -220,20 +219,21 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             registerButtonListener()
             mediaSessionHandlerAdapter.initialize(
                 this,
-                exoPlayerAdapter,
                 ::onConnectionToMediaSessionHandlerEstablished
             )
+            exoPlayerAdapter = mediaSessionHandlerAdapter.getExoPlayerAdapter()
             val representationInfoTextView = findViewById<TextView>(R.id.representation_info)
             mediaStreamHandlerEventHandler.initialize(representationInfoTextView, this)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
     override fun onStop() {
         EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
         super.onStop()
         // Unbind from the service
-        mediaSessionHandlerAdapter.reset(this)
+        mediaSessionHandlerAdapter.reset()
     }
 
     override fun onStart() {
@@ -296,7 +296,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun onConnectionToMediaSessionHandlerEstablished() {
-        exoPlayerAdapter.initialize(exoPlayerView, this, mediaSessionHandlerAdapter)
+        exoPlayerAdapter.initialize(exoPlayerView, this)
     }
 
     private fun registerButtonListener() {
