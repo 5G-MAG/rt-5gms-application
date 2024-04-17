@@ -1,9 +1,12 @@
 <resources>
     <string name="app_name">5GMS Aware Application</string>
     <string name="headline">5G-MAG Reference Tools</string>
+    <string name="label_M8_config">Select Config</string>
     <string name="label_M8_selection">Select M8 Input</string>
     <string name="label_stream_selection">Select a Stream</string>
     <string name="start_playback_button">Start Playback</string>
+    <string name="m8_config_input">default</string>
+    <string name="load_m8_button">Load</string>
     <string name="representation_info">%1$s kbit/s - Rep ID: %2$s</string>
     <string name="version_text_field">Version: %s</string>
     <string name="action_license">License</string>
