@@ -24,6 +24,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,7 +35,7 @@ import androidx.media3.common.util.UnstableApi
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
-import com.fivegmag.a5gmsdawareapplication.network.M8InterfaceApi
+import com.fivegmag.a5gmsdawareapplication.network.IM8InterfaceApi
 import com.fivegmag.a5gmsmediastreamhandler.player.exoplayer.ExoPlayerAdapter
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
 import androidx.media3.ui.PlayerView
@@ -50,6 +51,8 @@ import java.io.InputStream
 import java.net.URI
 import java.util.*
 import com.fivegmag.a5gmscommonlibrary.helpers.Utils
+import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 
 const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
@@ -61,7 +64,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private var currentSelectedStreamIndex: Int = 0
     private lateinit var exoPlayerAdapter: ExoPlayerAdapter
     private lateinit var currentSelectedM8Key: String
-    private lateinit var m8InterfaceApi: M8InterfaceApi
+    private lateinit var iM8InterfaceApi: IM8InterfaceApi
+    private lateinit var iConfigApi: IConfigApi
     private lateinit var m8Data: M8Model
     private lateinit var exoPlayerView: PlayerView
     private lateinit var configProperties: Properties
@@ -211,8 +215,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
      */
     private fun initialize() {
         try {
-            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
-            populateM8SelectionSpinner()
+            initializeRetrofitForConfigInterfaceApi()
+            handleConfigurationChange()
             exoPlayerView = findViewById(R.id.idExoPlayerVIew)
             setApplicationVersionNumber()
             printDependenciesVersionNumbers()
@@ -226,6 +230,44 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             mediaStreamHandlerEventHandler.initialize(representationInfoTextView, this)
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun handleConfigurationChange() {
+        val editText = findViewById<EditText>(R.id.configSelectionText);
+        val configurationUrl = editText.text.toString();
+
+        if (configurationUrl == "default") {
+            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
+            populateM8SelectionSpinner()
+        } else {
+            setConfigViaEndpoint(configurationUrl)
+        }
+    }
+
+    private fun setConfigViaEndpoint(configurationUrl: String) {
+        try {
+            val call: Call<ResponseBody>? =
+                iConfigApi.fetchConfiguration(configurationUrl)
+            call?.enqueue(object : Callback<ResponseBody?> {
+                override fun onResponse(
+                    call: Call<ResponseBody?>,
+                    response: Response<ResponseBody?>
+                ) {
+                    val resource: String? = response.body()?.string()
+                    if (resource != null) {
+                        configProperties = Properties()
+                        configProperties.loadFromXML(resource.byteInputStream())
+                        populateM8SelectionSpinner()
+                    }
+                }
+
+                override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
+                    call.cancel()
+                }
+            })
+        } catch (_: Exception) {
+
         }
     }
 
@@ -291,8 +333,18 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        m8InterfaceApi =
-            retrofitM8Interface.create(M8InterfaceApi::class.java)
+        iM8InterfaceApi =
+            retrofitM8Interface.create(IM8InterfaceApi::class.java)
+    }
+
+    private fun initializeRetrofitForConfigInterfaceApi() {
+        val retrofitInterface: Retrofit = Retrofit.Builder()
+            .baseUrl("http://localhost/")
+            .addConverterFactory(SimpleXmlConverterFactory.create())
+            .build()
+
+        iConfigApi =
+            retrofitInterface.create(IConfigApi::class.java)
     }
 
     private fun onConnectionToMediaSessionHandlerEstablished() {
@@ -303,6 +355,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         findViewById<Button>(R.id.loadButton)
             .setOnClickListener {
                 loadStream()
+            }
+        findViewById<Button>(R.id.loadM8Button)
+            .setOnClickListener {
+                handleConfigurationChange()
             }
     }
 
@@ -368,7 +424,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         try {
             initializeRetrofitForM8InterfaceApi(m8HostingEndpoint)
             val call: Call<ResponseBody>? =
-                m8InterfaceApi.fetchServiceAccessInformationList()
+                iM8InterfaceApi.fetchServiceAccessInformationList()
             call?.enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(
                     call: Call<ResponseBody?>,
