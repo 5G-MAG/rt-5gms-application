@@ -7,7 +7,11 @@ This repository holds the 5GMSd-Aware Application implementation of the 5G-MAG R
 The 5GMSd-Aware Application is an application in the UE, provided by the 5GMSd Application Provider,
 that contains the service logic of the 5GMSd application service, and interacts with other 5GMSd
 Client and Network functions via the interfaces and APIs defined in the 5GMSd architecture.
-The 5GMSd-Aware Application controls the Media Session Handler via a UE-internal API defined at reference point M6d. This reference point could, for example, be realized as a JavaScript API in a web browser or via Inter Process Communication (IPC) for native Android applications. The 5GMSd-Aware Application controls the Media Player via a UE-internal API defined at reference point M7.
+The 5GMSd-Aware Application controls the Media Session Handler via a UE-internal API defined at
+reference point M6d. This reference point could, for example, be realized as a JavaScript API in a
+web browser or via Inter Process Communication (IPC) for native Android applications. The
+5GMSd-Aware Application controls the Media Player via a UE-internal API defined at reference point
+M7.
 
 ### About the implementation
 
@@ -19,15 +23,9 @@ the [Media Session Handler](https://github.com/5G-MAG/rt-5gms-media-session-hand
 
 ### Specifications
 
-A list of specification related to this repository is available in the [Standards Wiki](https://github.com/5G-MAG/Standards/wiki/5G-Downlink-Media-Streaming-Architecture-(5GMSd):-Relevant-Specifications).
-
-
-
-
-
-
-
-
+A list of specification related to this repository is available in
+the [Standards Wiki](https://github.com/5G-MAG/Standards/wiki/5G-Downlink-Media-Streaming-Architecture-(5GMSd):-Relevant-Specifications)
+.
 
 ## Downloading
 
@@ -42,7 +40,10 @@ git clone https://github.com/5G-MAG/rt-5gms-application.git
 ```
 
 ## Install dependencies
-The 5GMSd-Aware Application requires the [Common Android Library](https://github.com/5G-MAG/rt-5gms-common-android-library) and the [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handler) to run.
+
+The 5GMSd-Aware Application requires
+the [Common Android Library](https://github.com/5G-MAG/rt-5gms-common-android-library) and
+the [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handler) to run.
 
 Both are included as Maven dependencies in the `build.gradle`:
 
@@ -53,11 +54,14 @@ dependencies {
 }
 ````
 
-To install these two dependencies follow the corresponding installation guides in the Readme documentation of both projects. Make sure to publish both of them to a local Maven repository:
+Note that the version number (in the example above it is set to `1.0.0`) might differ depending on
+the version of the 5GMS Aware Application.
+
+To install these two dependencies follow the corresponding installation guides in the Readme
+documentation of both projects. Make sure to publish both of them to a local Maven repository:
 
 * [Common Android Library](https://github.com/5G-MAG/rt-5gms-common-android-library#publish-to-local-maven-repository)
 * [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handler#publish-to-local-maven-repository)
-
 
 ## Building
 
@@ -99,20 +103,30 @@ line: `adb shell am start -n com.fivegmag.a5gmsdawareapplication/com.fivegmag.a5
 
 ## Configuration
 
-The 5GMSd-Aware Application is configured with a set of JSON-based configurations - M8 configurations - that
-populate its user interface with content selections. Each M8 configuration corresponds to a different content
-catalogue and is described in a JSON document which may either point to a local file distributed with the `apk` or
-to URLs on an external M8 server. The items listed in the M8 configuration are used to populate the lower menu in
-the user interface of the 5GMSd-Aware Applicaion and allow selection of individual content items by the user.
+The 5GMSd-Aware Application is configured with a set of JSON-based configurations - M8
+configurations - that
+populate its user interface with content selections. Each M8 configuration corresponds to a
+different content
+catalogue and is described in a JSON document which may either point to a local file distributed
+with the `apk` or
+to URLs on an external M8 server. The items listed in the M8 configuration are used to populate the
+lower menu in
+the user interface of the 5GMSd-Aware Applicaion and allow selection of individual content items by
+the user.
 
-The list of M8 configurations is configured in an XML file distributed with the `apk`. These are used to populate
-the upper menu in the user interface of the 5GMSd-Aware Application and allow the user to switch between
+The list of M8 configurations is configured in an XML file distributed with the `apk`. These are
+used to populate
+the upper menu in the user interface of the 5GMSd-Aware Application and allow the user to switch
+between
 different available content catalogues.
 
-The 5GMSd-Aware Application ships with an M8 configuration file and two static example M8 configuration JSON files.
+The 5GMSd-Aware Application ships with an M8 configuration file and two static example M8
+configuration JSON files.
 
-The format of the M8 configuration is not standardised by 3GPP, and so the following is provided as an example
-only. A real 5GMSd-Aware Application is expected to communicate with its own back-end content catalogue at
+The format of the M8 configuration is not standardised by 3GPP, and so the following is provided as
+an example
+only. A real 5GMSd-Aware Application is expected to communicate with its own back-end content
+catalogue at
 reference point M8 using an application-specific format.
 
 ### M8 endpoint configuration
@@ -129,7 +143,8 @@ The URL to the M8 endpoints can be configured in `src/main/assets/config.propert
 </properties>
 ````
 
-Each entry needs to have a unique `key` that is used to populate the selection spinner in the Main Acitivity. The
+Each entry needs to have a unique `key` that is used to populate the selection spinner in the Main
+Acitivity. The
 URL to the to the M8 JSON file can either be relative pointing to a local file in the `assets`
 folder or absolute pointing to a server side endpoint.
 
