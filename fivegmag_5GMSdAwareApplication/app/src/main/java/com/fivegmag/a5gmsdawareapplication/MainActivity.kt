@@ -237,7 +237,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         val editText = findViewById<EditText>(R.id.configSelectionText);
         val configurationUrl = editText.text.toString();
 
-        if (configurationUrl == "default") {
+        if (configurationUrl == getString(R.string.m8_config_input)) {
             configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
             populateM8SelectionSpinner()
         } else {
