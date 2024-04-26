@@ -1,6 +1,9 @@
-# 5GMSd-Aware Application
-
-This repository holds the 5GMSd-Aware Application implementation of the 5G-MAG Reference Tools.
+<h1 align="center">5GMSd-Aware Application</h1>
+<p align="center">
+  <img src="https://img.shields.io/github/v/tag/5G-MAG/rt-5gms-application?label=version" alt="Version">
+  <img src="https://img.shields.io/badge/Status-Under_Development-yellow" alt="Under Development">
+  <img src="https://img.shields.io/badge/License-5G--MAG%20Public%20License%20(v1.0)-blue" alt="License">
+</p>
 
 ## Introduction
 
@@ -13,6 +16,8 @@ web browser or via Inter Process Communication (IPC) for native Android applicat
 5GMSd-Aware Application controls the Media Player via a UE-internal API defined at reference point
 M7.
 
+Additional information can be found at: https://5g-mag.github.io/Getting-Started/pages/5g-media-streaming/
+
 ### About the implementation
 
 The 5GMSd-Aware Application is an Android application that serves as a reference implementation for
@@ -20,12 +25,6 @@ The 5GMSd-Aware Application is an Android application that serves as a reference
 the [Media Stream Handler](https://github.com/5G-MAG/rt-5gms-media-stream-handle) for playback and
 communication with
 the [Media Session Handler](https://github.com/5G-MAG/rt-5gms-media-session-handler).
-
-### Specifications
-
-A list of specification related to this repository is available in
-the [Standards Wiki](https://github.com/5G-MAG/Standards/wiki/5G-Downlink-Media-Streaming-Architecture-(5GMSd):-Relevant-Specifications)
-.
 
 ## Downloading
 
