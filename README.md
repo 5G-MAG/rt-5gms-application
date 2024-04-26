@@ -1,4 +1,11 @@
-# 5GMS-Aware Applications
+<h1 align="center">5GMS-Aware Applications</h1>
+<p align="center">
+  <img src="https://img.shields.io/github/v/tag/5G-MAG/rt-5gms-application?label=version" alt="Version">
+  <img src="https://img.shields.io/badge/Status-Under_Development-yellow" alt="Under Development">
+  <img src="https://img.shields.io/badge/License-5G--MAG%20Public%20License%20(v1.0)-blue" alt="License">
+</p>
+
+## Introduction
 
 This repository holds applications that can be used to test and demonstrate other 5G-MAG Reference Tools related to 5GMS.
 
