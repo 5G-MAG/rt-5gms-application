@@ -1,5 +1,0 @@
-The 5G-MAG Sample Player application uses the following open source software:
-
-- Exoplayer - application level media player for Android
-  available at https://github.com/google/ExoPlayer
-  Licensed under Apache Software License v2.0 terms (https://github.com/google/ExoPlayer/blob/release-v2/LICENSE)

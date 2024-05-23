@@ -13,9 +13,7 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.GET
 
-interface M8InterfaceApi {
-
+interface IM8InterfaceApi {
     @GET("m8.json")
     fun fetchServiceAccessInformationList(): Call<ResponseBody>?
-
 }

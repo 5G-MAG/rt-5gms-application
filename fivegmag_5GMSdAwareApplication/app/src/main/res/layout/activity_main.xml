@@ -27,23 +27,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="20dp"
         android:text="@string/label_M8_selection"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
-
+        app:layout_constraintTop_toBottomOf="@+id/configSelectionText" />
 
     <Spinner
         android:id="@+id/idM8Spinner"
         android:layout_width="331dp"
         android:layout_height="25dp"
         android:layout_marginStart="36dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
@@ -51,8 +51,8 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="12dp"
         android:text="@string/label_stream_selection"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idM8Spinner" />
@@ -61,8 +61,8 @@
         android:id="@+id/idStreamSpinner"
         android:layout_width="327dp"
         android:layout_height="24dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
@@ -71,9 +71,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="28dp"
-        android:text="@string/start_playback_button"
+        android:layout_marginTop="24dp"
         android:backgroundTint="@color/fivegmag_blue"
+        android:text="@string/start_playback_button"
         android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
@@ -101,12 +101,48 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:autoLink="web"
         android:text="@string/_5gmag_developer_link"
         android:textColorLink="@color/fivegmag_blue"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"
-        app:layout_constraintTop_toBottomOf="@+id/loadButton" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/label_M8_config"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
+
+
+    <EditText
+        android:id="@+id/configSelectionText"
+        android:layout_width="190dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="10dp"
+        android:ems="10"
+        android:inputType="text"
+        android:text="@string/m8_config_input"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    <Button
+        android:id="@+id/loadM8Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="52dp"
+        android:backgroundTint="@color/fivegmag_blue"
+        android:text="@string/load_m8_button"
+        android:textColor="@color/white"
+        app:layout_constraintStart_toEndOf="@+id/configSelectionText"
+        app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
