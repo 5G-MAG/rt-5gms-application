@@ -38,8 +38,8 @@ git clone --recurse-submodules https://github.com/5G-MAG/rt-5gms-application.git
 
 Copy the patch available inside the ```patch``` folder into the Exoplayer project, then apply it:
 ```
-cp ~/rt-5gms-application/fivegmag_ExoDvbi_player/patch/Exoplayer.patch ~/rt-5gms-application/fivegmag_ExoDvbi_player/Exoplayer.patch
-cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/
+cp ~/rt-5gms-application/fivegmag_ExoDvbi_player/patch/Exoplayer.patch ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer/Exoplayer.patch
+cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer
 git apply Exoplayer.patch
 ```
 
