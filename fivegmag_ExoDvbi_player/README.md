@@ -35,16 +35,17 @@ Clone the repository, including submodules
 git clone --recurse-submodules https://github.com/5G-MAG/rt-5gms-application.git
 ```
 
-Copy the patch available inside the ```patch``` folder into the Exoplayer project, then apply it:
+Build the patched Exoplayer project:
+```
+cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer
+./gradlew assembleRelease
+```
+
+Copy the patch available inside the ```patch``` folder into the Exoplayer project, then apply it and rebuild:
 ```
 cp ~/rt-5gms-application/fivegmag_ExoDvbi_player/patch/Exoplayer.patch ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer/Exoplayer.patch
 cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer
 git apply Exoplayer.patch
-```
-
-Build the patched Exoplayer project:
-```
-cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer
 ./gradlew assembleRelease
 ```
 
