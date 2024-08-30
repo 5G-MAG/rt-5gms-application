@@ -50,7 +50,7 @@ cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer
 
 Find the built .apk files in the Exoplayer folder:
 ```
-./Exoplayer/demos/main/buildout/outputs/apk
+cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer/demos/main/buildout/outputs/apk
 ```
 
 Pick the desired .apk (Debug/Release version, with/without Decoder Extensions) and install on your target device via e.g. ADB
