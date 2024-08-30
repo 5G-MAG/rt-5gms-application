@@ -66,6 +66,7 @@ To install the APK on a device run:
 ```
 adb -s <deviceID> install -r noDecoderExtensionsDvbiapp/release/demo-noDecoderExtensions-dvbiapp-release.apk
 ```
+replace <deviceID> by your device ID. You can list the available devices with `adb devices`.
 
 ## License
 
