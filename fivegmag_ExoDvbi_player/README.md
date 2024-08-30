@@ -33,7 +33,6 @@ Clone the repository, including submodules
 
 ```
 git clone --recurse-submodules https://github.com/5G-MAG/rt-5gms-application.git
-
 ```
 
 Copy the patch available inside the ```patch``` folder into the Exoplayer project, then apply it:
