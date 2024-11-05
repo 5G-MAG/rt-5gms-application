@@ -32,26 +32,24 @@ The DVB-I Reference Application project consists of a backend and frontend parts
 Clone the repository, including submodules
 
 ```
-git clone --recurse-submodules https://github.com/5G-MAG/rt-5gms-application.git
+git clone --recurse-submodules git@github.com:5G-MAG/rt-5gms-application.git
+```
+
+Copy the patch available inside the ```patch``` folder into the Exoplayer project, then apply it:
+```
+copy rt-5gms-application\fivegmag_ExoDvbi_player\patch\Exoplayer.patch rt-5gms-application\fivegmag_ExoDvbi_player\Exoplayer\
+cd rt-5gms-application\fivegmag_ExoDvbi_player\Exoplayer\
+git apply Exoplayer.patch
 ```
 
 Build the patched Exoplayer project:
 ```
-cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer
-./gradlew assembleRelease
-```
-
-Copy the patch available inside the ```patch``` folder into the Exoplayer project, then apply it and rebuild:
-```
-cp ~/rt-5gms-application/fivegmag_ExoDvbi_player/patch/Exoplayer.patch ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer/Exoplayer.patch
-cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer
-git apply Exoplayer.patch
 ./gradlew assembleRelease
 ```
 
 Find the built .apk files in the Exoplayer folder:
 ```
-cd ~/rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer/demos/main/buildout/outputs/apk
+.\Exoplayer\demos\main\buildout\outputs\apk
 ```
 
 Pick the desired .apk (Debug/Release version, with/without Decoder Extensions) and install on your target device via e.g. ADB
@@ -66,7 +64,6 @@ To install the APK on a device run:
 ```
 adb -s <deviceID> install -r noDecoderExtensionsDvbiapp/release/demo-noDecoderExtensions-dvbiapp-release.apk
 ```
-replace <deviceID> by your device ID. You can list the available devices with `adb devices`.
 
 ## License
 
