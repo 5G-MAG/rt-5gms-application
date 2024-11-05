@@ -43,7 +43,7 @@ new file mode 100644
 +
 +public class WebviewActivity extends AppCompatActivity {
 +
-+  String landing_url = "http://stage.sofiadigital.fi/dvb/dvb-i-reference-application/frontend/android/player.html";
++  String landing_url = "http://192.168.0.101:3333/dvb-i/frontend/android/player.html";
 +
 +  @RequiresApi(api = Build.VERSION_CODES.KITKAT)
 +  @Override
@@ -319,9 +319,9 @@ diff --git a/demos/main/build.gradle b/demos/main/build.gradle
 +        dvbiapp {
 +            dimension "targets"
 +            buildConfigField "boolean", "USE_DECODER_EXTENSIONS", "false"
-+            resValue "string", "application_name", "DVB-I App"
++            resValue "string", "application_name", "5G-MAG + DVB-I Playr"
 +            applicationId "com.google.android.exoplayer2.dvbiapp"
-+            resValue "string", "application_name", "DVB-I App"
++            resValue "string", "application_name", "5G-MAG + DVB-I Playr"
 +        }
      }
  }
