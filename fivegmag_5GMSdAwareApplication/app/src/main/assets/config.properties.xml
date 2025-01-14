@@ -3,9 +3,9 @@
     <!--<entry key="m8LocalSingleMedia">m8/config_single_media.json</entry>-->
     <!-- <entry key="m8LocalMultiMedia">m8/config_multi_media.json</entry> -->
     <!--<entry key="m8LocalAfAndAs">m8/config_local_af.json</entry>-->
-    <entry key="m85GMAGHost">https://rt.5g-mag.com/</entry>
+    <entry key="m8 5G-MAG On-Line Host">https://rt.5g-mag.com/</entry>
     <!-- <entry key="m8LocalDummyHost">http://10.147.67.10:3003/m8/</entry> -->
-    <entry key="m8LocalHost">http://192.168.2.7/</entry>
-    <entry key="m8LocalDummyHost">http://10.147.67.85:3003/m8/</entry>
+    <entry key="m8 5G-MAG Local Host">http://10.147.67.219</entry>
+    <!-- <entry key="m8LocalDummyHost">http://10.147.67.85:3003/m8/</entry> -->
     <!-- <entry key="m8LocalDummyHost">http://194.95.175.90:3003/m8/</entry> -->
 </properties>

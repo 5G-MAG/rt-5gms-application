@@ -4,65 +4,79 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#2B6CA3"
     tools:context="com.fivegmag.a5gmsdawareapplication.MainActivity">
 
-
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="250dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:id="@+id/imageView3"
+        android:layout_width="200dp"
+        android:layout_height="54dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="24dp"
         android:contentDescription="@string/_5g_mag_logo_description"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logo_5g_mag_reference_tools" />
+        app:srcCompat="@drawable/fivegmag_playr" />
 
     <androidx.media3.ui.PlayerView
         android:id="@+id/idExoPlayerVIew"
         android:layout_width="355dp"
         android:layout_height="200dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
+        app:layout_constraintTop_toBottomOf="@+id/imageView3" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
         android:text="@string/label_M8_selection"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/configSelectionText" />
 
     <Spinner
         android:id="@+id/idM8Spinner"
-        android:layout_width="331dp"
-        android:layout_height="25dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="10dp"
+        android:layout_width="311dp"
+        android:layout_height="27dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        style="@style/CustomSpinnerStyle" />
 
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
         android:text="@string/label_stream_selection"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idM8Spinner" />
 
     <Spinner
         android:id="@+id/idStreamSpinner"
-        android:layout_width="327dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="10dp"
+        style="@style/CustomSpinnerStyle"
+        android:layout_width="310dp"
+        android:layout_height="31dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
@@ -71,10 +85,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="@color/fivegmag_blue"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/white"
         android:text="@string/start_playback_button"
-        android:textColor="@color/white"
+        android:textColor="@color/fivegmag_blue"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
 
@@ -82,8 +97,10 @@
         android:id="@+id/representation_info"
         android:layout_width="352dp"
         android:layout_height="23dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:text=""
-        android:textColor="#FFFFFF"
+        android:textColor="@color/white"
         app:layout_constraintStart_toStartOf="@+id/idExoPlayerVIew"
         app:layout_constraintTop_toTopOf="@+id/idExoPlayerVIew" />
 
@@ -91,10 +108,13 @@
         android:id="@+id/versionNumber"
         android:layout_width="162dp"
         android:layout_height="23dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:text="@string/version_text_field"
         android:textAlignment="viewEnd"
-        app:layout_constraintBottom_toTopOf="@+id/representation_info"
+        android:textColor="@color/white"
+        android:textColorLink="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView3"
         app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew" />
 
     <TextView
@@ -102,29 +122,37 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
         android:autoLink="web"
         android:text="@string/_5gmag_developer_link"
-        android:textColorLink="@color/fivegmag_blue"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        android:textColorLink="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView4" />
 
     <TextView
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="#00FFFFFF"
         android:text="@string/label_M8_config"
+        android:textColor="@color/white"
+        android:textColorLink="@color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
-
 
     <EditText
         android:id="@+id/configSelectionText"
         android:layout_width="190dp"
-        android:layout_height="44dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="10dp"
+        android:layout_height="28dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:background="@color/white"
         android:ems="10"
         android:inputType="text"
         android:text="@string/m8_config_input"
@@ -134,15 +162,26 @@
 
     <Button
         android:id="@+id/loadM8Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="102dp"
+        android:layout_height="44dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="52dp"
-        android:backgroundTint="@color/fivegmag_blue"
+        android:layout_marginEnd="16dp"
+        android:backgroundTint="@color/white"
         android:text="@string/load_m8_button"
-        android:textColor="@color/white"
+        android:textColor="@color/fivegmag_blue"
+        android:textColorLink="@color/white"
         app:layout_constraintStart_toEndOf="@+id/configSelectionText"
-        app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="168dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/loadButton"
+        app:srcCompat="@drawable/logo_5g_mag_reference_tools" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

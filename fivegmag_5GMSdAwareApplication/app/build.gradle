@@ -5,16 +5,20 @@ plugins {
 
 android {
     namespace 'com.fivegmag.a5gmsdawareapplication'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.fivegmag.a5gmsdawareapplication"
         minSdk 29
-        targetSdk 32
+        targetSdk 34
         versionCode 1
-        versionName "1.2.0"
+        versionName "1.2.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -59,8 +63,8 @@ dependencies {
     }
 
     // 5G-MAG
-    implementation 'com.fivegmag:a5gmscommonlibrary:1.2.0'
-    implementation 'com.fivegmag:a5gmsmediastreamhandler:1.2.0'
+    implementation 'com.fivegmag:a5gmscommonlibrary:1.2.1'
+    implementation 'com.fivegmag:a5gmsmediastreamhandler:1.2.1'
 }
 
 task CaptureLibraryVersion {
