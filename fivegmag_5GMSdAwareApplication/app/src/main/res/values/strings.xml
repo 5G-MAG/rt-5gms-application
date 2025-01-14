@@ -16,9 +16,8 @@
     <string name="authors">Authors</string>
     <string name="project">Project</string>
     <string name="description">Description</string>
-    <string name="description_text"><![CDATA[<p>The 5GMS Media Session Handler is a 5GMS Client component that forms part of the 5G Media Services framework as defined in ETSI TS 126.501.</p>
-    <p>A Media Session Handler first retrieves its configuration (“Service Access Information”) from the 5GMSd AF at reference point M5d and then uses this configuration information to activate and exploit the currently provisioned 5GMSd features.
-    In addition, the Media Session Handler exposes APIs via M6 to the 5GMSd-Aware Application and to the Media Player (for downlink streaming).</p>]]></string>
+    <string name="description_text"><![CDATA[<p>The 5GMSd-Aware Application is an application in the UE, provided by the 5GMSd Application Provider, that contains the service logic of the 5GMSd application service, and interacts with other 5GMSd Client and Network functions via the interfaces and APIs defined in the 5GMSd architecture.
+    </p><p>The 5GMSd-Aware Application controls the Media Session Handler via a UE-internal API defined at reference point M6d. This reference point could, for example, be realized as a JavaScript API in a web browser or via Inter Process Communication (IPC) for native Android applications. The 5GMSd-Aware Application controls the Media Player via a UE-internal API defined at reference point M7.</p>]]></string>
     <string name="github_label">Github</string>
     <string name="github_url">https://github.com/5G-MAG/rt-5gms-application</string>
     <string name="twitter_label">Twitter</string>
@@ -29,7 +28,7 @@
     <string name="slack_url">https://join.slack.com/t/5g-mag/shared_invite/zt-trtvsmw5-yYgcRidDgIS7x_u48sTuQA</string>
     <string name="website_label">Website</string>
     <string name="website_url">https://www.5g-mag.com/</string>
-    <string name="authors_text">https://github.com/5G-MAG/rt-5gms-media-session-handler/graphs/contributors</string>
+    <string name="authors_text">https://github.com/5G-MAG/rt-5gms-application/graphs/contributors</string>
     <string name="license_text"><![CDATA[<h1>5G-MAG Public License (v1.0)</h1>
 
 <h3>LICENSE TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION OF

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomSpinnerStyle" parent="Widget.AppCompat.Spinner">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorLink">@color/white</item>
+        <item name="android:spinnerMode">dropdown</item>
+    </style>
+</resources>
