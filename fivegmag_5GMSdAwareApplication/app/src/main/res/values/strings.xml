@@ -3,7 +3,7 @@
     <string name="logo_text_5gmag">5G-MAG</string>
     <string name="logo_text_flix">flix</string>
     <string name="headline">5G-MAG Reference Tools</string>
-    <string name="label_M8_config">Select Config</string>
+    <string name="label_M8_config">Configuration URL</string>
     <string name="label_M8_selection">Select M8 Input</string>
     <string name="label_stream_selection">Select a Stream</string>
     <string name="start_playback_button">Start Playback</string>
@@ -302,11 +302,18 @@ Version 1.0 Dated 22/07/2021]]></string>
     <!-- Settings page -->
     <string name="settings_title">Settings</string>
     <string name="settings_config_heading">Configuration Source</string>
-    <string name="settings_config_description">Enter a URL to load M8 configuration from a remote endpoint, or use the default local APK config.</string>
-    <string name="settings_m8_heading">M8 Input</string>
-    <string name="settings_m8_description">Select which M8 input to use. Changing the M8 input will update the available content.</string>
+    <string name="settings_config_description">Enter the URL of a remote app_config.json file to load sources from a server. Leave empty to use the built-in local configuration.</string>
+    <string name="settings_config_hint">https://example.com/app_config.json</string>
+    <string name="settings_m8_heading">Content Source</string>
+    <string name="settings_m8_description">Select which content source to display. The available sources are loaded from the configuration above.</string>
     <string name="settings_apply_button">Apply</string>
-    <string name="settings_reset_button">Reset to Default</string>
+    <string name="settings_reset_button">Reset</string>
+    <string name="settings_loading">Loading configuration\u2026</string>
+    <string name="settings_load_success">Loaded %d source(s)</string>
+    <string name="settings_load_error">Failed to load configuration</string>
+    <string name="settings_load_empty">Configuration contains no sources</string>
+    <string name="settings_reset_done">Reset to built-in configuration</string>
+    <string name="settings_using_local">Using built-in configuration</string>
 
     <!-- Menu -->
     <string name="action_settings">Settings</string>

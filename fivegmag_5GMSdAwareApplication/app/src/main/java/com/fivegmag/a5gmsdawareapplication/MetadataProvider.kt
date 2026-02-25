@@ -18,6 +18,7 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.net.URI
 
 const val TAG_METADATA_PROVIDER = "MetadataProvider"
 
@@ -30,28 +31,77 @@ class MetadataProvider {
     private var metadataMap: HashMap<String, ContentMetadata> = HashMap()
 
     /**
-     * Tries to load metadata for a given M8 config key from local assets.
-     * The naming convention is: m8/<key>.json -> metadata/<key>_metadata.json
+     * Single entry point for loading metadata.
+     *
+     * @param m8Url The M8 URL (used to derive the metadata URL if explicitMetadataUrl is null)
+     * @param explicitMetadataUrl Explicit metadata URL from the app config.
+     *        null = derive from m8Url by convention.
+     *        "" (empty) = skip metadata loading entirely.
+     *        Otherwise used as-is (relative path = local asset, absolute URL = remote).
+     * @param assets AssetManager for local file loading
+     * @param iConfigApi Retrofit API for remote loading
+     * @param callback Called when metadata loading completes (success or failure)
      */
-    fun loadFromAssets(assets: AssetManager, m8ConfigPath: String) {
+    fun loadMetadata(
+        m8Url: String,
+        explicitMetadataUrl: String?,
+        assets: AssetManager,
+        iConfigApi: IConfigApi,
+        callback: () -> Unit
+    ) {
+        // Explicit empty string means no metadata
+        if (explicitMetadataUrl == "") {
+            metadataMap.clear()
+            callback()
+            return
+        }
+
+        // Determine the actual metadata URL to use
+        val metadataUrl = explicitMetadataUrl ?: deriveMetadataUrl(m8Url)
+
+        if (metadataUrl.isEmpty()) {
+            metadataMap.clear()
+            callback()
+            return
+        }
+
+        // Determine if it's a local asset path or a remote URL
         try {
-            val metadataPath = deriveMetadataPath(m8ConfigPath)
+            val uri = URI(metadataUrl)
+            if (uri.isAbsolute) {
+                loadFromEndpoint(metadataUrl, iConfigApi, callback)
+            } else {
+                loadFromAssets(assets, metadataUrl)
+                callback()
+            }
+        } catch (e: Exception) {
+            Log.d(TAG_METADATA_PROVIDER, "Failed to load metadata: ${e.message}")
+            metadataMap.clear()
+            callback()
+        }
+    }
+
+    fun getMetadataForEntry(entryName: String): ContentMetadata? {
+        return metadataMap[entryName]
+    }
+
+    private fun loadFromAssets(assets: AssetManager, metadataPath: String) {
+        try {
             val inputStream = assets.open(metadataPath)
             val json = inputStream.bufferedReader().use { it.readText() }
             parseMetadataJson(json)
         } catch (e: Exception) {
-            Log.d(TAG_METADATA_PROVIDER, "No local metadata found for $m8ConfigPath")
+            Log.d(TAG_METADATA_PROVIDER, "No local metadata found at $metadataPath")
             metadataMap.clear()
         }
     }
 
-    /**
-     * Loads metadata from a remote endpoint.
-     * Expects the metadata JSON to be at <baseUrl>/metadata.json
-     */
-    fun loadFromEndpoint(m8Url: String, iConfigApi: IConfigApi, callback: () -> Unit) {
+    private fun loadFromEndpoint(
+        metadataUrl: String,
+        iConfigApi: IConfigApi,
+        callback: () -> Unit
+    ) {
         try {
-            val metadataUrl = m8Url.substringBeforeLast('/') + "/metadata.json"
             val call: Call<ResponseBody>? = iConfigApi.fetchConfiguration(metadataUrl)
             call?.enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(
@@ -71,7 +121,7 @@ class MetadataProvider {
                 }
 
                 override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
-                    Log.d(TAG_METADATA_PROVIDER, "Failed to fetch remote metadata")
+                    Log.d(TAG_METADATA_PROVIDER, "Failed to fetch remote metadata: ${t.message}")
                     metadataMap.clear()
                     call.cancel()
                     callback()
@@ -81,10 +131,6 @@ class MetadataProvider {
             metadataMap.clear()
             callback()
         }
-    }
-
-    fun getMetadataForEntry(entryName: String): ContentMetadata? {
-        return metadataMap[entryName]
     }
 
     private fun parseMetadataJson(json: String) {
@@ -107,9 +153,24 @@ class MetadataProvider {
         }
     }
 
-    private fun deriveMetadataPath(m8ConfigPath: String): String {
-        // m8/config_multi_media.json -> metadata/config_multi_media_metadata.json
-        val filename = m8ConfigPath.substringAfterLast("/").substringBeforeLast(".")
-        return "metadata/${filename}_metadata.json"
+    /**
+     * Derives the metadata URL from the M8 URL by convention.
+     * - Remote: http://host/path/m8.json -> http://host/path/metadata.json
+     * - Local: m8/config_multi_media.json -> metadata/config_multi_media_metadata.json
+     */
+    private fun deriveMetadataUrl(m8Url: String): String {
+        return try {
+            val uri = URI(m8Url)
+            if (uri.isAbsolute) {
+                // Remote: replace filename with metadata.json
+                m8Url.substringBeforeLast('/') + "/metadata.json"
+            } else {
+                // Local: m8/<key>.json -> metadata/<key>_metadata.json
+                val filename = m8Url.substringAfterLast("/").substringBeforeLast(".")
+                "metadata/${filename}_metadata.json"
+            }
+        } catch (_: Exception) {
+            ""
+        }
     }
 }

@@ -11,7 +11,9 @@ package com.fivegmag.a5gmsdawareapplication
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -21,7 +23,6 @@ import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -30,15 +31,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fivegmag.a5gmscommonlibrary.helpers.Utils
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmsdawareapplication.adapter.CategoryRowAdapter
+import com.fivegmag.a5gmsdawareapplication.model.AppConfig
 import com.fivegmag.a5gmsdawareapplication.model.ContentCategory
 import com.fivegmag.a5gmsdawareapplication.model.ContentItem
+import com.fivegmag.a5gmsdawareapplication.model.M8Source
 import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
-import com.fivegmag.a5gmsdawareapplication.network.IM8InterfaceApi
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.serialization.json.*
@@ -47,58 +48,47 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.io.InputStream
 import java.net.URI
-import java.util.*
 
 const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
 /**
- * Landing page of the application. Displays available content items in a grid of poster cards.
+ * Landing page of the application. Displays available content items
+ * in horizontal carousels grouped by media type.
  * Configuration and M8 input selection has been moved to SettingsActivity.
  */
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        const val REQUEST_SETTINGS = 1001
-    }
-
     private lateinit var contentGrid: RecyclerView
     private lateinit var emptyStateText: TextView
     private lateinit var categoryRowAdapter: CategoryRowAdapter
-    private lateinit var iM8InterfaceApi: IM8InterfaceApi
     private lateinit var iConfigApi: IConfigApi
-    private lateinit var configProperties: Properties
     private lateinit var m8Data: M8Model
 
+    private val configProvider = ConfigProvider()
     private val metadataProvider = MetadataProvider()
+    private var appConfig: AppConfig = AppConfig(emptyList())
     private var currentConfigUrl: String = ""
-    private var currentSelectedM8Key: String = ""
-    private var currentM8Path: String = ""
+    private var currentSource: M8Source? = null
 
     private val settingsLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-            val data = result.data
-            if (data != null) {
-                val configUrl = data.getStringExtra(SettingsActivity.EXTRA_CONFIG_URL) ?: ""
-                val m8Key = data.getStringExtra(SettingsActivity.EXTRA_SELECTED_M8_KEY) ?: ""
-                val resolvedValue = data.getStringExtra("resolved_m8_value") ?: ""
+            val data = result.data ?: return@registerForActivityResult
+            val configUrl = data.getStringExtra(SettingsActivity.EXTRA_CONFIG_URL) ?: ""
+            val sourceName = data.getStringExtra(SettingsActivity.EXTRA_SELECTED_SOURCE_NAME) ?: ""
+            val m8Url = data.getStringExtra(SettingsActivity.EXTRA_SELECTED_M8_URL) ?: ""
+            val metadataUrl = data.getStringExtra(SettingsActivity.EXTRA_SELECTED_METADATA_URL)
 
-                currentConfigUrl = configUrl
-                currentSelectedM8Key = m8Key
+            currentConfigUrl = configUrl
 
-                if (resolvedValue.isNotEmpty()) {
-                    val selectedUri = URI(resolvedValue)
-                    if (selectedUri.isAbsolute) {
-                        setM8DataViaEndpoint(selectedUri.toString())
-                    } else {
-                        setM8DataViaJson(selectedUri.toString())
-                    }
-                }
+            if (m8Url.isNotEmpty()) {
+                val source = M8Source(sourceName, m8Url, metadataUrl)
+                currentSource = source
+                loadM8Source(source)
             }
         }
     }
@@ -161,7 +151,10 @@ class MainActivity : AppCompatActivity() {
             R.id.actionSettings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
                 intent.putExtra(SettingsActivity.EXTRA_CONFIG_URL, currentConfigUrl)
-                intent.putExtra(SettingsActivity.EXTRA_SELECTED_M8_KEY, currentSelectedM8Key)
+                intent.putExtra(
+                    SettingsActivity.EXTRA_SELECTED_SOURCE_NAME,
+                    currentSource?.name ?: ""
+                )
                 settingsLauncher.launch(intent)
                 return true
             }
@@ -267,7 +260,6 @@ class MainActivity : AppCompatActivity() {
                 initialize()
             }
 
-        // Register the cell info callback
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -293,64 +285,72 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Initialization is performed after the user permissions have been requested.
+     * Reads persisted config URL and source name from SharedPreferences.
      */
     private fun initialize() {
         try {
             initializeRetrofitForConfigInterfaceApi()
-            currentConfigUrl = getString(R.string.m8_config_input)
-            handleConfigurationChange()
+
+            val prefs = getSharedPreferences(
+                SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE
+            )
+            val persistedUrl = prefs.getString(SettingsActivity.PREF_CONFIG_URL, null)
+
+            // Determine config URL: persisted remote URL, or local
+            currentConfigUrl = if (!persistedUrl.isNullOrEmpty()) {
+                persistedUrl
+            } else {
+                getString(R.string.m8_config_input)
+            }
+
+            val persistedSourceName = prefs.getString(
+                SettingsActivity.PREF_SELECTED_SOURCE_NAME, null
+            )
+            loadAppConfig(persistedSourceName)
             printDependenciesVersionNumbers()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun handleConfigurationChange() {
+    private fun loadAppConfig(preferredSourceName: String? = null) {
         if (currentConfigUrl == getString(R.string.m8_config_input)) {
-            configProperties = Utils().loadConfiguration(this.assets, "m8config.properties.xml")
-            loadFirstM8Entry()
+            appConfig = configProvider.loadFromAssets(assets)
+            loadSourceByName(preferredSourceName)
         } else {
-            setConfigViaEndpoint(currentConfigUrl)
-        }
-    }
-
-    private fun loadFirstM8Entry() {
-        val propertyNames = configProperties.propertyNames()
-        if (propertyNames.hasMoreElements()) {
-            val firstKey = propertyNames.nextElement() as String
-            currentSelectedM8Key = firstKey
-            val value = configProperties.getProperty(firstKey)
-            val selectedUri = URI(value)
-            if (selectedUri.isAbsolute) {
-                setM8DataViaEndpoint(selectedUri.toString())
-            } else {
-                setM8DataViaJson(selectedUri.toString())
+            configProvider.loadFromEndpoint(currentConfigUrl, iConfigApi) { config ->
+                appConfig = config
+                runOnUiThread { loadSourceByName(preferredSourceName) }
             }
         }
     }
 
-    private fun setConfigViaEndpoint(configurationUrl: String) {
-        try {
-            val call: Call<ResponseBody>? =
-                iConfigApi.fetchConfiguration(configurationUrl)
-            call?.enqueue(object : Callback<ResponseBody?> {
-                override fun onResponse(
-                    call: Call<ResponseBody?>,
-                    response: Response<ResponseBody?>
-                ) {
-                    val resource: String? = response.body()?.string()
-                    if (resource != null) {
-                        configProperties = Properties()
-                        configProperties.loadFromXML(resource.byteInputStream())
-                        loadFirstM8Entry()
-                    }
-                }
+    /**
+     * Selects and loads a source by name. Falls back to the first source
+     * if the named source is not found in the current config.
+     */
+    private fun loadSourceByName(sourceName: String?) {
+        if (appConfig.sources.isEmpty()) return
 
-                override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
-                    call.cancel()
-                }
-            })
-        } catch (_: Exception) {
+        val source = if (!sourceName.isNullOrEmpty()) {
+            appConfig.sources.find { it.name == sourceName } ?: appConfig.sources[0]
+        } else {
+            appConfig.sources[0]
+        }
+        currentSource = source
+        loadM8Source(source)
+    }
+
+    /**
+     * Loads M8 data and metadata for the given source.
+     */
+    private fun loadM8Source(source: M8Source) {
+        val m8Url = source.m8Url
+        val selectedUri = URI(m8Url)
+        if (selectedUri.isAbsolute) {
+            setM8DataViaEndpoint(m8Url, source)
+        } else {
+            setM8DataViaJson(m8Url, source)
         }
     }
 
@@ -365,16 +365,6 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun initializeRetrofitForM8InterfaceApi(url: String) {
-        val retrofitM8Interface: Retrofit = Retrofit.Builder()
-            .baseUrl(url)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        iM8InterfaceApi =
-            retrofitM8Interface.create(IM8InterfaceApi::class.java)
-    }
-
     private fun initializeRetrofitForConfigInterfaceApi() {
         val retrofitInterface: Retrofit = Retrofit.Builder()
             .baseUrl("http://localhost/")
@@ -385,25 +375,18 @@ class MainActivity : AppCompatActivity() {
             retrofitInterface.create(IConfigApi::class.java)
     }
 
-    private fun onM8DataChanged() {
-        loadMetadataAndDisplayGrid()
+    private fun onM8DataChanged(source: M8Source) {
+        loadMetadataAndDisplayGrid(source)
     }
 
-    private fun loadMetadataAndDisplayGrid() {
-        if (currentM8Path.isNotEmpty()) {
-            val selectedUri = URI(currentM8Path)
-            if (!selectedUri.isAbsolute) {
-                // Local M8 config: try to load matching metadata from assets
-                metadataProvider.loadFromAssets(assets, currentM8Path)
-                displayContentGrid()
-            } else {
-                // Remote M8 config: try to load metadata from remote endpoint
-                metadataProvider.loadFromEndpoint(currentM8Path, iConfigApi) {
-                    runOnUiThread { displayContentGrid() }
-                }
-            }
-        } else {
-            displayContentGrid()
+    private fun loadMetadataAndDisplayGrid(source: M8Source) {
+        metadataProvider.loadMetadata(
+            m8Url = source.m8Url,
+            explicitMetadataUrl = source.metadataUrl,
+            assets = assets,
+            iConfigApi = iConfigApi
+        ) {
+            runOnUiThread { displayContentGrid() }
         }
     }
 
@@ -459,12 +442,10 @@ class MainActivity : AppCompatActivity() {
         return categories
     }
 
-    private fun setM8DataViaEndpoint(m8HostingEndpoint: String) {
+    private fun setM8DataViaEndpoint(m8HostingEndpoint: String, source: M8Source) {
         try {
-            currentM8Path = m8HostingEndpoint
-            initializeRetrofitForM8InterfaceApi(m8HostingEndpoint)
             val call: Call<ResponseBody>? =
-                iM8InterfaceApi.fetchServiceAccessInformationList()
+                iConfigApi.fetchConfiguration(m8HostingEndpoint)
             call?.enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(
                     call: Call<ResponseBody?>,
@@ -472,35 +453,51 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     val resource: String? = response.body()?.string()
                     if (resource != null) {
-                        val jsonObject: JsonObject =
-                            Json.parseToJsonElement(resource).jsonObject
-                        val m5BaseUrl: String =
-                            replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
-                        val jsonServiceList = jsonObject["serviceList"]?.jsonArray
-                        m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
-                        onM8DataChanged()
+                        try {
+                            val jsonObject: JsonObject =
+                                Json.parseToJsonElement(resource).jsonObject
+                            val m5BaseUrl: String =
+                                replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
+                            val jsonServiceList = jsonObject["serviceList"]?.jsonArray
+                            m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
+                            onM8DataChanged(source)
+                        } catch (e: Exception) {
+                            Log.e(TAG_AWARE_APPLICATION, "Failed to parse M8 data: ${e.message}")
+                            runOnUiThread { showEmptyState() }
+                        }
+                    } else {
+                        Log.e(TAG_AWARE_APPLICATION, "M8 response body was null")
+                        runOnUiThread { showEmptyState() }
                     }
                 }
 
                 override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
+                    Log.e(TAG_AWARE_APPLICATION, "Failed to fetch M8 data: ${t.message}")
                     call.cancel()
+                    runOnUiThread { showEmptyState() }
                 }
             })
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            Log.e(TAG_AWARE_APPLICATION, "Error loading M8 endpoint: ${e.message}")
+            showEmptyState()
         }
     }
 
-    private fun setM8DataViaJson(url: String) {
+    private fun showEmptyState() {
+        emptyStateText.visibility = View.VISIBLE
+        contentGrid.visibility = View.GONE
+    }
+
+    private fun setM8DataViaJson(url: String, source: M8Source) {
         val json: String?
         try {
-            currentM8Path = url
             val inputStream: InputStream = assets.open(url)
             json = inputStream.bufferedReader().use { it.readText() }
             val jsonObject: JsonObject = Json.parseToJsonElement(json).jsonObject
             val m5BaseUrl: String = replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
             val jsonServiceList = jsonObject["serviceList"]?.jsonArray
             m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
-            onM8DataChanged()
+            onM8DataChanged(source)
         } catch (e: Exception) {
             e.printStackTrace()
         }

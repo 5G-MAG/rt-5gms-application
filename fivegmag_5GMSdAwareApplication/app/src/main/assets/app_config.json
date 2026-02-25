@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "name": "Docker",
+      "m8Url": "http://192.168.178.56/m8.json",
+      "metadataUrl": "http://192.168.178.56/metadata.json"
+    }
+  ]
+}

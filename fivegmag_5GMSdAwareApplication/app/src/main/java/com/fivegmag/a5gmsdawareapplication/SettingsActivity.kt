@@ -10,55 +10,75 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 package com.fivegmag.a5gmsdawareapplication
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
-import android.widget.TextView
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import com.fivegmag.a5gmscommonlibrary.helpers.Utils
+import com.fivegmag.a5gmsdawareapplication.model.AppConfig
+import com.fivegmag.a5gmsdawareapplication.model.M8Source
 import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.textfield.TextInputEditText
-import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
-import java.util.*
 
 /**
- * Settings screen that allows the user to configure the M8 data source.
- * When the user navigates back (toolbar or system back), the currently selected
- * M8 input is returned to MainActivity which then reloads the content grid.
+ * Settings screen that allows the user to configure the app configuration source.
+ *
+ * The user can either:
+ * - Leave the URL field empty to use the built-in local app_config.json
+ * - Enter a remote URL pointing to a JSON file in app_config.json format
+ *
+ * After loading a configuration, the user selects a content source from the spinner.
+ * The selected config URL and source are persisted in SharedPreferences so the app
+ * remembers the settings across restarts.
  */
 class SettingsActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_CONFIG_URL = "config_url"
-        const val EXTRA_SELECTED_M8_KEY = "selected_m8_key"
-        const val EXTRA_CONFIG_CHANGED = "config_changed"
+        const val EXTRA_SELECTED_SOURCE_NAME = "selected_source_name"
+        const val EXTRA_SELECTED_M8_URL = "selected_m8_url"
+        const val EXTRA_SELECTED_METADATA_URL = "selected_metadata_url"
+
+        const val PREFS_NAME = "5gmagflix_settings"
+        const val PREF_CONFIG_URL = "config_url"
+        const val PREF_SELECTED_SOURCE_NAME = "selected_source_name"
     }
 
     private lateinit var configUrlInput: TextInputEditText
     private lateinit var m8Spinner: Spinner
+    private lateinit var loadButton: Button
+    private lateinit var resetButton: Button
+    private lateinit var loadingContainer: LinearLayout
+    private lateinit var configStatusText: TextView
     private lateinit var iConfigApi: IConfigApi
-    private lateinit var configProperties: Properties
+    private lateinit var prefs: SharedPreferences
 
-    /** The M8 key that was active when this activity was opened */
-    private var receivedM8Key: String = ""
+    private val configProvider = ConfigProvider()
+    private var appConfig: AppConfig = AppConfig(emptyList())
+
+    /** The source name that was active when this activity was opened */
+    private var receivedSourceName: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
-        receivedM8Key = intent.getStringExtra(EXTRA_SELECTED_M8_KEY) ?: ""
+        prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        receivedSourceName = intent.getStringExtra(EXTRA_SELECTED_SOURCE_NAME) ?: ""
 
         setupToolbar()
         setupLogo()
@@ -103,67 +123,75 @@ class SettingsActivity : AppCompatActivity() {
     private fun initializeViews() {
         configUrlInput = findViewById(R.id.configUrlInput)
         m8Spinner = findViewById(R.id.m8Spinner)
+        loadButton = findViewById(R.id.loadConfigButton)
+        resetButton = findViewById(R.id.resetConfigButton)
+        loadingContainer = findViewById(R.id.loadingContainer)
+        configStatusText = findViewById(R.id.configStatusText)
 
-        val configUrl = intent.getStringExtra(EXTRA_CONFIG_URL)
-        if (configUrl != null) {
-            configUrlInput.setText(configUrl)
+        // Populate the input field: use the persisted config URL if available,
+        // otherwise check the intent extra, otherwise leave empty (local config).
+        val persistedUrl = prefs.getString(PREF_CONFIG_URL, null)
+        val intentUrl = intent.getStringExtra(EXTRA_CONFIG_URL)
+
+        val urlToShow = when {
+            persistedUrl != null && persistedUrl.isNotEmpty() -> persistedUrl
+            intentUrl != null && intentUrl != getString(R.string.m8_config_input) -> intentUrl
+            else -> ""
         }
+        configUrlInput.setText(urlToShow)
     }
 
     private fun loadInitialConfig() {
-        val configUrl = configUrlInput.text.toString()
-        if (configUrl == getString(R.string.m8_config_input)) {
-            configProperties = Utils().loadConfiguration(this.assets, "m8config.properties.xml")
-            populateM8Spinner()
+        val configUrl = configUrlInput.text.toString().trim()
+        if (configUrl.isEmpty()) {
+            appConfig = configProvider.loadFromAssets(assets)
+            populateSourceSpinner()
+            showStatus(getString(R.string.settings_using_local), isError = false)
         } else {
-            loadConfigFromEndpoint(configUrl)
-        }
-    }
-
-    private fun loadConfigFromEndpoint(configurationUrl: String) {
-        try {
-            val call: Call<ResponseBody>? =
-                iConfigApi.fetchConfiguration(configurationUrl)
-            call?.enqueue(object : Callback<ResponseBody?> {
-                override fun onResponse(
-                    call: Call<ResponseBody?>,
-                    response: Response<ResponseBody?>
-                ) {
-                    val resource: String? = response.body()?.string()
-                    if (resource != null) {
-                        configProperties = Properties()
-                        configProperties.loadFromXML(resource.byteInputStream())
-                        populateM8Spinner()
+            showLoading(true)
+            configProvider.loadFromEndpoint(configUrl, iConfigApi) { config ->
+                runOnUiThread {
+                    showLoading(false)
+                    appConfig = config
+                    if (config.sources.isNotEmpty()) {
+                        populateSourceSpinner()
+                        showStatus(
+                            getString(R.string.settings_load_success, config.sources.size),
+                            isError = false
+                        )
+                    } else {
+                        populateSourceSpinner()
+                        showStatus(getString(R.string.settings_load_empty), isError = true)
                     }
                 }
-
-                override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
-                    call.cancel()
-                }
-            })
-        } catch (_: Exception) {
+            }
         }
     }
 
-    private fun populateM8Spinner() {
+    private fun populateSourceSpinner() {
         try {
-            val spinnerOptions: ArrayList<String> = ArrayList()
-            val propertyNames = configProperties.propertyNames()
-
-            while (propertyNames.hasMoreElements()) {
-                spinnerOptions.add(propertyNames.nextElement() as String)
+            val spinnerOptions = ArrayList<String>()
+            for (source in appConfig.sources) {
+                spinnerOptions.add(source.name)
             }
 
-            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
+            val adapter = ArrayAdapter<String>(
                 this,
                 android.R.layout.simple_spinner_item, spinnerOptions
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             m8Spinner.adapter = adapter
 
-            // Restore previous selection
-            if (receivedM8Key.isNotEmpty()) {
-                val position = spinnerOptions.indexOf(receivedM8Key)
+            // Restore previous selection: first try the received source name,
+            // then the persisted source name
+            val sourceToSelect = if (receivedSourceName.isNotEmpty()) {
+                receivedSourceName
+            } else {
+                prefs.getString(PREF_SELECTED_SOURCE_NAME, null) ?: ""
+            }
+
+            if (sourceToSelect.isNotEmpty()) {
+                val position = spinnerOptions.indexOf(sourceToSelect)
                 if (position >= 0) {
                     m8Spinner.setSelection(position)
                 }
@@ -174,40 +202,105 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun registerButtonListeners() {
-        // "Load" button only reloads config properties and repopulates the spinner.
-        // It does NOT close the activity -- the user navigates back to apply.
-        findViewById<Button>(R.id.loadConfigButton).setOnClickListener {
-            val configUrl = configUrlInput.text.toString()
-            if (configUrl == getString(R.string.m8_config_input)) {
-                configProperties = Utils().loadConfiguration(this.assets, "m8config.properties.xml")
-                populateM8Spinner()
+        loadButton.setOnClickListener {
+            val configUrl = configUrlInput.text.toString().trim()
+            if (configUrl.isEmpty()) {
+                appConfig = configProvider.loadFromAssets(assets)
+                receivedSourceName = ""
+                populateSourceSpinner()
+                showStatus(getString(R.string.settings_using_local), isError = false)
             } else {
-                loadConfigFromEndpoint(configUrl)
+                showLoading(true)
+                loadButton.isEnabled = false
+                configProvider.loadFromEndpoint(configUrl, iConfigApi) { config ->
+                    runOnUiThread {
+                        showLoading(false)
+                        loadButton.isEnabled = true
+                        appConfig = config
+                        receivedSourceName = ""
+                        if (config.sources.isNotEmpty()) {
+                            populateSourceSpinner()
+                            showStatus(
+                                getString(R.string.settings_load_success, config.sources.size),
+                                isError = false
+                            )
+                            Toast.makeText(
+                                this,
+                                getString(R.string.settings_load_success, config.sources.size),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            populateSourceSpinner()
+                            showStatus(getString(R.string.settings_load_empty), isError = true)
+                        }
+                    }
+                }
             }
         }
 
-        findViewById<Button>(R.id.resetConfigButton).setOnClickListener {
-            configUrlInput.setText(getString(R.string.m8_config_input))
-            configProperties = Utils().loadConfiguration(this.assets, "m8config.properties.xml")
-            receivedM8Key = ""
-            populateM8Spinner()
+        resetButton.setOnClickListener {
+            configUrlInput.setText("")
+            appConfig = configProvider.loadFromAssets(assets)
+            receivedSourceName = ""
+            populateSourceSpinner()
+
+            // Clear persisted settings
+            prefs.edit()
+                .remove(PREF_CONFIG_URL)
+                .remove(PREF_SELECTED_SOURCE_NAME)
+                .apply()
+
+            showStatus(getString(R.string.settings_reset_done), isError = false)
+            Toast.makeText(this, getString(R.string.settings_reset_done), Toast.LENGTH_SHORT).show()
         }
     }
 
+    private fun showLoading(show: Boolean) {
+        loadingContainer.visibility = if (show) View.VISIBLE else View.GONE
+        if (show) {
+            configStatusText.visibility = View.GONE
+        }
+    }
+
+    private fun showStatus(message: String, isError: Boolean) {
+        configStatusText.text = message
+        configStatusText.setTextColor(
+            getColor(if (isError) R.color.flix_red else R.color.fivegmag_blue)
+        )
+        configStatusText.visibility = View.VISIBLE
+    }
+
     /**
-     * Returns the currently selected M8 key and config URL to MainActivity,
-     * then finishes this activity.
+     * Persists the current settings and returns the selected source to MainActivity.
      */
     private fun returnResultAndFinish() {
+        val configUrl = configUrlInput.text.toString().trim()
         val resultIntent = Intent()
-        resultIntent.putExtra(EXTRA_CONFIG_URL, configUrlInput.text.toString())
-        val selectedM8Key = m8Spinner.selectedItem as? String
-        if (selectedM8Key != null) {
-            resultIntent.putExtra(EXTRA_SELECTED_M8_KEY, selectedM8Key)
-            val resolvedValue = configProperties.getProperty(selectedM8Key)
-            resultIntent.putExtra("resolved_m8_value", resolvedValue)
+
+        // Persist the config URL
+        prefs.edit().putString(PREF_CONFIG_URL, configUrl).apply()
+
+        // For MainActivity: pass back the config URL marker
+        // Empty string means local config
+        if (configUrl.isEmpty()) {
+            resultIntent.putExtra(EXTRA_CONFIG_URL, getString(R.string.m8_config_input))
+        } else {
+            resultIntent.putExtra(EXTRA_CONFIG_URL, configUrl)
         }
-        resultIntent.putExtra(EXTRA_CONFIG_CHANGED, true)
+
+        val selectedIndex = m8Spinner.selectedItemPosition
+        if (selectedIndex >= 0 && selectedIndex < appConfig.sources.size) {
+            val selectedSource = appConfig.sources[selectedIndex]
+            resultIntent.putExtra(EXTRA_SELECTED_SOURCE_NAME, selectedSource.name)
+            resultIntent.putExtra(EXTRA_SELECTED_M8_URL, selectedSource.m8Url)
+            if (selectedSource.metadataUrl != null) {
+                resultIntent.putExtra(EXTRA_SELECTED_METADATA_URL, selectedSource.metadataUrl)
+            }
+
+            // Persist selected source name
+            prefs.edit().putString(PREF_SELECTED_SOURCE_NAME, selectedSource.name).apply()
+        }
+
         setResult(Activity.RESULT_OK, resultIntent)
         finish()
     }
@@ -225,7 +318,7 @@ class SettingsActivity : AppCompatActivity() {
         try {
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
             val versionName = packageInfo.versionName
-            val versionTextView = findViewById<android.widget.TextView>(R.id.settingsVersionNumber)
+            val versionTextView = findViewById<TextView>(R.id.settingsVersionNumber)
             val versionText = getString(R.string.version_text_field, versionName)
             versionTextView.text = versionText
         } catch (e: android.content.pm.PackageManager.NameNotFoundException) {

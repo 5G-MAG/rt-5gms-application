@@ -59,9 +59,8 @@
                     android:id="@+id/configUrlInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/label_M8_config"
+                    android:hint="@string/settings_config_hint"
                     android:inputType="textUri"
-                    android:text="@string/m8_config_input"
                     android:textColor="@color/on_surface_primary"
                     android:textSize="14sp" />
 
@@ -71,6 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <Button
@@ -92,6 +92,42 @@
                     android:text="@string/settings_reset_button" />
 
             </LinearLayout>
+
+            <!-- Loading indicator and status -->
+            <LinearLayout
+                android:id="@+id/loadingContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:id="@+id/loadingProgress"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:indeterminateTint="@color/fivegmag_blue" />
+
+                <TextView
+                    android:id="@+id/loadingStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/settings_loading"
+                    android:textColor="@color/on_surface_secondary"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+            <!-- Status text (shown after load completes) -->
+            <TextView
+                android:id="@+id/configStatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textSize="13sp"
+                android:visibility="gone" />
 
             <!-- Divider -->
             <View
