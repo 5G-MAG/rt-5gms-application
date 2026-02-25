@@ -27,8 +27,10 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.media3.common.util.UnstableApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.facebook.shimmer.ShimmerFrameLayout
@@ -62,6 +64,7 @@ const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
  * in horizontal carousels grouped by media type.
  * Configuration and M8 input selection has been moved to SettingsActivity.
  */
+@OptIn(UnstableApi::class)
 class MainActivity : AppCompatActivity() {
 
     private lateinit var contentGrid: RecyclerView
