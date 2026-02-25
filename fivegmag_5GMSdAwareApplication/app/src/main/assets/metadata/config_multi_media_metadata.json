@@ -1,0 +1,14 @@
+{
+  "BBC": {
+    "title": "BBC Test Card",
+    "description": "BBC Research & Development test card stream delivered in full AVC encoding via DASH. This reference stream demonstrates adaptive bitrate streaming with multiple quality levels.",
+    "posterUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/BBC_Test_Card_F_%28original_test_card%29.jpg/1200px-BBC_Test_Card_F_%28original_test_card%29.jpg",
+    "mediaType": "movie"
+  },
+  "AWS": {
+    "title": "AWS Reference Stream",
+    "description": "Amazon Web Services CloudFront hosted DASH reference stream. A comprehensive test stream for validating adaptive bitrate playback over content delivery networks.",
+    "posterUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Smpte_color_bars.svg/1200px-Smpte_color_bars.svg.png",
+    "mediaType": "movie"
+  }
+}

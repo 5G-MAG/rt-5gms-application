@@ -13,6 +13,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.text.Html
@@ -21,68 +22,130 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.media3.common.util.UnstableApi
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.fivegmag.a5gmscommonlibrary.helpers.Utils
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
+import com.fivegmag.a5gmsdawareapplication.adapter.ContentGridAdapter
+import com.fivegmag.a5gmsdawareapplication.model.ContentItem
+import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
 import com.fivegmag.a5gmsdawareapplication.network.IM8InterfaceApi
-import com.fivegmag.a5gmsmediastreamhandler.player.exoplayer.ExoPlayerAdapter
-import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
-import androidx.media3.ui.PlayerView
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.serialization.json.*
 import okhttp3.ResponseBody
-import org.greenrobot.eventbus.EventBus
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.io.InputStream
 import java.net.URI
 import java.util.*
-import com.fivegmag.a5gmscommonlibrary.helpers.Utils
-import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 
 const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
-@UnstableApi
-class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+/**
+ * Landing page of the application. Displays available content items in a grid of poster cards.
+ * Configuration and M8 input selection has been moved to SettingsActivity.
+ */
+class MainActivity : AppCompatActivity() {
 
-    private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
-    private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
-    private var currentSelectedStreamIndex: Int = 0
-    private lateinit var exoPlayerAdapter: ExoPlayerAdapter
-    private lateinit var currentSelectedM8Key: String
+    companion object {
+        const val REQUEST_SETTINGS = 1001
+    }
+
+    private lateinit var contentGrid: RecyclerView
+    private lateinit var emptyStateText: TextView
+    private lateinit var contentGridAdapter: ContentGridAdapter
     private lateinit var iM8InterfaceApi: IM8InterfaceApi
     private lateinit var iConfigApi: IConfigApi
-    private lateinit var m8Data: M8Model
-    private lateinit var exoPlayerView: PlayerView
     private lateinit var configProperties: Properties
+    private lateinit var m8Data: M8Model
+
+    private val metadataProvider = MetadataProvider()
+    private var currentConfigUrl: String = ""
+    private var currentSelectedM8Key: String = ""
+    private var currentM8Path: String = ""
+
+    private val settingsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            if (data != null) {
+                val configUrl = data.getStringExtra(SettingsActivity.EXTRA_CONFIG_URL) ?: ""
+                val m8Key = data.getStringExtra(SettingsActivity.EXTRA_SELECTED_M8_KEY) ?: ""
+                val resolvedValue = data.getStringExtra("resolved_m8_value") ?: ""
+
+                currentConfigUrl = configUrl
+                currentSelectedM8Key = m8Key
+
+                if (resolvedValue.isNotEmpty()) {
+                    val selectedUri = URI(resolvedValue)
+                    if (selectedUri.isAbsolute) {
+                        setM8DataViaEndpoint(selectedUri.toString())
+                    } else {
+                        setM8DataViaJson(selectedUri.toString())
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setupToolbar()
+        setupContentGrid()
         requestUserPermissions()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
+    private fun setupToolbar() {
+        val toolbar = findViewById<MaterialToolbar>(R.id.mainToolbar)
+        toolbar.inflateMenu(R.menu.menu_main)
+        toolbar.setOnMenuItemClickListener { item ->
+            onMenuItemSelected(item)
+        }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    private fun setupContentGrid() {
+        contentGrid = findViewById(R.id.contentGrid)
+        emptyStateText = findViewById(R.id.emptyStateText)
+
+        contentGridAdapter = ContentGridAdapter { item ->
+            val intent = Intent(this, DetailActivity::class.java)
+            intent.putExtra(DetailActivity.EXTRA_TITLE, item.title)
+            intent.putExtra(DetailActivity.EXTRA_DESCRIPTION, item.description)
+            intent.putExtra(DetailActivity.EXTRA_POSTER_URL, item.posterUrl)
+            intent.putExtra(DetailActivity.EXTRA_MEDIA_TYPE, item.mediaType)
+            intent.putExtra(DetailActivity.EXTRA_SERVICE_LIST_ENTRY_JSON, item.serviceListEntryJson)
+            intent.putExtra(DetailActivity.EXTRA_M5_BASE_URL, m8Data.m5BaseUrl)
+            startActivity(intent)
+        }
+
+        val spanCount = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 3 else 2
+        contentGrid.layoutManager = GridLayoutManager(this, spanCount)
+        contentGrid.adapter = contentGridAdapter
+    }
+
+    private fun onMenuItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.actionSettings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                intent.putExtra(SettingsActivity.EXTRA_CONFIG_URL, currentConfigUrl)
+                intent.putExtra(SettingsActivity.EXTRA_SELECTED_M8_KEY, currentSelectedM8Key)
+                settingsLauncher.launch(intent)
+                return true
+            }
+
             R.id.actionLicense -> {
                 val dialogView = LayoutInflater.from(this).inflate(R.layout.activity_license, null)
                 val textView = dialogView.findViewById<TextView>(R.id.licenseTextView)
@@ -120,7 +183,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 return true
             }
         }
-        return super.onOptionsItemSelected(item)
+        return false
     }
 
     private fun addVersionNumber(dialogView: View) {
@@ -132,7 +195,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun setClickListeners(dialogView: View) {
-
         val githubTextView = dialogView.findViewById<TextView>(R.id.githubLink)
         githubTextView.setOnClickListener {
             val url = getString(R.string.github_url)
@@ -211,37 +273,39 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     /**
      * Initialization is performed after the user permissions have been requested.
-     *
      */
     private fun initialize() {
         try {
             initializeRetrofitForConfigInterfaceApi()
+            currentConfigUrl = getString(R.string.m8_config_input)
             handleConfigurationChange()
-            exoPlayerView = findViewById(R.id.idExoPlayerVIew)
-            setApplicationVersionNumber()
             printDependenciesVersionNumbers()
-            registerButtonListener()
-            mediaSessionHandlerAdapter.initialize(
-                this,
-                ::onConnectionToMediaSessionHandlerEstablished
-            )
-            exoPlayerAdapter = mediaSessionHandlerAdapter.getExoPlayerAdapter()
-            val representationInfoTextView = findViewById<TextView>(R.id.representation_info)
-            mediaStreamHandlerEventHandler.initialize(representationInfoTextView, this)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     private fun handleConfigurationChange() {
-        val editText = findViewById<EditText>(R.id.configSelectionText);
-        val configurationUrl = editText.text.toString();
-
-        if (configurationUrl == getString(R.string.m8_config_input)) {
+        if (currentConfigUrl == getString(R.string.m8_config_input)) {
             configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
-            populateM8SelectionSpinner()
+            loadFirstM8Entry()
         } else {
-            setConfigViaEndpoint(configurationUrl)
+            setConfigViaEndpoint(currentConfigUrl)
+        }
+    }
+
+    private fun loadFirstM8Entry() {
+        val propertyNames = configProperties.propertyNames()
+        if (propertyNames.hasMoreElements()) {
+            val firstKey = propertyNames.nextElement() as String
+            currentSelectedM8Key = firstKey
+            val value = configProperties.getProperty(firstKey)
+            val selectedUri = URI(value)
+            if (selectedUri.isAbsolute) {
+                setM8DataViaEndpoint(selectedUri.toString())
+            } else {
+                setM8DataViaJson(selectedUri.toString())
+            }
         }
     }
 
@@ -258,7 +322,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     if (resource != null) {
                         configProperties = Properties()
                         configProperties.loadFromXML(resource.byteInputStream())
-                        populateM8SelectionSpinner()
+                        loadFirstM8Entry()
                     }
                 }
 
@@ -267,31 +331,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 }
             })
         } catch (_: Exception) {
-
-        }
-    }
-
-    override fun onStop() {
-        EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
-        super.onStop()
-        // Unbind from the service
-        mediaSessionHandlerAdapter.reset()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(mediaStreamHandlerEventHandler)
-    }
-
-    private fun setApplicationVersionNumber() {
-        try {
-            val packageInfo = packageManager.getPackageInfo(packageName, 0)
-            val versionName = packageInfo.versionName
-            val versionTextView = findViewById<TextView>(R.id.versionNumber)
-            val versionText = getString(R.string.version_text_field, versionName)
-            versionTextView.text = versionText
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
         }
     }
 
@@ -304,27 +343,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             TAG_AWARE_APPLICATION,
             "5GMS Media Stream Handler Version: ${BuildConfig.LIB_VERSION_a5gmsmediastreamhandler}"
         )
-    }
-
-    private fun populateM8SelectionSpinner() {
-        try {
-            val spinner: Spinner = findViewById(R.id.idM8Spinner)
-            val spinnerOptions: ArrayList<String> = ArrayList()
-            val propertyNames = configProperties.propertyNames()
-
-            while (propertyNames.hasMoreElements()) {
-                spinnerOptions.add(propertyNames.nextElement() as String)
-            }
-
-            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_spinner_item, spinnerOptions
-            )
-            spinner.adapter = adapter
-            spinner.onItemSelectedListener = this
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 
     private fun initializeRetrofitForM8InterfaceApi(url: String) {
@@ -347,81 +365,48 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             retrofitInterface.create(IConfigApi::class.java)
     }
 
-    private fun onConnectionToMediaSessionHandlerEstablished() {
-        exoPlayerAdapter.initialize(exoPlayerView, this)
-    }
-
-    private fun registerButtonListener() {
-        findViewById<Button>(R.id.loadButton)
-            .setOnClickListener {
-                loadStream()
-            }
-        findViewById<Button>(R.id.loadM8Button)
-            .setOnClickListener {
-                handleConfigurationChange()
-            }
-    }
-
     private fun onM8DataChanged() {
-        mediaSessionHandlerAdapter.setM5Endpoint(m8Data.m5BaseUrl)
-        populateStreamSelectionSpinner()
+        loadMetadataAndDisplayGrid()
     }
 
-    private fun populateStreamSelectionSpinner() {
-        try {
-            val spinner: Spinner = findViewById(R.id.idStreamSpinner)
-            val spinnerOptions: ArrayList<String> = ArrayList()
-
-            val iterator = m8Data.serviceList.iterator()
-            while (iterator.hasNext()) {
-                spinnerOptions.add(iterator.next().name)
+    private fun loadMetadataAndDisplayGrid() {
+        if (currentM8Path.isNotEmpty()) {
+            val selectedUri = URI(currentM8Path)
+            if (!selectedUri.isAbsolute) {
+                // Local M8 config: try to load matching metadata from assets
+                metadataProvider.loadFromAssets(assets, currentM8Path)
+                displayContentGrid()
+            } else {
+                // Remote M8 config: try to load metadata from remote endpoint
+                metadataProvider.loadFromEndpoint(currentM8Path, iConfigApi) {
+                    runOnUiThread { displayContentGrid() }
+                }
             }
-            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_spinner_item, spinnerOptions
-            )
-            spinner.adapter = adapter
-            spinner.onItemSelectedListener = this
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } else {
+            displayContentGrid()
         }
     }
 
-    private fun loadStream() {
-        exoPlayerAdapter.stop()
-        val serviceListEntry: ServiceListEntry = m8Data.serviceList[currentSelectedStreamIndex]
-        mediaSessionHandlerAdapter.initializePlaybackByServiceListEntry(serviceListEntry)
-    }
+    private fun displayContentGrid() {
+        val contentItems = ArrayList<ContentItem>()
+        for (serviceListEntry in m8Data.serviceList) {
+            val metadata = metadataProvider.getMetadataForEntry(serviceListEntry.name)
+            contentItems.add(ContentItem(serviceListEntry, metadata))
+        }
 
-    private fun replaceDoubleTicks(value: String): String {
-        return value.replace("\"", "")
-    }
-
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        if (parent != null) {
-            when (parent.id) {
-                R.id.idStreamSpinner -> {
-                    currentSelectedStreamIndex = position
-                }
-
-                R.id.idM8Spinner -> {
-                    currentSelectedM8Key = parent.selectedItem as String
-                    val selectedUri = URI(configProperties.getProperty(currentSelectedM8Key))
-                    if (selectedUri.isAbsolute) {
-                        setM8DataViaEndpoint(selectedUri.toString())
-                    } else {
-                        setM8DataViaJson(selectedUri.toString())
-                    }
-                }
-
-                else -> { // Note the block
-                }
-            }
+        if (contentItems.isEmpty()) {
+            emptyStateText.visibility = View.VISIBLE
+            contentGrid.visibility = View.GONE
+        } else {
+            emptyStateText.visibility = View.GONE
+            contentGrid.visibility = View.VISIBLE
+            contentGridAdapter.updateItems(contentItems)
         }
     }
 
     private fun setM8DataViaEndpoint(m8HostingEndpoint: String) {
         try {
+            currentM8Path = m8HostingEndpoint
             initializeRetrofitForM8InterfaceApi(m8HostingEndpoint)
             val call: Call<ResponseBody>? =
                 iM8InterfaceApi.fetchServiceAccessInformationList()
@@ -447,13 +432,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 }
             })
         } catch (_: Exception) {
-
         }
     }
 
     private fun setM8DataViaJson(url: String) {
         val json: String?
         try {
+            currentM8Path = url
             val inputStream: InputStream = assets.open(url)
             json = inputStream.bufferedReader().use { it.readText() }
             val jsonObject: JsonObject = Json.parseToJsonElement(json).jsonObject
@@ -464,6 +449,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun replaceDoubleTicks(value: String): String {
+        return value.replace("\"", "")
     }
 
     private fun createM8Model(m5BaseUrl: String, jsonServiceList: JsonArray): M8Model {
@@ -511,9 +500,5 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         }
 
         return M8Model(m5BaseUrl, serviceList)
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-        TODO("Not yet implemented")
     }
 }

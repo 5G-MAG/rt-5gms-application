@@ -1,0 +1,14 @@
+{
+  "DASH-IF LiveSim": {
+    "title": "DASH-IF Live Simulator",
+    "description": "DASH Industry Forum live stream simulator providing a continuously generated live DASH stream for testing live playback scenarios.",
+    "posterUrl": "",
+    "mediaType": "tv_show"
+  },
+  "Envivio": {
+    "title": "Envivio Test Stream",
+    "description": "Envivio encoding test stream demonstrating high quality adaptive DASH streaming with multiple representation levels.",
+    "posterUrl": "",
+    "mediaType": "movie"
+  }
+}

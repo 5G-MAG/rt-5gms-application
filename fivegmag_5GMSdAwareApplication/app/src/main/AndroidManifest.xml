@@ -22,6 +22,18 @@
             android:name=".LicenseActivity"
             android:exported="false" />
         <activity
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.5GMSdAwareApplication.Fullscreen"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="landscape" />
+        <activity
             android:name="com.fivegmag.a5gmsdawareapplication.MainActivity"
             android:exported="true">
             <intent-filter>

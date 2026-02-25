@@ -1,17 +1,34 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.5GMSdAwareApplication" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
+    <!-- Base application theme - dark streaming theme -->
+    <style name="Theme.5GMSdAwareApplication" parent="Theme.MaterialComponents.NoActionBar">
+        <!-- Primary brand color (5G-MAG blue as accent) -->
         <item name="colorPrimary">@color/fivegmag_blue</item>
         <item name="colorPrimaryVariant">@color/fivegmag_blue2</item>
-        <item name="colorOnPrimary">@color/fivegmag_blue3</item>
-        <!-- Secondary brand color. -->
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color -->
         <item name="colorSecondary">@color/fivegmag_blue</item>
         <item name="colorSecondaryVariant">@color/fivegmag_blue2</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Background and surface -->
+        <item name="android:colorBackground">@color/surface_dark</item>
+        <item name="colorSurface">@color/surface_dark</item>
+        <item name="colorOnSurface">@color/on_surface_primary</item>
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@color/status_bar_dark</item>
+        <item name="android:navigationBarColor">@color/surface_dark</item>
+        <!-- Font -->
         <item name="android:fontFamily">@font/poppins</item>
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/on_surface_primary</item>
+        <item name="android:textColorSecondary">@color/on_surface_secondary</item>
+    </style>
+
+    <!-- Fullscreen theme for the player -->
+    <style name="Theme.5GMSdAwareApplication.Fullscreen" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:colorBackground">@color/black</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:navigationBarColor">@color/black</item>
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="colorPrimary">@color/fivegmag_blue</item>
     </style>
 </resources>

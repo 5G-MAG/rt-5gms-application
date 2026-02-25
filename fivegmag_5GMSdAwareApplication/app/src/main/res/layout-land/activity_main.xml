@@ -4,160 +4,52 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/surface_dark"
     tools:context="com.fivegmag.a5gmsdawareapplication.MainActivity">
 
-    <ScrollView
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/mainToolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="-163dp"
-        tools:layout_editor_absoluteY="133dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/surface_dark"
+        app:layout_constraintTop_toTopOf="parent"
+        app:titleTextColor="@color/on_surface_primary">
 
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="32dp"
+            android:contentDescription="@string/_5g_mag_logo_description"
+            app:srcCompat="@drawable/fivegmag_playr" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    </com.google.android.material.appbar.MaterialToolbar>
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="215dp"
-                android:layout_height="57dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="4dp"
-                android:contentDescription="@string/_5g_mag_logo_description"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/logo_5g_mag_reference_tools" />
+    <!-- Empty state text -->
+    <TextView
+        android:id="@+id/emptyStateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="48dp"
+        android:text="@string/no_content_available"
+        android:textColor="@color/on_surface_secondary"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mainToolbar" />
 
-
-            <androidx.media3.ui.PlayerView
-                android:id="@+id/idExoPlayerVIew"
-                android:layout_width="351dp"
-                android:layout_height="197dp"
-                android:layout_marginStart="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/idM8Spinner"
-                app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
-            <Spinner
-                android:id="@+id/idM8Spinner"
-                android:layout_width="252dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView" />
-
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/label_stream_selection"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/idM8Spinner" />
-
-            <Spinner
-                android:id="@+id/idStreamSpinner"
-                android:layout_width="252dp"
-                android:layout_height="22dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView3" />
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/label_M8_selection"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/configSelectionText" />
-
-            <Button
-                android:id="@+id/loadButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="14dp"
-                android:backgroundTint="@color/fivegmag_blue"
-                android:text="@string/start_playback_button"
-                android:textColor="@color/white"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/idStreamSpinner" />
-
-            <TextView
-                android:id="@+id/representation_info"
-                android:layout_width="348dp"
-                android:layout_height="19dp"
-                android:text=""
-                android:textColor="#FFFFFF"
-                app:layout_constraintStart_toStartOf="@+id/idExoPlayerVIew"
-                app:layout_constraintTop_toTopOf="@+id/idExoPlayerVIew" />
-
-            <TextView
-                android:id="@+id/versionNumber"
-                android:layout_width="146dp"
-                android:layout_height="20dp"
-                android:layout_marginBottom="16dp"
-                android:text="@string/version_text_field"
-                android:textAlignment="textEnd"
-                app:layout_constraintBottom_toTopOf="@+id/idExoPlayerVIew"
-                app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"
-                app:layout_constraintTop_toTopOf="@+id/imageView" />
-
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:autoLink="web"
-                android:text="@string/_5gmag_developer_link"
-                android:textColorLink="@color/fivegmag_blue"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/idExoPlayerVIew"
-                app:layout_constraintTop_toBottomOf="@+id/idExoPlayerVIew" />
-
-
-            <TextView
-                android:id="@+id/textView4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/label_M8_config"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
-            <EditText
-                android:id="@+id/configSelectionText"
-                android:layout_width="190dp"
-                android:layout_height="44dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:ems="10"
-                android:inputType="text"
-                android:text="@string/m8_config_input"
-                android:textSize="14sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView4" />
-
-            <Button
-                android:id="@+id/loadM8Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="10dp"
-                android:backgroundTint="@color/fivegmag_blue"
-                android:text="@string/load_m8_button"
-                android:textColor="@color/white"
-                app:layout_constraintStart_toEndOf="@+id/configSelectionText"
-                app:layout_constraintTop_toBottomOf="@+id/textView4" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
-
+    <!-- Content grid (landscape uses 3 columns via code) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/contentGrid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:padding="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mainToolbar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
