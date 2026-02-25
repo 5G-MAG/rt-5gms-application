@@ -31,6 +31,7 @@
             android:exported="false" />
         <activity
             android:name="com.fivegmag.a5gmsdawareapplication.MainActivity"
+            android:theme="@style/Theme.5GMSdAwareApplication.Splash"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

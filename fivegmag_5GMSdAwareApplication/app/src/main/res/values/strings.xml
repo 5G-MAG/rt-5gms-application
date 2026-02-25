@@ -288,6 +288,7 @@ Version 1.0 Dated 22/07/2021]]></string>
     <string name="category_tv_shows">TV Shows</string>
     <string name="no_content_available">No content available. Check your M8 configuration in Settings.</string>
     <string name="content_description_poster">Poster image for %s</string>
+    <string name="hero_badge_featured">Featured</string>
 
     <!-- Detail page -->
     <string name="play_button">Play</string>

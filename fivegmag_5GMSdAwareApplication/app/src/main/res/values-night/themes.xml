@@ -17,6 +17,14 @@
         <item name="android:textColorSecondary">@color/on_surface_secondary</item>
     </style>
 
+    <!-- Splash screen theme -->
+    <style name="Theme.5GMSdAwareApplication.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/surface_dark</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_fivegmagflix</item>
+        <item name="windowSplashScreenAnimationDuration">800</item>
+        <item name="postSplashScreenTheme">@style/Theme.5GMSdAwareApplication</item>
+    </style>
+
     <style name="Theme.5GMSdAwareApplication.Fullscreen" parent="Theme.MaterialComponents.NoActionBar">
         <item name="android:colorBackground">@color/black</item>
         <item name="android:statusBarColor">@color/black</item>

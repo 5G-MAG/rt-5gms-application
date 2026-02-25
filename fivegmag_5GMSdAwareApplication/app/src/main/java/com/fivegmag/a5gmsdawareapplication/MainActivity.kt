@@ -29,6 +29,9 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.facebook.shimmer.ShimmerFrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
@@ -63,6 +66,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var contentGrid: RecyclerView
     private lateinit var emptyStateText: TextView
+    private lateinit var swipeRefresh: SwipeRefreshLayout
+    private lateinit var shimmerLayout: ShimmerFrameLayout
     private lateinit var categoryRowAdapter: CategoryRowAdapter
     private lateinit var iConfigApi: IConfigApi
     private lateinit var m8Data: M8Model
@@ -72,6 +77,7 @@ class MainActivity : AppCompatActivity() {
     private var appConfig: AppConfig = AppConfig(emptyList())
     private var currentConfigUrl: String = ""
     private var currentSource: M8Source? = null
+    private var isContentLoaded: Boolean = false
 
     private val settingsLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -94,8 +100,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Keep splash screen visible until content is loaded
+        splashScreen.setKeepOnScreenCondition { !isContentLoaded }
+
         setupToolbar()
         setupLogo()
         setupContentGrid()
@@ -130,6 +141,15 @@ class MainActivity : AppCompatActivity() {
     private fun setupContentGrid() {
         contentGrid = findViewById(R.id.contentGrid)
         emptyStateText = findViewById(R.id.emptyStateText)
+        swipeRefresh = findViewById(R.id.swipeRefresh)
+        shimmerLayout = findViewById(R.id.shimmerLayout)
+
+        // Configure pull-to-refresh colors
+        swipeRefresh.setColorSchemeResources(R.color.fivegmag_blue)
+        swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.surface_dark_elevated)
+        swipeRefresh.setOnRefreshListener {
+            loadAppConfig()
+        }
 
         categoryRowAdapter = CategoryRowAdapter { item ->
             val intent = Intent(this, DetailActivity::class.java)
@@ -391,6 +411,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun displayContentGrid() {
+        // Hide shimmer, stop refresh spinner
+        shimmerLayout.stopShimmer()
+        shimmerLayout.visibility = View.GONE
+        swipeRefresh.isRefreshing = false
+
         val contentItems = ArrayList<ContentItem>()
         for (serviceListEntry in m8Data.serviceList) {
             val metadata = metadataProvider.getMetadataForEntry(serviceListEntry.name)
@@ -399,13 +424,21 @@ class MainActivity : AppCompatActivity() {
 
         if (contentItems.isEmpty()) {
             emptyStateText.visibility = View.VISIBLE
-            contentGrid.visibility = View.GONE
+            swipeRefresh.visibility = View.GONE
         } else {
             emptyStateText.visibility = View.GONE
-            contentGrid.visibility = View.VISIBLE
+            swipeRefresh.visibility = View.VISIBLE
+
+            // Select featured/hero item: first movie, or first item if no movies
+            val heroItem = contentItems.firstOrNull { it.mediaType == "movie" }
+                ?: contentItems.first()
+            categoryRowAdapter.setHeroItem(heroItem)
+
             val categories = groupItemsByMediaType(contentItems)
             categoryRowAdapter.updateCategories(categories)
         }
+
+        isContentLoaded = true
     }
 
     private fun groupItemsByMediaType(items: List<ContentItem>): List<ContentCategory> {
@@ -484,8 +517,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showEmptyState() {
+        shimmerLayout.stopShimmer()
+        shimmerLayout.visibility = View.GONE
+        swipeRefresh.isRefreshing = false
+        swipeRefresh.visibility = View.GONE
         emptyStateText.visibility = View.VISIBLE
-        contentGrid.visibility = View.GONE
+        isContentLoaded = true
     }
 
     private fun setM8DataViaJson(url: String, source: M8Source) {
