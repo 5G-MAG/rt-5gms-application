@@ -28,26 +28,57 @@
             android:layout_height="wrap_content"
             android:paddingBottom="32dp">
 
-            <!-- Poster image (large, top of page) -->
-            <ImageView
-                android:id="@+id/detailPosterImage"
+            <!-- Container for poster image and player (same position, swap visibility) -->
+            <FrameLayout
+                android:id="@+id/mediaContainer"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:background="@drawable/bg_poster_placeholder"
-                android:scaleType="centerCrop"
                 app:layout_constraintDimensionRatio="16:9"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <!-- Gradient overlay on poster -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="120dp"
-                android:background="@drawable/bg_card_gradient"
-                app:layout_constraintBottom_toBottomOf="@+id/detailPosterImage"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                <!-- Poster image (shown initially) -->
+                <ImageView
+                    android:id="@+id/detailPosterImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_poster_placeholder"
+                    android:scaleType="centerCrop" />
+
+                <!-- Player view (hidden initially, shown when playback starts) -->
+                <androidx.media3.ui.PlayerView
+                    android:id="@+id/detailPlayerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone" />
+
+                <!-- Representation info overlay on player -->
+                <TextView
+                    android:id="@+id/representation_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|top"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:background="#80000000"
+                    android:paddingStart="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="2dp"
+                    android:textColor="@color/white"
+                    android:textSize="11sp"
+                    android:visibility="gone" />
+
+                <!-- Gradient overlay at bottom (only visible when poster is shown) -->
+                <View
+                    android:id="@+id/posterGradient"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:layout_gravity="bottom"
+                    android:background="@drawable/bg_card_gradient" />
+
+            </FrameLayout>
 
             <!-- Media type badge -->
             <TextView
@@ -59,7 +90,7 @@
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_badge_movie"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/detailPosterImage" />
+                app:layout_constraintTop_toBottomOf="@+id/mediaContainer" />
 
             <!-- Title -->
             <TextView

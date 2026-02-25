@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">5GMS Aware Application</string>
+    <string name="app_name">5G-MAGflix</string>
+    <string name="logo_text_5gmag">5G-MAG</string>
+    <string name="logo_text_flix">flix</string>
     <string name="headline">5G-MAG Reference Tools</string>
     <string name="label_M8_config">Select Config</string>
     <string name="label_M8_selection">Select M8 Input</string>
@@ -282,6 +284,8 @@ Version 1.0 Dated 22/07/2021]]></string>
 
     <!-- Landing page -->
     <string name="landing_title">5G Streaming</string>
+    <string name="category_movies">Movies</string>
+    <string name="category_tv_shows">TV Shows</string>
     <string name="no_content_available">No content available. Check your M8 configuration in Settings.</string>
     <string name="content_description_poster">Poster image for %s</string>
 

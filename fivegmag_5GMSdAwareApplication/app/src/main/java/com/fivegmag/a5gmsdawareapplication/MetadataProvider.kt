@@ -49,9 +49,9 @@ class MetadataProvider {
      * Loads metadata from a remote endpoint.
      * Expects the metadata JSON to be at <baseUrl>/metadata.json
      */
-    fun loadFromEndpoint(baseUrl: String, iConfigApi: IConfigApi, callback: () -> Unit) {
+    fun loadFromEndpoint(m8Url: String, iConfigApi: IConfigApi, callback: () -> Unit) {
         try {
-            val metadataUrl = baseUrl.trimEnd('/') + "/metadata.json"
+            val metadataUrl = m8Url.substringBeforeLast('/') + "/metadata.json"
             val call: Call<ResponseBody>? = iConfigApi.fetchConfiguration(metadataUrl)
             call?.enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(

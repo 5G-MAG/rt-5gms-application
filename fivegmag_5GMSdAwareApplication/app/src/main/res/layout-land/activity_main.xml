@@ -16,11 +16,12 @@
         app:layout_constraintTop_toTopOf="parent"
         app:titleTextColor="@color/on_surface_primary">
 
-        <ImageView
-            android:layout_width="120dp"
-            android:layout_height="32dp"
-            android:contentDescription="@string/_5g_mag_logo_description"
-            app:srcCompat="@drawable/fivegmag_playr" />
+        <TextView
+            android:id="@+id/logoText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_semibold"
+            android:textSize="22sp" />
 
     </com.google.android.material.appbar.MaterialToolbar>
 

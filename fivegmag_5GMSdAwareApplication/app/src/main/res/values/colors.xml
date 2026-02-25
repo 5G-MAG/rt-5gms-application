@@ -17,4 +17,5 @@
     <color name="media_type_badge_movie">#FF00A0D2</color>
     <color name="media_type_badge_tv">#FF4CAF50</color>
     <color name="placeholder_bg">#FF2C2C2C</color>
+    <color name="flix_red">#FFE50914</color>
 </resources>

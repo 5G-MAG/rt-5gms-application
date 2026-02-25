@@ -21,12 +21,13 @@ import com.fivegmag.a5gmsdawareapplication.R
 import com.fivegmag.a5gmsdawareapplication.model.ContentItem
 
 /**
- * RecyclerView adapter for displaying content items in a grid on the landing page.
- * Each item shows a poster image with a title overlay and media type badge.
+ * RecyclerView adapter for displaying content items in a horizontal carousel.
+ * Each card shows a poster image with a title overlay.
+ * Used as the inner adapter inside each category row.
  */
-class ContentGridAdapter(
+class ContentCardAdapter(
     private val onItemClick: (ContentItem) -> Unit
-) : RecyclerView.Adapter<ContentGridAdapter.ContentViewHolder>() {
+) : RecyclerView.Adapter<ContentCardAdapter.ContentViewHolder>() {
 
     private val items: ArrayList<ContentItem> = ArrayList()
 
@@ -57,14 +58,8 @@ class ContentGridAdapter(
         fun bind(item: ContentItem) {
             contentTitle.text = item.title
 
-            // Set media type badge
-            if (item.mediaType == "tv_show") {
-                mediaTypeBadge.text = itemView.context.getString(R.string.media_type_tv_show)
-                mediaTypeBadge.setBackgroundResource(R.drawable.bg_badge_tv)
-            } else {
-                mediaTypeBadge.text = itemView.context.getString(R.string.media_type_movie)
-                mediaTypeBadge.setBackgroundResource(R.drawable.bg_badge_movie)
-            }
+            // Hide the badge in carousel mode (the row header already shows the category)
+            mediaTypeBadge.visibility = View.GONE
 
             // Load poster image
             if (item.posterUrl.isNotEmpty()) {

@@ -12,9 +12,14 @@ package com.fivegmag.a5gmsdawareapplication
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.widget.TextView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.fivegmag.a5gmscommonlibrary.helpers.Utils
 import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
@@ -30,7 +35,8 @@ import java.util.*
 
 /**
  * Settings screen that allows the user to configure the M8 data source.
- * Replaces the config URL input and M8 spinner that were previously on the main screen.
+ * When the user navigates back (toolbar or system back), the currently selected
+ * M8 input is returned to MainActivity which then reloads the content grid.
  */
 class SettingsActivity : AppCompatActivity() {
 
@@ -45,21 +51,53 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var iConfigApi: IConfigApi
     private lateinit var configProperties: Properties
 
+    /** The M8 key that was active when this activity was opened */
+    private var receivedM8Key: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        receivedM8Key = intent.getStringExtra(EXTRA_SELECTED_M8_KEY) ?: ""
+
         setupToolbar()
+        setupLogo()
         initializeRetrofitForConfigInterfaceApi()
         initializeViews()
         loadInitialConfig()
         registerButtonListeners()
         setVersionNumber()
+        setupBackNavigation()
     }
 
     private fun setupToolbar() {
         val toolbar = findViewById<MaterialToolbar>(R.id.settingsToolbar)
-        toolbar.setNavigationOnClickListener { finish() }
+        toolbar.setNavigationOnClickListener { returnResultAndFinish() }
+    }
+
+    private fun setupBackNavigation() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                returnResultAndFinish()
+            }
+        })
+    }
+
+    private fun setupLogo() {
+        val logoText = findViewById<TextView>(R.id.settingsLogoText)
+        val part1 = getString(R.string.logo_text_5gmag)
+        val part2 = getString(R.string.logo_text_flix)
+        val full = "$part1$part2"
+        val spannable = SpannableString(full)
+        spannable.setSpan(
+            ForegroundColorSpan(getColor(R.color.fivegmag_blue)),
+            0, part1.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        spannable.setSpan(
+            ForegroundColorSpan(getColor(R.color.flix_red)),
+            part1.length, full.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        logoText.text = spannable
     }
 
     private fun initializeViews() {
@@ -75,7 +113,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun loadInitialConfig() {
         val configUrl = configUrlInput.text.toString()
         if (configUrl == getString(R.string.m8_config_input)) {
-            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
+            configProperties = Utils().loadConfiguration(this.assets, "m8config.properties.xml")
             populateM8Spinner()
         } else {
             loadConfigFromEndpoint(configUrl)
@@ -123,10 +161,9 @@ class SettingsActivity : AppCompatActivity() {
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             m8Spinner.adapter = adapter
 
-            // Restore previous selection if available
-            val previousKey = intent.getStringExtra(EXTRA_SELECTED_M8_KEY)
-            if (previousKey != null) {
-                val position = spinnerOptions.indexOf(previousKey)
+            // Restore previous selection
+            if (receivedM8Key.isNotEmpty()) {
+                val position = spinnerOptions.indexOf(receivedM8Key)
                 if (position >= 0) {
                     m8Spinner.setSelection(position)
                 }
@@ -137,37 +174,36 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun registerButtonListeners() {
+        // "Load" button only reloads config properties and repopulates the spinner.
+        // It does NOT close the activity -- the user navigates back to apply.
         findViewById<Button>(R.id.loadConfigButton).setOnClickListener {
-            applySettings()
+            val configUrl = configUrlInput.text.toString()
+            if (configUrl == getString(R.string.m8_config_input)) {
+                configProperties = Utils().loadConfiguration(this.assets, "m8config.properties.xml")
+                populateM8Spinner()
+            } else {
+                loadConfigFromEndpoint(configUrl)
+            }
         }
 
         findViewById<Button>(R.id.resetConfigButton).setOnClickListener {
             configUrlInput.setText(getString(R.string.m8_config_input))
-            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
+            configProperties = Utils().loadConfiguration(this.assets, "m8config.properties.xml")
+            receivedM8Key = ""
             populateM8Spinner()
         }
     }
 
-    private fun applySettings() {
-        val configUrl = configUrlInput.text.toString()
-
-        if (configUrl == getString(R.string.m8_config_input)) {
-            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
-            populateM8Spinner()
-        } else {
-            loadConfigFromEndpoint(configUrl)
-        }
-
-        returnResult()
-    }
-
-    private fun returnResult() {
+    /**
+     * Returns the currently selected M8 key and config URL to MainActivity,
+     * then finishes this activity.
+     */
+    private fun returnResultAndFinish() {
         val resultIntent = Intent()
         resultIntent.putExtra(EXTRA_CONFIG_URL, configUrlInput.text.toString())
         val selectedM8Key = m8Spinner.selectedItem as? String
         if (selectedM8Key != null) {
             resultIntent.putExtra(EXTRA_SELECTED_M8_KEY, selectedM8Key)
-            // Pass the resolved URL/path for the selected M8 key
             val resolvedValue = configProperties.getProperty(selectedM8Key)
             resultIntent.putExtra("resolved_m8_value", resolvedValue)
         }

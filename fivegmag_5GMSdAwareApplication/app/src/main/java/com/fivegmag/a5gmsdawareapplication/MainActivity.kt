@@ -13,10 +13,12 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.text.Html
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
@@ -26,13 +28,14 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fivegmag.a5gmscommonlibrary.helpers.Utils
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
-import com.fivegmag.a5gmsdawareapplication.adapter.ContentGridAdapter
+import com.fivegmag.a5gmsdawareapplication.adapter.CategoryRowAdapter
+import com.fivegmag.a5gmsdawareapplication.model.ContentCategory
 import com.fivegmag.a5gmsdawareapplication.model.ContentItem
 import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
 import com.fivegmag.a5gmsdawareapplication.network.IM8InterfaceApi
@@ -64,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var contentGrid: RecyclerView
     private lateinit var emptyStateText: TextView
-    private lateinit var contentGridAdapter: ContentGridAdapter
+    private lateinit var categoryRowAdapter: CategoryRowAdapter
     private lateinit var iM8InterfaceApi: IM8InterfaceApi
     private lateinit var iConfigApi: IConfigApi
     private lateinit var configProperties: Properties
@@ -104,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setupToolbar()
+        setupLogo()
         setupContentGrid()
         requestUserPermissions()
     }
@@ -116,11 +120,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupLogo() {
+        val logoText = findViewById<TextView>(R.id.logoText)
+        val part1 = getString(R.string.logo_text_5gmag)
+        val part2 = getString(R.string.logo_text_flix)
+        val full = "$part1$part2"
+        val spannable = SpannableString(full)
+        spannable.setSpan(
+            ForegroundColorSpan(getColor(R.color.fivegmag_blue)),
+            0, part1.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        spannable.setSpan(
+            ForegroundColorSpan(getColor(R.color.flix_red)),
+            part1.length, full.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        logoText.text = spannable
+    }
+
     private fun setupContentGrid() {
         contentGrid = findViewById(R.id.contentGrid)
         emptyStateText = findViewById(R.id.emptyStateText)
 
-        contentGridAdapter = ContentGridAdapter { item ->
+        categoryRowAdapter = CategoryRowAdapter { item ->
             val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra(DetailActivity.EXTRA_TITLE, item.title)
             intent.putExtra(DetailActivity.EXTRA_DESCRIPTION, item.description)
@@ -131,9 +152,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        val spanCount = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) 3 else 2
-        contentGrid.layoutManager = GridLayoutManager(this, spanCount)
-        contentGrid.adapter = contentGridAdapter
+        contentGrid.layoutManager = LinearLayoutManager(this)
+        contentGrid.adapter = categoryRowAdapter
     }
 
     private fun onMenuItemSelected(item: MenuItem): Boolean {
@@ -287,7 +307,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleConfigurationChange() {
         if (currentConfigUrl == getString(R.string.m8_config_input)) {
-            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
+            configProperties = Utils().loadConfiguration(this.assets, "m8config.properties.xml")
             loadFirstM8Entry()
         } else {
             setConfigViaEndpoint(currentConfigUrl)
@@ -400,8 +420,43 @@ class MainActivity : AppCompatActivity() {
         } else {
             emptyStateText.visibility = View.GONE
             contentGrid.visibility = View.VISIBLE
-            contentGridAdapter.updateItems(contentItems)
+            val categories = groupItemsByMediaType(contentItems)
+            categoryRowAdapter.updateCategories(categories)
         }
+    }
+
+    private fun groupItemsByMediaType(items: List<ContentItem>): List<ContentCategory> {
+        val grouped = LinkedHashMap<String, ArrayList<ContentItem>>()
+        for (item in items) {
+            val type = item.mediaType
+            if (!grouped.containsKey(type)) {
+                grouped[type] = ArrayList()
+            }
+            grouped[type]?.add(item)
+        }
+
+        // Define display order: movies first, then tv_show, then any others
+        val orderedTypes = ArrayList<String>()
+        if (grouped.containsKey("movie")) orderedTypes.add("movie")
+        if (grouped.containsKey("tv_show")) orderedTypes.add("tv_show")
+        for (key in grouped.keys) {
+            if (!orderedTypes.contains(key)) orderedTypes.add(key)
+        }
+
+        val categories = ArrayList<ContentCategory>()
+        for (type in orderedTypes) {
+            val label = when (type) {
+                "movie" -> getString(R.string.category_movies)
+                "tv_show" -> getString(R.string.category_tv_shows)
+                else -> type.replaceFirstChar { it.uppercase() }
+            }
+            val categoryItems = grouped[type]
+            if (categoryItems != null && categoryItems.isNotEmpty()) {
+                categories.add(ContentCategory(label, type, categoryItems))
+            }
+        }
+
+        return categories
     }
 
     private fun setM8DataViaEndpoint(m8HostingEndpoint: String) {

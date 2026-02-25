@@ -9,19 +9,29 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 
 package com.fivegmag.a5gmsdawareapplication
 
-import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.PlayerView
 import coil.load
+import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
+import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
+import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
+import com.fivegmag.a5gmsmediastreamhandler.player.exoplayer.ExoPlayerAdapter
 import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.serialization.json.*
+import org.greenrobot.eventbus.EventBus
 
 /**
  * Detail screen for a content item. Shows the poster image, title, description,
- * and a Play button to launch playback via PlayerActivity.
+ * and a Play button. When Play is tapped the poster is replaced with an inline
+ * ExoPlayer view and playback begins.
  */
+@UnstableApi
 class DetailActivity : AppCompatActivity() {
 
     companion object {
@@ -33,6 +43,20 @@ class DetailActivity : AppCompatActivity() {
         const val EXTRA_M5_BASE_URL = "detail_m5_base_url"
     }
 
+    private lateinit var posterImage: ImageView
+    private lateinit var playerView: PlayerView
+    private lateinit var representationInfo: TextView
+    private lateinit var posterGradient: View
+    private lateinit var playButton: Button
+
+    private var mediaSessionHandlerAdapter: MediaSessionHandlerAdapter? = null
+    private var exoPlayerAdapter: ExoPlayerAdapter? = null
+    private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
+    private var isPlaying = false
+
+    private var serviceListEntryJson: String = ""
+    private var m5BaseUrl: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
@@ -41,23 +65,32 @@ class DetailActivity : AppCompatActivity() {
         val description = intent.getStringExtra(EXTRA_DESCRIPTION) ?: ""
         val posterUrl = intent.getStringExtra(EXTRA_POSTER_URL) ?: ""
         val mediaType = intent.getStringExtra(EXTRA_MEDIA_TYPE) ?: "movie"
-        val serviceListEntryJson = intent.getStringExtra(EXTRA_SERVICE_LIST_ENTRY_JSON) ?: ""
-        val m5BaseUrl = intent.getStringExtra(EXTRA_M5_BASE_URL) ?: ""
+        serviceListEntryJson = intent.getStringExtra(EXTRA_SERVICE_LIST_ENTRY_JSON) ?: ""
+        m5BaseUrl = intent.getStringExtra(EXTRA_M5_BASE_URL) ?: ""
 
         if (title.isEmpty()) {
             finish()
             return
         }
 
+        posterImage = findViewById(R.id.detailPosterImage)
+        playerView = findViewById(R.id.detailPlayerView)
+        representationInfo = findViewById(R.id.representation_info)
+        posterGradient = findViewById(R.id.posterGradient)
+        playButton = findViewById(R.id.playButton)
+
         setupToolbar(title)
         displayContent(title, description, posterUrl, mediaType)
-        setupPlayButton(serviceListEntryJson, m5BaseUrl, title)
+        setupPlayButton()
     }
 
     private fun setupToolbar(title: String) {
         val toolbar = findViewById<MaterialToolbar>(R.id.detailToolbar)
         toolbar.title = title
-        toolbar.setNavigationOnClickListener { finish() }
+        toolbar.setNavigationOnClickListener {
+            stopPlaybackIfActive()
+            finish()
+        }
     }
 
     private fun displayContent(
@@ -66,7 +99,6 @@ class DetailActivity : AppCompatActivity() {
         posterUrl: String,
         mediaType: String
     ) {
-        val posterImage = findViewById<ImageView>(R.id.detailPosterImage)
         val titleView = findViewById<TextView>(R.id.detailTitle)
         val descriptionView = findViewById<TextView>(R.id.detailDescription)
         val mediaTypeBadge = findViewById<TextView>(R.id.detailMediaTypeBadge)
@@ -98,14 +130,100 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupPlayButton(serviceListEntryJson: String, m5BaseUrl: String, title: String) {
-        val playButton = findViewById<Button>(R.id.playButton)
+    private fun setupPlayButton() {
         playButton.setOnClickListener {
-            val intent = Intent(this, PlayerActivity::class.java)
-            intent.putExtra(PlayerActivity.EXTRA_SERVICE_LIST_ENTRY_JSON, serviceListEntryJson)
-            intent.putExtra(PlayerActivity.EXTRA_M5_BASE_URL, m5BaseUrl)
-            intent.putExtra(PlayerActivity.EXTRA_TITLE, title)
-            startActivity(intent)
+            if (!isPlaying) {
+                startPlayback()
+            }
         }
+    }
+
+    private fun startPlayback() {
+        if (serviceListEntryJson.isEmpty()) return
+
+        // Swap poster for player
+        posterImage.visibility = View.GONE
+        posterGradient.visibility = View.GONE
+        playerView.visibility = View.VISIBLE
+        representationInfo.visibility = View.VISIBLE
+        playButton.isEnabled = false
+        playButton.text = getString(R.string.player_title)
+
+        isPlaying = true
+
+        // Initialize event handler and register for EventBus events
+        mediaStreamHandlerEventHandler.initialize(representationInfo, this)
+        EventBus.getDefault().register(mediaStreamHandlerEventHandler)
+
+        // Initialize MediaSessionHandler and start playback
+        val adapter = MediaSessionHandlerAdapter()
+        mediaSessionHandlerAdapter = adapter
+        adapter.initialize(this) {
+            onConnectionToMediaSessionHandlerEstablished()
+        }
+    }
+
+    private fun onConnectionToMediaSessionHandlerEstablished() {
+        val adapter = mediaSessionHandlerAdapter ?: return
+        val playerAdapter = adapter.getExoPlayerAdapter()
+        exoPlayerAdapter = playerAdapter
+        playerAdapter.initialize(playerView, this)
+
+        val serviceListEntry = deserializeServiceListEntry(serviceListEntryJson)
+        adapter.setM5Endpoint(m5BaseUrl)
+        adapter.initializePlaybackByServiceListEntry(serviceListEntry)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (isPlaying && !EventBus.getDefault().isRegistered(mediaStreamHandlerEventHandler)) {
+            EventBus.getDefault().register(mediaStreamHandlerEventHandler)
+        }
+    }
+
+    override fun onStop() {
+        if (EventBus.getDefault().isRegistered(mediaStreamHandlerEventHandler)) {
+            EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
+        }
+        super.onStop()
+        stopPlaybackIfActive()
+    }
+
+    private fun stopPlaybackIfActive() {
+        if (isPlaying) {
+            try {
+                exoPlayerAdapter?.stop()
+            } catch (_: Exception) {
+            }
+            mediaSessionHandlerAdapter?.reset()
+            isPlaying = false
+        }
+    }
+
+    private fun deserializeServiceListEntry(json: String): ServiceListEntry {
+        val jsonObject = Json.parseToJsonElement(json).jsonObject
+        val provisioningSessionId =
+            jsonObject["provisioningSessionId"]?.jsonPrimitive?.content ?: ""
+        val name = jsonObject["name"]?.jsonPrimitive?.content ?: ""
+
+        val entryPoints = ArrayList<EntryPoint>()
+        val entryPointsArray = jsonObject["entryPoints"]?.jsonArray
+        if (entryPointsArray != null) {
+            for (ep in entryPointsArray) {
+                val epObj = ep.jsonObject
+                val locator = epObj["locator"]?.jsonPrimitive?.content ?: ""
+                val contentType = epObj["contentType"]?.jsonPrimitive?.content ?: ""
+                val profiles = ArrayList<String>()
+                val profilesArray = epObj["profiles"]?.jsonArray
+                if (profilesArray != null) {
+                    for (profile in profilesArray) {
+                        profiles.add(profile.jsonPrimitive.content)
+                    }
+                }
+                entryPoints.add(EntryPoint(locator, contentType, profiles))
+            }
+        }
+
+        return ServiceListEntry(provisioningSessionId, name, entryPoints)
     }
 }

@@ -130,7 +130,7 @@ reference point M8 using an application-specific format.
 
 ### M8 endpoint configuration
 
-The URL to the M8 endpoints can be configured in `src/main/assets/config.properties`:
+The URL to the M8 endpoints can be configured in `src/main/assets/m8config.properties`:
 
 ```` 
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
