@@ -1,0 +1,20 @@
+{
+  "VoD: Big Buck Bunny": {
+    "title": "Big Buck Bunny",
+    "description": "Big Buck Bunny is a short animated film by the Blender Institute. A large and lovable bunny discovers that life in a sunny meadow is not as pleasant as it seems.",
+    "posterUrl": "http://192.168.178.56/posters/bbb.jpg",
+    "mediaType": "movie"
+  },
+  "VoD: Elephant's Dream": {
+    "title": "Elephants Dream",
+    "description": "Elephants Dream (code-named Project Orange during production and originally titled Machina) is a 2006 Dutch animated science fiction fantasy experimental short film produced by Blender Foundation using, almost exclusively, free and open-source software. The film is English-language and includes subtitles in over 30 languages.",
+    "posterUrl": "http://192.168.178.56/posters/elephants-dream.jpg",
+    "mediaType": "movie"
+  },
+  "VoD: Testcard": {
+    "title": "Testcard",
+    "description": "A test card, also known as a test pattern or start-up/closedown test, is a television test signal, typically broadcast at times when the transmitter is active but no program is being broadcast (often at sign-on and sign-off).",
+    "posterUrl": "http://192.168.178.56/posters/testcard.jpg",
+    "mediaType": "tv_show"
+  }
+}
