@@ -103,30 +103,36 @@ class MetadataProvider {
     ) {
         try {
             val call: Call<ResponseBody>? = iConfigApi.fetchConfiguration(metadataUrl)
-            call?.enqueue(object : Callback<ResponseBody?> {
-                override fun onResponse(
-                    call: Call<ResponseBody?>,
-                    response: Response<ResponseBody?>
-                ) {
-                    val resource: String? = response.body()?.string()
-                    if (resource != null) {
-                        try {
-                            parseMetadataJson(resource)
-                        } catch (e: Exception) {
-                            Log.d(TAG_METADATA_PROVIDER, "Failed to parse remote metadata")
-                            metadataMap.clear()
+            if (call != null) {
+                call.enqueue(object : Callback<ResponseBody?> {
+                    override fun onResponse(
+                        call: Call<ResponseBody?>,
+                        response: Response<ResponseBody?>
+                    ) {
+                        val resource: String? = response.body()?.string()
+                        if (resource != null) {
+                            try {
+                                parseMetadataJson(resource)
+                            } catch (e: Exception) {
+                                Log.d(TAG_METADATA_PROVIDER, "Failed to parse remote metadata")
+                                metadataMap.clear()
+                            }
                         }
+                        callback()
                     }
-                    callback()
-                }
 
-                override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
-                    Log.d(TAG_METADATA_PROVIDER, "Failed to fetch remote metadata: ${t.message}")
-                    metadataMap.clear()
-                    call.cancel()
-                    callback()
-                }
-            })
+                    override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
+                        Log.d(TAG_METADATA_PROVIDER, "Failed to fetch remote metadata: ${t.message}")
+                        metadataMap.clear()
+                        call.cancel()
+                        callback()
+                    }
+                })
+            } else {
+                Log.d(TAG_METADATA_PROVIDER, "Metadata call was null for: $metadataUrl")
+                metadataMap.clear()
+                callback()
+            }
         } catch (_: Exception) {
             metadataMap.clear()
             callback()

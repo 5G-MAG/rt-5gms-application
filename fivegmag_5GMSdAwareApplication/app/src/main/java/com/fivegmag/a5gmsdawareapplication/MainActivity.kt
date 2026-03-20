@@ -332,7 +332,8 @@ class MainActivity : AppCompatActivity() {
             loadAppConfig(persistedSourceName)
             printDependenciesVersionNumbers()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG_AWARE_APPLICATION, "Initialization failed: ${e.message}")
+            showEmptyState()
         }
     }
 
@@ -353,7 +354,10 @@ class MainActivity : AppCompatActivity() {
      * if the named source is not found in the current config.
      */
     private fun loadSourceByName(sourceName: String?) {
-        if (appConfig.sources.isEmpty()) return
+        if (appConfig.sources.isEmpty()) {
+            showEmptyState()
+            return
+        }
 
         val source = if (!sourceName.isNullOrEmpty()) {
             appConfig.sources.find { it.name == sourceName } ?: appConfig.sources[0]
@@ -539,7 +543,8 @@ class MainActivity : AppCompatActivity() {
             m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
             onM8DataChanged(source)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG_AWARE_APPLICATION, "Failed to parse local M8 data: ${e.message}")
+            showEmptyState()
         }
     }
 
