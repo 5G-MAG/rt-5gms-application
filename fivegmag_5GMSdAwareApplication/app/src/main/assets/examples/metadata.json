@@ -16,5 +16,11 @@
     "description": "A test card, also known as a test pattern or start-up/closedown test, is a television test signal, typically broadcast at times when the transmitter is active but no program is being broadcast (often at sign-on and sign-off).",
     "posterUrl": "http://192.168.178.56/posters/testcard.jpg",
     "mediaType": "tv_show"
+  },
+  "Tears Of Steel (aau.at)": {
+    "title": "Tears Of Steel",
+    "description": "Tears of Steel (code-named Project Mango) is a short science fiction film by producer Ton Roosendaal and director/writer Ian Hubert. The film is both live-action and CGI; it was made using new enhancements to the visual effects capabilities of Blender, a free and open-source 3D computer graphics app. Set in a dystopian future, the short film features a group of warriors and scientists who gather at the Oude Kerk in Amsterdam in a desperate attempt to save the world from destructive robots",
+    "posterUrl": "http://192.168.178.56/posters/tos.jpg",
+    "mediaType": "movie"
   }
 }

@@ -1,0 +1,77 @@
+{
+  "m5BaseUrl": "http://rt.5g-mag.com:7778/3gpp-m5/v2/",
+  "serviceList": [
+    {
+      "provisioningSessionId": "ea168aca-16d3-41f0-956c-ebbd5966fa55",
+      "name": "Tears Of Steel (aau.at)"
+    },
+    {
+      "provisioningSessionId": "ea0cddf4-16d3-41f0-956c-ebbd5966fa55",
+      "name": "VoD: Elephant's Dream",
+      "entryPoints": [
+        {
+          "locator": "http://rt.5g-mag.com/m4d/provisioning-session-ea0cddf4-16d3-41f0-956c-ebbd5966fa55/elephants_dream/1/client_manifest-all.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        },
+        {
+          "locator": "https://rt.5g-mag.com/m4d/provisioning-session-ea0cddf4-16d3-41f0-956c-ebbd5966fa55/elephants_dream/1/client_manifest-all.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        }
+      ]
+    },
+    {
+      "provisioningSessionId": "ea0cddf4-16d3-41f0-956c-ebbd5966fa55",
+      "name": "VoD: Big Buck Bunny",
+      "entryPoints": [
+        {
+          "locator": "http://rt.5g-mag.com/m4d/provisioning-session-ea0cddf4-16d3-41f0-956c-ebbd5966fa55/bbb/2/client_manifest-common_init.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        },
+        {
+          "locator": "https://rt.5g-mag.com/m4d/provisioning-session-ea0cddf4-16d3-41f0-956c-ebbd5966fa55/bbb/2/client_manifest-common_init.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        }
+      ]
+    },
+    {
+      "provisioningSessionId": "ea0cddf4-16d3-41f0-956c-ebbd5966fa55",
+      "name": "VoD: Testcard",
+      "entryPoints": [
+        {
+          "locator": "http://rt.5g-mag.com/m4d/provisioning-session-ea0cddf4-16d3-41f0-956c-ebbd5966fa55/testcard/vod/manifests/avc-full.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        },
+        {
+          "locator": "https://rt.5g-mag.com/m4d/provisioning-session-ea0cddf4-16d3-41f0-956c-ebbd5966fa55/testcard/vod/manifests/avc-full.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        },
+        {
+          "locator": "http://rt.5g-mag.com/m4d/provisioning-session-ea0cddf4-16d3-41f0-956c-ebbd5966fa55/testcard/vod/manifests/avc-full.m3u8",
+          "contentType": "application/x-mpegURL"
+        },
+        {
+          "locator": "https://rt.5g-mag.com/m4d/provisioning-session-ea0cddf4-16d3-41f0-956c-ebbd5966fa55/testcard/vod/manifests/avc-full.m3u8",
+          "contentType": "application/x-mpegURL"
+        }
+      ]
+    }
+  ]
+}
