@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Splash screen logo: "5G-MAG" (blue) stacked above "flix" (red).
+    Geometric sans-serif letter paths approximating the brand.
+    Designed to fit within the Android 12+ circular splash mask (160dp visible).
+    ViewBox: 240x160
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="192dp"
+    android:height="128dp"
+    android:viewportWidth="240"
+    android:viewportHeight="160">
+
+    <!-- ============ TOP LINE: "5G-MAG" in blue (#00A0D2) ============ -->
+
+    <!-- Letter "5" -->
+    <!-- Top bar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M18,10 L46,10 L46,17 L18,17 Z" />
+    <!-- Vertical left -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M18,10 L25,10 L25,33 L18,33 Z" />
+    <!-- Middle bar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M18,30 L42,30 L42,37 L18,37 Z" />
+    <!-- Right leg -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M35,37 L42,37 L42,55 L35,55 Z" />
+    <!-- Bottom bar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M18,48 L42,48 L42,55 L18,55 Z" />
+
+    <!-- Letter "G" -->
+    <!-- Top bar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M52,10 L82,10 L82,17 L52,17 Z" />
+    <!-- Left vertical -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M52,10 L59,10 L59,55 L52,55 Z" />
+    <!-- Bottom bar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M52,48 L82,48 L82,55 L52,55 Z" />
+    <!-- Right lower vertical -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M75,32 L82,32 L82,55 L75,55 Z" />
+    <!-- Middle crossbar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M67,32 L82,32 L82,39 L67,39 Z" />
+
+    <!-- Hyphen "-" -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M88,29 L98,29 L98,36 L88,36 Z" />
+
+    <!-- Letter "M" -->
+    <!-- Left vertical -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M104,10 L111,10 L111,55 L104,55 Z" />
+    <!-- Left diagonal -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M111,10 L122,35 L118,37 L107,12 Z" />
+    <!-- Right diagonal -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M122,35 L133,10 L137,12 L126,37 Z" />
+    <!-- Right vertical -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M133,10 L140,10 L140,55 L133,55 Z" />
+
+    <!-- Letter "A" -->
+    <!-- Left leg -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M148,55 L155,55 L165,10 L158,10 Z" />
+    <!-- Right leg -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M165,10 L172,10 L182,55 L175,55 Z" />
+    <!-- Crossbar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M153,34 L177,34 L177,41 L153,41 Z" />
+
+    <!-- Letter "G" (second) -->
+    <!-- Top bar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M188,10 L218,10 L218,17 L188,17 Z" />
+    <!-- Left vertical -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M188,10 L195,10 L195,55 L188,55 Z" />
+    <!-- Bottom bar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M188,48 L218,48 L218,55 L188,55 Z" />
+    <!-- Right lower vertical -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M211,32 L218,32 L218,55 L211,55 Z" />
+    <!-- Middle crossbar -->
+    <path android:fillColor="#00A0D2"
+        android:pathData="M203,32 L218,32 L218,39 L203,39 Z" />
+
+    <!-- ============ BOTTOM LINE: "flix" in red (#E50914) ============ -->
+
+    <!-- Letter "f" -->
+    <!-- Vertical stem -->
+    <path android:fillColor="#E50914"
+        android:pathData="M72,80 L79,80 L79,130 L72,130 Z" />
+    <!-- Top hook -->
+    <path android:fillColor="#E50914"
+        android:pathData="M72,75 L88,75 L88,80 L72,80 Z" />
+    <!-- Crossbar -->
+    <path android:fillColor="#E50914"
+        android:pathData="M65,90 L88,90 L88,96 L65,96 Z" />
+
+    <!-- Letter "l" -->
+    <!-- Vertical -->
+    <path android:fillColor="#E50914"
+        android:pathData="M95,75 L102,75 L102,130 L95,130 Z" />
+
+    <!-- Letter "i" -->
+    <!-- Dot -->
+    <path android:fillColor="#E50914"
+        android:pathData="M110,75 L117,75 L117,82 L110,82 Z" />
+    <!-- Vertical -->
+    <path android:fillColor="#E50914"
+        android:pathData="M110,90 L117,90 L117,130 L110,130 Z" />
+
+    <!-- Letter "x" -->
+    <!-- Forward diagonal -->
+    <path android:fillColor="#E50914"
+        android:pathData="M124,90 L131,90 L150,130 L143,130 Z" />
+    <!-- Backward diagonal -->
+    <path android:fillColor="#E50914"
+        android:pathData="M143,90 L150,90 L131,130 L124,130 Z" />
+
+</vector>

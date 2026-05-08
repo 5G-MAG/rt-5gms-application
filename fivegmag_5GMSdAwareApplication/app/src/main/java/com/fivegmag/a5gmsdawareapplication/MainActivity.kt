@@ -11,78 +11,177 @@ package com.fivegmag.a5gmsdawareapplication
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.text.Html
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.media3.common.util.UnstableApi
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.facebook.shimmer.ShimmerFrameLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
-import com.fivegmag.a5gmsdawareapplication.network.IM8InterfaceApi
-import com.fivegmag.a5gmsmediastreamhandler.player.exoplayer.ExoPlayerAdapter
-import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
-import androidx.media3.ui.PlayerView
+import com.fivegmag.a5gmsdawareapplication.adapter.CategoryRowAdapter
+import com.fivegmag.a5gmsdawareapplication.model.AppConfig
+import com.fivegmag.a5gmsdawareapplication.model.ContentCategory
+import com.fivegmag.a5gmsdawareapplication.model.ContentItem
+import com.fivegmag.a5gmsdawareapplication.model.M8Source
+import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.serialization.json.*
 import okhttp3.ResponseBody
-import org.greenrobot.eventbus.EventBus
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.io.InputStream
 import java.net.URI
-import java.util.*
-import com.fivegmag.a5gmscommonlibrary.helpers.Utils
-import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
-import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 
 const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
-@UnstableApi
-class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
+/**
+ * Landing page of the application. Displays available content items
+ * in horizontal carousels grouped by media type.
+ * Configuration and M8 input selection has been moved to SettingsActivity.
+ */
+@OptIn(UnstableApi::class)
+class MainActivity : AppCompatActivity() {
 
-    private val mediaSessionHandlerAdapter = MediaSessionHandlerAdapter()
-    private val mediaStreamHandlerEventHandler = MediaStreamHandlerEventHandler()
-    private var currentSelectedStreamIndex: Int = 0
-    private lateinit var exoPlayerAdapter: ExoPlayerAdapter
-    private lateinit var currentSelectedM8Key: String
-    private lateinit var iM8InterfaceApi: IM8InterfaceApi
+    private lateinit var contentGrid: RecyclerView
+    private lateinit var emptyStateText: TextView
+    private lateinit var swipeRefresh: SwipeRefreshLayout
+    private lateinit var shimmerLayout: ShimmerFrameLayout
+    private lateinit var categoryRowAdapter: CategoryRowAdapter
     private lateinit var iConfigApi: IConfigApi
     private lateinit var m8Data: M8Model
-    private lateinit var exoPlayerView: PlayerView
-    private lateinit var configProperties: Properties
+
+    private val configProvider = ConfigProvider()
+    private val metadataProvider = MetadataProvider()
+    private var appConfig: AppConfig = AppConfig(emptyList())
+    private var currentConfigUrl: String = ""
+    private var currentSource: M8Source? = null
+    private var isContentLoaded: Boolean = false
+
+    private val settingsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data ?: return@registerForActivityResult
+            val configUrl = data.getStringExtra(SettingsActivity.EXTRA_CONFIG_URL) ?: ""
+            val sourceName = data.getStringExtra(SettingsActivity.EXTRA_SELECTED_SOURCE_NAME) ?: ""
+            val m8Url = data.getStringExtra(SettingsActivity.EXTRA_SELECTED_M8_URL) ?: ""
+            val metadataUrl = data.getStringExtra(SettingsActivity.EXTRA_SELECTED_METADATA_URL)
+
+            currentConfigUrl = configUrl
+
+            if (m8Url.isNotEmpty()) {
+                val source = M8Source(sourceName, m8Url, metadataUrl)
+                currentSource = source
+                loadM8Source(source)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Keep splash screen visible until content is loaded
+        splashScreen.setKeepOnScreenCondition { !isContentLoaded }
+
+        setupToolbar()
+        setupLogo()
+        setupContentGrid()
         requestUserPermissions()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
+    private fun setupToolbar() {
+        val toolbar = findViewById<MaterialToolbar>(R.id.mainToolbar)
+        toolbar.inflateMenu(R.menu.menu_main)
+        toolbar.setOnMenuItemClickListener { item ->
+            onMenuItemSelected(item)
+        }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    private fun setupLogo() {
+        val logoText = findViewById<TextView>(R.id.logoText)
+        val part1 = getString(R.string.logo_text_5gmag)
+        val part2 = getString(R.string.logo_text_flix)
+        val full = "$part1$part2"
+        val spannable = SpannableString(full)
+        spannable.setSpan(
+            ForegroundColorSpan(getColor(R.color.fivegmag_blue)),
+            0, part1.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        spannable.setSpan(
+            ForegroundColorSpan(getColor(R.color.flix_red)),
+            part1.length, full.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        logoText.text = spannable
+    }
+
+    private fun setupContentGrid() {
+        contentGrid = findViewById(R.id.contentGrid)
+        emptyStateText = findViewById(R.id.emptyStateText)
+        swipeRefresh = findViewById(R.id.swipeRefresh)
+        shimmerLayout = findViewById(R.id.shimmerLayout)
+
+        // Configure pull-to-refresh colors
+        swipeRefresh.setColorSchemeResources(R.color.fivegmag_blue)
+        swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.surface_dark_elevated)
+        swipeRefresh.setOnRefreshListener {
+            loadAppConfig()
+        }
+
+        categoryRowAdapter = CategoryRowAdapter { item ->
+            val intent = Intent(this, DetailActivity::class.java)
+            intent.putExtra(DetailActivity.EXTRA_TITLE, item.title)
+            intent.putExtra(DetailActivity.EXTRA_DESCRIPTION, item.description)
+            intent.putExtra(DetailActivity.EXTRA_POSTER_URL, item.posterUrl)
+            intent.putExtra(DetailActivity.EXTRA_MEDIA_TYPE, item.mediaType)
+            intent.putExtra(DetailActivity.EXTRA_SERVICE_LIST_ENTRY_JSON, item.serviceListEntryJson)
+            intent.putExtra(DetailActivity.EXTRA_M5_BASE_URL, m8Data.m5BaseUrl)
+            startActivity(intent)
+        }
+
+        contentGrid.layoutManager = LinearLayoutManager(this)
+        contentGrid.adapter = categoryRowAdapter
+    }
+
+    private fun onMenuItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.actionSettings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                intent.putExtra(SettingsActivity.EXTRA_CONFIG_URL, currentConfigUrl)
+                intent.putExtra(
+                    SettingsActivity.EXTRA_SELECTED_SOURCE_NAME,
+                    currentSource?.name ?: ""
+                )
+                settingsLauncher.launch(intent)
+                return true
+            }
+
             R.id.actionLicense -> {
                 val dialogView = LayoutInflater.from(this).inflate(R.layout.activity_license, null)
                 val textView = dialogView.findViewById<TextView>(R.id.licenseTextView)
@@ -120,7 +219,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 return true
             }
         }
-        return super.onOptionsItemSelected(item)
+        return false
     }
 
     private fun addVersionNumber(dialogView: View) {
@@ -132,7 +231,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     }
 
     private fun setClickListeners(dialogView: View) {
-
         val githubTextView = dialogView.findViewById<TextView>(R.id.githubLink)
         githubTextView.setOnClickListener {
             val url = getString(R.string.github_url)
@@ -185,7 +283,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 initialize()
             }
 
-        // Register the cell info callback
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -211,87 +308,76 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
 
     /**
      * Initialization is performed after the user permissions have been requested.
-     *
+     * Reads persisted config URL and source name from SharedPreferences.
      */
     private fun initialize() {
         try {
             initializeRetrofitForConfigInterfaceApi()
-            handleConfigurationChange()
-            exoPlayerView = findViewById(R.id.idExoPlayerVIew)
-            setApplicationVersionNumber()
-            printDependenciesVersionNumbers()
-            registerButtonListener()
-            mediaSessionHandlerAdapter.initialize(
-                this,
-                ::onConnectionToMediaSessionHandlerEstablished
+
+            val prefs = getSharedPreferences(
+                SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE
             )
-            exoPlayerAdapter = mediaSessionHandlerAdapter.getExoPlayerAdapter()
-            val representationInfoTextView = findViewById<TextView>(R.id.representation_info)
-            mediaStreamHandlerEventHandler.initialize(representationInfoTextView, this)
+            val persistedUrl = prefs.getString(SettingsActivity.PREF_CONFIG_URL, null)
+
+            // Determine config URL: persisted remote URL, or local
+            currentConfigUrl = if (!persistedUrl.isNullOrEmpty()) {
+                persistedUrl
+            } else {
+                getString(R.string.m8_config_input)
+            }
+
+            val persistedSourceName = prefs.getString(
+                SettingsActivity.PREF_SELECTED_SOURCE_NAME, null
+            )
+            loadAppConfig(persistedSourceName)
+            printDependenciesVersionNumbers()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG_AWARE_APPLICATION, "Initialization failed: ${e.message}")
+            showEmptyState()
         }
     }
 
-    private fun handleConfigurationChange() {
-        val editText = findViewById<EditText>(R.id.configSelectionText);
-        val configurationUrl = editText.text.toString();
-
-        if (configurationUrl == getString(R.string.m8_config_input)) {
-            configProperties = Utils().loadConfiguration(this.assets, "config.properties.xml")
-            populateM8SelectionSpinner()
+    private fun loadAppConfig(preferredSourceName: String? = null) {
+        if (currentConfigUrl == getString(R.string.m8_config_input)) {
+            appConfig = configProvider.loadFromAssets(assets)
+            loadSourceByName(preferredSourceName)
         } else {
-            setConfigViaEndpoint(configurationUrl)
+            configProvider.loadFromEndpoint(currentConfigUrl, iConfigApi) { config ->
+                appConfig = config
+                runOnUiThread { loadSourceByName(preferredSourceName) }
+            }
         }
     }
 
-    private fun setConfigViaEndpoint(configurationUrl: String) {
-        try {
-            val call: Call<ResponseBody>? =
-                iConfigApi.fetchConfiguration(configurationUrl)
-            call?.enqueue(object : Callback<ResponseBody?> {
-                override fun onResponse(
-                    call: Call<ResponseBody?>,
-                    response: Response<ResponseBody?>
-                ) {
-                    val resource: String? = response.body()?.string()
-                    if (resource != null) {
-                        configProperties = Properties()
-                        configProperties.loadFromXML(resource.byteInputStream())
-                        populateM8SelectionSpinner()
-                    }
-                }
-
-                override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
-                    call.cancel()
-                }
-            })
-        } catch (_: Exception) {
-
+    /**
+     * Selects and loads a source by name. Falls back to the first source
+     * if the named source is not found in the current config.
+     */
+    private fun loadSourceByName(sourceName: String?) {
+        if (appConfig.sources.isEmpty()) {
+            showEmptyState()
+            return
         }
+
+        val source = if (!sourceName.isNullOrEmpty()) {
+            appConfig.sources.find { it.name == sourceName } ?: appConfig.sources[0]
+        } else {
+            appConfig.sources[0]
+        }
+        currentSource = source
+        loadM8Source(source)
     }
 
-    override fun onStop() {
-        EventBus.getDefault().unregister(mediaStreamHandlerEventHandler)
-        super.onStop()
-        // Unbind from the service
-        mediaSessionHandlerAdapter.reset()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(mediaStreamHandlerEventHandler)
-    }
-
-    private fun setApplicationVersionNumber() {
-        try {
-            val packageInfo = packageManager.getPackageInfo(packageName, 0)
-            val versionName = packageInfo.versionName
-            val versionTextView = findViewById<TextView>(R.id.versionNumber)
-            val versionText = getString(R.string.version_text_field, versionName)
-            versionTextView.text = versionText
-        } catch (e: PackageManager.NameNotFoundException) {
-            e.printStackTrace()
+    /**
+     * Loads M8 data and metadata for the given source.
+     */
+    private fun loadM8Source(source: M8Source) {
+        val m8Url = source.m8Url
+        val selectedUri = URI(m8Url)
+        if (selectedUri.isAbsolute) {
+            setM8DataViaEndpoint(m8Url, source)
+        } else {
+            setM8DataViaJson(m8Url, source)
         }
     }
 
@@ -306,37 +392,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         )
     }
 
-    private fun populateM8SelectionSpinner() {
-        try {
-            val spinner: Spinner = findViewById(R.id.idM8Spinner)
-            val spinnerOptions: ArrayList<String> = ArrayList()
-            val propertyNames = configProperties.propertyNames()
-
-            while (propertyNames.hasMoreElements()) {
-                spinnerOptions.add(propertyNames.nextElement() as String)
-            }
-
-            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_spinner_item, spinnerOptions
-            )
-            spinner.adapter = adapter
-            spinner.onItemSelectedListener = this
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun initializeRetrofitForM8InterfaceApi(url: String) {
-        val retrofitM8Interface: Retrofit = Retrofit.Builder()
-            .baseUrl(url)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        iM8InterfaceApi =
-            retrofitM8Interface.create(IM8InterfaceApi::class.java)
-    }
-
     private fun initializeRetrofitForConfigInterfaceApi() {
         val retrofitInterface: Retrofit = Retrofit.Builder()
             .baseUrl("http://localhost/")
@@ -347,84 +402,90 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             retrofitInterface.create(IConfigApi::class.java)
     }
 
-    private fun onConnectionToMediaSessionHandlerEstablished() {
-        exoPlayerAdapter.initialize(exoPlayerView, this)
+    private fun onM8DataChanged(source: M8Source) {
+        loadMetadataAndDisplayGrid(source)
     }
 
-    private fun registerButtonListener() {
-        findViewById<Button>(R.id.loadButton)
-            .setOnClickListener {
-                loadStream()
-            }
-        findViewById<Button>(R.id.loadM8Button)
-            .setOnClickListener {
-                handleConfigurationChange()
-            }
-    }
-
-    private fun onM8DataChanged() {
-        mediaSessionHandlerAdapter.setM5Endpoint(m8Data.m5BaseUrl)
-        populateStreamSelectionSpinner()
-    }
-
-    private fun populateStreamSelectionSpinner() {
-        try {
-            val spinner: Spinner = findViewById(R.id.idStreamSpinner)
-            val spinnerOptions: ArrayList<String> = ArrayList()
-
-            val iterator = m8Data.serviceList.iterator()
-            while (iterator.hasNext()) {
-                spinnerOptions.add(iterator.next().name)
-            }
-            val adapter: ArrayAdapter<String> = ArrayAdapter<String>(
-                this,
-                android.R.layout.simple_spinner_item, spinnerOptions
-            )
-            spinner.adapter = adapter
-            spinner.onItemSelectedListener = this
-        } catch (e: Exception) {
-            e.printStackTrace()
+    private fun loadMetadataAndDisplayGrid(source: M8Source) {
+        metadataProvider.loadMetadata(
+            m8Url = source.m8Url,
+            explicitMetadataUrl = source.metadataUrl,
+            assets = assets,
+            iConfigApi = iConfigApi
+        ) {
+            runOnUiThread { displayContentGrid() }
         }
     }
 
-    private fun loadStream() {
-        exoPlayerAdapter.stop()
-        val serviceListEntry: ServiceListEntry = m8Data.serviceList[currentSelectedStreamIndex]
-        mediaSessionHandlerAdapter.initializePlaybackByServiceListEntry(serviceListEntry)
+    private fun displayContentGrid() {
+        // Hide shimmer, stop refresh spinner
+        shimmerLayout.stopShimmer()
+        shimmerLayout.visibility = View.GONE
+        swipeRefresh.isRefreshing = false
+
+        val contentItems = ArrayList<ContentItem>()
+        for (serviceListEntry in m8Data.serviceList) {
+            val metadata = metadataProvider.getMetadataForEntry(serviceListEntry.name)
+            contentItems.add(ContentItem(serviceListEntry, metadata))
+        }
+
+        if (contentItems.isEmpty()) {
+            emptyStateText.visibility = View.VISIBLE
+            swipeRefresh.visibility = View.GONE
+        } else {
+            emptyStateText.visibility = View.GONE
+            swipeRefresh.visibility = View.VISIBLE
+
+            // Select featured/hero item: first movie, or first item if no movies
+            val heroItem = contentItems.firstOrNull { it.mediaType == "movie" }
+                ?: contentItems.first()
+            categoryRowAdapter.setHeroItem(heroItem)
+
+            val categories = groupItemsByMediaType(contentItems)
+            categoryRowAdapter.updateCategories(categories)
+        }
+
+        isContentLoaded = true
     }
 
-    private fun replaceDoubleTicks(value: String): String {
-        return value.replace("\"", "")
-    }
+    private fun groupItemsByMediaType(items: List<ContentItem>): List<ContentCategory> {
+        val grouped = LinkedHashMap<String, ArrayList<ContentItem>>()
+        for (item in items) {
+            val type = item.mediaType
+            if (!grouped.containsKey(type)) {
+                grouped[type] = ArrayList()
+            }
+            grouped[type]?.add(item)
+        }
 
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        if (parent != null) {
-            when (parent.id) {
-                R.id.idStreamSpinner -> {
-                    currentSelectedStreamIndex = position
-                }
+        // Define display order: movies first, then tv_show, then any others
+        val orderedTypes = ArrayList<String>()
+        if (grouped.containsKey("movie")) orderedTypes.add("movie")
+        if (grouped.containsKey("tv_show")) orderedTypes.add("tv_show")
+        for (key in grouped.keys) {
+            if (!orderedTypes.contains(key)) orderedTypes.add(key)
+        }
 
-                R.id.idM8Spinner -> {
-                    currentSelectedM8Key = parent.selectedItem as String
-                    val selectedUri = URI(configProperties.getProperty(currentSelectedM8Key))
-                    if (selectedUri.isAbsolute) {
-                        setM8DataViaEndpoint(selectedUri.toString())
-                    } else {
-                        setM8DataViaJson(selectedUri.toString())
-                    }
-                }
-
-                else -> { // Note the block
-                }
+        val categories = ArrayList<ContentCategory>()
+        for (type in orderedTypes) {
+            val label = when (type) {
+                "movie" -> getString(R.string.category_movies)
+                "tv_show" -> getString(R.string.category_tv_shows)
+                else -> type.replaceFirstChar { it.uppercase() }
+            }
+            val categoryItems = grouped[type]
+            if (categoryItems != null && categoryItems.isNotEmpty()) {
+                categories.add(ContentCategory(label, type, categoryItems))
             }
         }
+
+        return categories
     }
 
-    private fun setM8DataViaEndpoint(m8HostingEndpoint: String) {
+    private fun setM8DataViaEndpoint(m8HostingEndpoint: String, source: M8Source) {
         try {
-            initializeRetrofitForM8InterfaceApi(m8HostingEndpoint)
             val call: Call<ResponseBody>? =
-                iM8InterfaceApi.fetchServiceAccessInformationList()
+                iConfigApi.fetchConfiguration(m8HostingEndpoint)
             call?.enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(
                     call: Call<ResponseBody?>,
@@ -432,26 +493,46 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                 ) {
                     val resource: String? = response.body()?.string()
                     if (resource != null) {
-                        val jsonObject: JsonObject =
-                            Json.parseToJsonElement(resource).jsonObject
-                        val m5BaseUrl: String =
-                            replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
-                        val jsonServiceList = jsonObject["serviceList"]?.jsonArray
-                        m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
-                        onM8DataChanged()
+                        try {
+                            val jsonObject: JsonObject =
+                                Json.parseToJsonElement(resource).jsonObject
+                            val m5BaseUrl: String =
+                                replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
+                            val jsonServiceList = jsonObject["serviceList"]?.jsonArray
+                            m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
+                            onM8DataChanged(source)
+                        } catch (e: Exception) {
+                            Log.e(TAG_AWARE_APPLICATION, "Failed to parse M8 data: ${e.message}")
+                            runOnUiThread { showEmptyState() }
+                        }
+                    } else {
+                        Log.e(TAG_AWARE_APPLICATION, "M8 response body was null")
+                        runOnUiThread { showEmptyState() }
                     }
                 }
 
                 override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
+                    Log.e(TAG_AWARE_APPLICATION, "Failed to fetch M8 data: ${t.message}")
                     call.cancel()
+                    runOnUiThread { showEmptyState() }
                 }
             })
-        } catch (_: Exception) {
-
+        } catch (e: Exception) {
+            Log.e(TAG_AWARE_APPLICATION, "Error loading M8 endpoint: ${e.message}")
+            showEmptyState()
         }
     }
 
-    private fun setM8DataViaJson(url: String) {
+    private fun showEmptyState() {
+        shimmerLayout.stopShimmer()
+        shimmerLayout.visibility = View.GONE
+        swipeRefresh.isRefreshing = false
+        swipeRefresh.visibility = View.GONE
+        emptyStateText.visibility = View.VISIBLE
+        isContentLoaded = true
+    }
+
+    private fun setM8DataViaJson(url: String, source: M8Source) {
         val json: String?
         try {
             val inputStream: InputStream = assets.open(url)
@@ -460,10 +541,15 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             val m5BaseUrl: String = replaceDoubleTicks(jsonObject["m5BaseUrl"].toString())
             val jsonServiceList = jsonObject["serviceList"]?.jsonArray
             m8Data = jsonServiceList?.let { createM8Model(m5BaseUrl, it) }!!
-            onM8DataChanged()
+            onM8DataChanged(source)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG_AWARE_APPLICATION, "Failed to parse local M8 data: ${e.message}")
+            showEmptyState()
         }
+    }
+
+    private fun replaceDoubleTicks(value: String): String {
+        return value.replace("\"", "")
     }
 
     private fun createM8Model(m5BaseUrl: String, jsonServiceList: JsonArray): M8Model {
@@ -511,9 +597,5 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         }
 
         return M8Model(m5BaseUrl, serviceList)
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-        TODO("Not yet implemented")
     }
 }

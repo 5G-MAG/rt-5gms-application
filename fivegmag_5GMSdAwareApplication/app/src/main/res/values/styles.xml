@@ -5,4 +5,40 @@
         <item name="android:textColorLink">@color/white</item>
         <item name="android:spinnerMode">dropdown</item>
     </style>
+
+    <!-- Content card style for the landing page grid -->
+    <style name="ContentCardStyle" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">@color/card_dark</item>
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">4dp</item>
+    </style>
+
+    <!-- Play button style for the detail page -->
+    <style name="PlayButtonStyle" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/fivegmag_blue</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">24dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+    </style>
+
+    <!-- Settings button style -->
+    <style name="SettingsButtonStyle" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/fivegmag_blue</item>
+        <item name="android:textColor">@color/fivegmag_blue</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <!-- Media type badge -->
+    <style name="MediaTypeBadge">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">@font/poppins_semibold</item>
+    </style>
 </resources>
