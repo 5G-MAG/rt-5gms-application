@@ -1,9 +1,14 @@
 {
   "sources": [
     {
+      "name": "5G-MAG online reference",
+      "m8Url": "https://rt.5g-mag.com/m8.json",
+      "metadataUrl": "https://rt.5g-mag.com/metadata.json"
+    },
+    {
       "name": "Docker",
-      "m8Url": "http://192.168.178.56/m8.json",
-      "metadataUrl": "http://192.168.178.56/metadata.json"
+      "m8Url": "http://<YOUR_IP_HERE>:8000/m8.json",
+      "metadataUrl": "http://<YOUR_IP_HERE>:3344/metadata.json"
     }
   ]
 }

@@ -1,0 +1,44 @@
+{
+  "m5BaseUrl": "http://192.168.178.56:7778/3gpp-m5/v2/",
+  "serviceList": [
+    {
+      "provisioningSessionId": "916a8140-4abe-41f1-a03b-7dc231beba20",
+      "name": "VoD: BBC - Big Buck Bunny",
+      "entryPoints": [
+        {
+          "locator": "http://192.168.178.56/m4d/provisioning-session-916a8140-4abe-41f1-a03b-7dc231beba20/bbb/2/client_manifest-common_init.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        }
+      ]
+    },
+    {
+      "provisioningSessionId": "916c90de-4abe-41f1-a03b-7dc231beba20",
+      "name": "VoD: Axinom - Tears of Steel",
+      "entryPoints": [
+        {
+          "locator": "http://192.168.178.56/m4d/provisioning-session-916c90de-4abe-41f1-a03b-7dc231beba20/TestVectors/Cmaf/clear_1080p_h264/manifest.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        }
+      ]
+    },
+    {
+      "provisioningSessionId": "916e88c6-4abe-41f1-a03b-7dc231beba20",
+      "name": "Live: 5G-MAG LiveSim2",
+      "entryPoints": [
+        {
+          "locator": "http://192.168.178.56/m4d/provisioning-session-916e88c6-4abe-41f1-a03b-7dc231beba20/livesim2/euforia/dash.mpd",
+          "contentType": "application/dash+xml",
+          "profiles": [
+            "urn:mpeg:dash:profile:isoff-live:2011"
+          ]
+        }
+      ]
+    }
+  ]
+}
