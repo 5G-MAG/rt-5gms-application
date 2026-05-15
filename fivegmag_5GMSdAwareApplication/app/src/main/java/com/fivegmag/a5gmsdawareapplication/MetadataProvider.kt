@@ -89,8 +89,8 @@ class MetadataProvider {
         try {
             val inputStream = assets.open(metadataPath)
             val json = inputStream.bufferedReader().use { it.readText() }
-            parseMetadataJson(json)
-        } catch (e: Exception) {
+            parseMetadataJson(json, metadataPath)
+        } catch (_: Exception) {
             Log.d(TAG_METADATA_PROVIDER, "No local metadata found at $metadataPath")
             metadataMap.clear()
         }
@@ -112,8 +112,8 @@ class MetadataProvider {
                         val resource: String? = response.body()?.string()
                         if (resource != null) {
                             try {
-                                parseMetadataJson(resource)
-                            } catch (e: Exception) {
+                                parseMetadataJson(resource, metadataUrl)
+                            } catch (_: Exception) {
                                 Log.d(TAG_METADATA_PROVIDER, "Failed to parse remote metadata")
                                 metadataMap.clear()
                             }
@@ -139,7 +139,7 @@ class MetadataProvider {
         }
     }
 
-    private fun parseMetadataJson(json: String) {
+    private fun parseMetadataJson(json: String, metadataLocation: String) {
         metadataMap.clear()
         val jsonObject: JsonObject = Json.parseToJsonElement(json).jsonObject
 
@@ -147,7 +147,10 @@ class MetadataProvider {
             val entryObject = value.jsonObject
             val title = entryObject["title"]?.jsonPrimitive?.content ?: key
             val description = entryObject["description"]?.jsonPrimitive?.content ?: ""
-            val posterUrl = entryObject["posterUrl"]?.jsonPrimitive?.content ?: ""
+            val posterUrl = resolvePosterUrl(
+                entryObject["posterUrl"]?.jsonPrimitive?.content ?: "",
+                metadataLocation
+            )
             val mediaType = entryObject["mediaType"]?.jsonPrimitive?.content ?: "movie"
 
             metadataMap[key] = ContentMetadata(
@@ -157,6 +160,54 @@ class MetadataProvider {
                 mediaType = mediaType
             )
         }
+    }
+
+    /**
+     * Resolves a poster URL relative to the metadata JSON location.
+     * Remote metadata keeps remote URLs, while local asset metadata is mapped
+     * to the android_asset URI space used by Coil.
+     */
+    internal fun resolvePosterUrl(posterUrl: String, metadataLocation: String): String {
+        if (posterUrl.isEmpty()) {
+            return ""
+        }
+
+        return try {
+            val posterUri = URI(posterUrl)
+            if (posterUri.isAbsolute) {
+                posterUrl
+            } else {
+                val metadataUri = URI(metadataLocation)
+                if (metadataUri.isAbsolute) {
+                    metadataUri.resolve(posterUrl).toString()
+                } else {
+                    resolveAssetPosterUrl(posterUrl, metadataLocation)
+                }
+            }
+        } catch (_: Exception) {
+            posterUrl
+        }
+    }
+
+    private fun resolveAssetPosterUrl(posterUrl: String, metadataPath: String): String {
+        val combinedPath = if (posterUrl.startsWith('/')) {
+            posterUrl.removePrefix("/")
+        } else {
+            val metadataDirectory = metadataPath.substringBeforeLast("/", "")
+            if (metadataDirectory.isNotEmpty()) {
+                "$metadataDirectory/$posterUrl"
+            } else {
+                posterUrl
+            }
+        }
+
+        val normalizedPath = try {
+            URI("file:///$combinedPath").normalize().path?.removePrefix("/") ?: combinedPath
+        } catch (_: Exception) {
+            combinedPath
+        }
+
+        return "file:///android_asset/$normalizedPath"
     }
 
     /**
