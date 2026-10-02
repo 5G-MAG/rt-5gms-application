@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+License: 5G-MAG Public License (v1.0)
+Author: Jordi J. Gimenez (5G-MAG)
+Copyright: (C) 2026 5G-MAG Association
+For full license terms please see the LICENSE file distributed with this
+program. If this file is missing then the license can be retrieved from
+https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
+
+Services of the three 5G Broadcast forms of the browser client's end-to-end test (test/e2e.test.js,
+fixture5gXml), plus the HLS form of annex G.2.3, an application controlling media presentation
+(clause 5.2.3.2), scheduled service hours (clause 5.2.5.2), LCNRange (clause 5.5.29) and the
+list-level ContentGuideSource (clause 6.1).
+
+libxml2 rejects the first mbms:// locator as xs:anyURI; it is the form of TS 26.347 V18.1.0 clause
+8.2.3 and of the browser client's fixture, and is kept as such.
+-->
+<ServiceList
+  xmlns="urn:dvb:metadata:servicediscovery:2024"
+  xmlns:tva="urn:tva:metadata:2024"
+  xmlns:dvbisd-t="urn:dvb:metadata:servicediscovery-types:2023"
+  id="tag:dvbi.example,2024:servicelist:5g" version="1" xml:lang="en">
+  <Name>5G Broadcast List</Name>
+  <ProviderName>Sample Provider</ProviderName>
+  <LCNTableList>
+    <LCNTable>
+      <LCN channelNumber="1" serviceRef="tag:sample,2024:service:hybrid"/>
+      <LCNRange start="100" end="199" fillMethod="fillGaps"/>
+    </LCNTable>
+  </LCNTableList>
+  <ContentGuideSource CGSID="list-level">
+    <ProviderName>Sample EPG</ProviderName>
+    <ScheduleInfoEndpoint contentType="application/xml"><dvbisd-t:URI>http://192.168.1.202:4000/epg/schedule</dvbisd-t:URI></ScheduleInfoEndpoint>
+    <ProgramInfoEndpoint contentType="application/xml"><dvbisd-t:URI>http://192.168.1.202:4000/epg/program</dvbisd-t:URI></ProgramInfoEndpoint>
+  </ContentGuideSource>
+  <Service version="1">
+    <UniqueIdentifier>tag:sample,2024:service:hybrid</UniqueIdentifier>
+    <ServiceInstance priority="1">
+      <DisplayName>Hybrid 5G</DisplayName>
+      <IdentifierBasedDeliveryParameters>mbms://service1000.mbms.operator.com&amp;label=http://www.example.com/hybrid.mpd</IdentifierBasedDeliveryParameters>
+    </ServiceInstance>
+    <ServiceInstance priority="2">
+      <DisplayName>Hybrid over DASH</DisplayName>
+      <DASHDeliveryParameters>
+        <UriBasedLocation contentType="application/dash+xml"><dvbisd-t:URI>http://192.168.1.202:3004/dash/hybrid.mpd</dvbisd-t:URI></UriBasedLocation>
+      </DASHDeliveryParameters>
+    </ServiceInstance>
+    <ServiceName>Hybrid 5G</ServiceName>
+    <ProviderName>Sample Provider</ProviderName>
+    <RelatedMaterial>
+      <tva:HowRelated href="urn:dvb:metadata:cs:HowRelatedCS:2021:1001.2"/>
+      <tva:MediaLocator>
+        <tva:MediaUri contentType="image/webp">http://192.168.1.202:4000/logos/hybrid.webp</tva:MediaUri>
+      </tva:MediaLocator>
+      <tva:MediaLocator>
+        <tva:MediaUri contentType="image/jpeg">http://192.168.1.202:4000/logos/hybrid.jpg</tva:MediaUri>
+      </tva:MediaLocator>
+    </RelatedMaterial>
+  </Service>
+  <Service version="1">
+    <UniqueIdentifier>tag:sample,2024:service:5gonly</UniqueIdentifier>
+    <ServiceInstance priority="1">
+      <DisplayName>Only 5G</DisplayName>
+      <IdentifierBasedDeliveryParameters>mbms://example.com/userservice/1</IdentifierBasedDeliveryParameters>
+    </ServiceInstance>
+    <ServiceName>Only 5G</ServiceName>
+    <ProviderName>Sample Provider</ProviderName>
+  </Service>
+  <Service version="1">
+    <UniqueIdentifier>tag:sample,2024:service:bad5g</UniqueIdentifier>
+    <ServiceInstance priority="1">
+      <DisplayName>Bad 5G</DisplayName>
+      <IdentifierBasedDeliveryParameters>mbms://example.com&amp;foo=1</IdentifierBasedDeliveryParameters>
+    </ServiceInstance>
+    <ServiceName>Bad 5G</ServiceName>
+    <ProviderName>Sample Provider</ProviderName>
+  </Service>
+  <Service version="1">
+    <UniqueIdentifier>tag:sample,2024:service:hls-id</UniqueIdentifier>
+    <ServiceInstance>
+      <IdentifierBasedDeliveryParameters contentType="application/vnd.apple.mpegurl">http://192.168.1.202:3004/hls/ch1.m3u8?auth=foo</IdentifierBasedDeliveryParameters>
+    </ServiceInstance>
+    <ServiceName xml:lang="fr">Chaine HLS</ServiceName>
+    <ServiceName xml:lang="en">HLS Channel</ServiceName>
+    <ProviderName>Sample Provider</ProviderName>
+    <ServiceType href="urn:dvb:metadata:cs:ServiceTypeCS:2019:linear-radio"/>
+    <ParentalRating>
+      <MinimumAge>12</MinimumAge>
+      <MinimumAge countryCodes="DEU,AUT">16</MinimumAge>
+    </ParentalRating>
+  </Service>
+  <Service version="1">
+    <UniqueIdentifier>tag:sample,2024:service:app</UniqueIdentifier>
+    <ServiceInstance priority="1">
+      <DisplayName>Player application</DisplayName>
+      <RelatedMaterial>
+        <tva:HowRelated href="urn:dvb:metadata:cs:LinkedApplicationCS:2019:1.2"/>
+        <tva:MediaLocator>
+          <tva:MediaUri contentType="text/html">http://open.tv/hls-player.html</tva:MediaUri>
+        </tva:MediaLocator>
+      </RelatedMaterial>
+      <DASHDeliveryParameters>
+        <UriBasedLocation contentType="application/dash+xml"><dvbisd-t:URI>http://192.168.1.202:3004/dash/ignored.mpd</dvbisd-t:URI></UriBasedLocation>
+      </DASHDeliveryParameters>
+    </ServiceInstance>
+    <ServiceInstance priority="3">
+      <DisplayName>Part time</DisplayName>
+      <Availability>
+        <Period validFrom="2026-01-05T00:00:00Z">
+          <Interval days="1 2 3 4 5" recurrence="2" startTime="18:00:00Z" endTime="02:00:00Z"/>
+        </Period>
+      </Availability>
+      <DASHDeliveryParameters>
+        <UriBasedLocation contentType="application/dash+xml"><dvbisd-t:URI>http://192.168.1.202:3004/dash/parttime.mpd</dvbisd-t:URI></UriBasedLocation>
+      </DASHDeliveryParameters>
+    </ServiceInstance>
+    <ServiceName>Application Service</ServiceName>
+    <ProviderName>Sample Provider</ProviderName>
+  </Service>
+</ServiceList>
