@@ -14,6 +14,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DVBIClient">
         <activity
+            android:name=".PlayerActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

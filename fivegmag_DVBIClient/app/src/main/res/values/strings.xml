@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">DVB-I Client</string>
     <string name="no_service_list">No service list loaded</string>
+    <string name="badge_5g">5G Broadcast</string>
+    <string name="service_not_found">This service is not in the installed service list.</string>
+    <string name="no_playable_instance">No service instance of this service can be played on this device.</string>
 </resources>
