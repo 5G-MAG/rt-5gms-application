@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.DVBIClient" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorPrimary">@color/fivegmag_blue</item>
+        <item name="colorPrimaryVariant">@color/fivegmag_blue2</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/fivegmag_blue</item>
+        <item name="colorOnSecondary">@color/white</item>
+    </style>
+</resources>

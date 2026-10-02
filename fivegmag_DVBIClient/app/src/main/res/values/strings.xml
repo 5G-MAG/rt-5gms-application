@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DVB-I Client</string>
+    <string name="no_service_list">No service list loaded</string>
+</resources>
