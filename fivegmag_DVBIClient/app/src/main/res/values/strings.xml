@@ -2,6 +2,27 @@
     <string name="app_name">DVB-I Client</string>
     <string name="no_service_list">No service list loaded</string>
     <string name="badge_5g">5G Broadcast</string>
+    <string name="badge_5g_short">5G</string>
     <string name="service_not_found">This service is not in the installed service list.</string>
     <string name="no_playable_instance">No service instance of this service can be played on this device.</string>
+    <string name="channel_number_hint">Channel number</string>
+    <string name="go">Go</string>
+    <string name="logo">Service logo</string>
+    <string name="schedule">Schedule</string>
+    <string name="reload">Reload</string>
+    <string name="settings">Settings</string>
+    <string name="service_list_url">Service list URL</string>
+    <string name="registry_url">Service List Registry endpoint</string>
+    <string name="country">Country (ISO 3166 alpha-3)</string>
+    <string name="country_hint">for example CHE; empty for no TargetCountry</string>
+    <string name="query_registry">Query the registry and pick a list</string>
+    <string name="region">Region (Region@regionID of the list)</string>
+    <string name="region_hint">empty for none</string>
+    <string name="packages">Subscription packages (comma separated)</string>
+    <string name="packages_hint">empty for none</string>
+    <string name="parental">Restrict content rated at or above this age</string>
+    <string name="parental_hint">0 for no restriction</string>
+    <string name="save">Save</string>
+    <string name="loading">Loading…</string>
+    <string name="restricted">Restricted by your parental setting</string>
 </resources>

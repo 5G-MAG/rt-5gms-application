@@ -21,6 +21,10 @@ object DvbiSession {
     @Volatile
     var serviceList: ServiceList? = null
 
+    /** The ServiceListURI the installed list came from. */
+    @Volatile
+    var serviceListUrl: String? = null
+
     /** Replaced by an Android MBMS Client implementation when one exists. */
     var mbmsClient: IMbmsStreamingClient = NoMbmsClient
 

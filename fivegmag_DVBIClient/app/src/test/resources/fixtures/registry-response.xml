@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+License: 5G-MAG Public License (v1.0)
+Author: Jordi J. Gimenez (5G-MAG)
+Copyright: (C) 2026 5G-MAG Association
+For full license terms please see the LICENSE file distributed with this
+program. If this file is missing then the license can be retrieved from
+https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
+
+A Service List Registry response (clause 5.3, schema dvbi_service_list_discovery_v1.6.xsd): the
+offering rt-dvb-i-service-list-registry returns for the live demo, a regulator list that needs
+DVB-T, and a list with two ServiceListURI elements and a logo.
+-->
+<ServiceListEntryPoints
+  xml:lang="en"
+  xmlns="urn:dvb:metadata:servicelistdiscovery:2024"
+  xmlns:dvbisd-t="urn:dvb:metadata:servicediscovery-types:2023"
+  xmlns:mpeg7="urn:tva:mpeg7:2008"
+  xmlns:tva="urn:tva:metadata:2024">
+  <ServiceListRegistryEntity>
+    <Name>5G-MAG Reference Service List Registry</Name>
+  </ServiceListRegistryEntity>
+  <ProviderOffering>
+    <Provider>
+      <Name>5G-MAG</Name>
+    </Provider>
+    <ServiceListOffering>
+      <dvbisd-t:ServiceListName>5G-MAG</dvbisd-t:ServiceListName>
+      <dvbisd-t:ServiceListURI contentType="application/vnd.dvb.dvbisl+xml">
+        <dvbisd-t:URI>http://192.168.1.202:4000/service-list.xml</dvbisd-t:URI>
+      </dvbisd-t:ServiceListURI>
+      <dvbisd-t:Delivery>
+        <dvbisd-t:DASHDelivery/>
+      </dvbisd-t:Delivery>
+      <dvbisd-t:Language>en</dvbisd-t:Language>
+      <dvbisd-t:TargetCountry>CHE</dvbisd-t:TargetCountry>
+      <dvbisd-t:TargetCountry>DEU</dvbisd-t:TargetCountry>
+      <dvbisd-t:TargetCountry>ESP</dvbisd-t:TargetCountry>
+      <dvbisd-t:ServiceListId>tag:5g-mag.org,2026:servicelist:local-demo</dvbisd-t:ServiceListId>
+    </ServiceListOffering>
+  </ProviderOffering>
+  <ProviderOffering>
+    <Provider regulatorFlag="true">
+      <Name>National Authority</Name>
+    </Provider>
+    <ServiceListOffering regulatorListFlag="true">
+      <dvbisd-t:ServiceListName>Official list</dvbisd-t:ServiceListName>
+      <dvbisd-t:ServiceListURI contentType="application/vnd.dvb.dvbisl+xml">
+        <dvbisd-t:URI>https://authority.example/list.xml</dvbisd-t:URI>
+      </dvbisd-t:ServiceListURI>
+      <dvbisd-t:Delivery>
+        <dvbisd-t:DASHDelivery/>
+        <dvbisd-t:DVBTDelivery required="true"/>
+      </dvbisd-t:Delivery>
+      <dvbisd-t:ServiceListId>tag:authority.example,2026:list</dvbisd-t:ServiceListId>
+    </ServiceListOffering>
+    <ServiceListOffering>
+      <dvbisd-t:ServiceListName>Mirrored list</dvbisd-t:ServiceListName>
+      <dvbisd-t:ServiceListURI contentType="application/vnd.dvb.dvbisl+xml">
+        <dvbisd-t:URI>https://a.example/list.xml</dvbisd-t:URI>
+      </dvbisd-t:ServiceListURI>
+      <dvbisd-t:ServiceListURI contentType="application/vnd.dvb.dvbisl+xml">
+        <dvbisd-t:URI>https://b.example/list.xml</dvbisd-t:URI>
+      </dvbisd-t:ServiceListURI>
+      <dvbisd-t:Delivery>
+        <dvbisd-t:DASHDelivery required="true"/>
+      </dvbisd-t:Delivery>
+      <dvbisd-t:RelatedMaterial>
+        <tva:HowRelated href="urn:dvb:metadata:cs:HowRelatedCS:2021:1001.1"/>
+        <tva:MediaLocator><tva:MediaUri contentType="image/png">https://a.example/logo.png</tva:MediaUri></tva:MediaLocator>
+      </dvbisd-t:RelatedMaterial>
+      <dvbisd-t:ServiceListId>tag:a.example,2026:list</dvbisd-t:ServiceListId>
+    </ServiceListOffering>
+  </ProviderOffering>
+</ServiceListEntryPoints>

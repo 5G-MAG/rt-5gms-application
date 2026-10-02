@@ -12,6 +12,12 @@ android {
         targetSdk 34
         versionCode 1
         versionName "0.1.0"
+
+        // Defaults shown in the settings until the user changes them: the demo laptop on the Wi-Fi.
+        buildConfigField 'String', 'DEFAULT_SERVICE_LIST_URL',
+            "\"${providers.gradleProperty('dvbiServiceListUrl').getOrElse('http://192.168.1.202:4000/service-list.xml')}\""
+        buildConfigField 'String', 'DEFAULT_REGISTRY_URL',
+            "\"${providers.gradleProperty('dvbiRegistryUrl').getOrElse('http://192.168.1.202:7000/query')}\""
     }
 
     buildFeatures {

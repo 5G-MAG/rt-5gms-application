@@ -30,6 +30,30 @@
                 android:textAppearance="?attr/textAppearanceHeadline6" />
 
             <TextView
+                android:id="@+id/nowNextText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/parentalText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@color/warning_bg"
+                android:padding="8dp"
+                android:textColor="@color/warning_fg"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/scheduleButton"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/schedule"
+                android:visibility="gone" />
+
+            <TextView
                 android:id="@+id/fiveGBadge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

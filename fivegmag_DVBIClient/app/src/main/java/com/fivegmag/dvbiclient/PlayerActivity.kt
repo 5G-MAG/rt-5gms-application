@@ -17,6 +17,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
@@ -27,12 +28,16 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import java.text.DateFormat
+import java.util.Date
+import com.fivegmag.dvbiclient.guide.GuideParser
 import com.fivegmag.dvbiclient.mbms.IMbmsStreamingClient
 import com.fivegmag.dvbiclient.mbms.MbmsReception
 import com.fivegmag.dvbiclient.mbms.MbmsUrl
 import com.fivegmag.dvbiclient.servicelist.Delivery
 import com.fivegmag.dvbiclient.servicelist.Service
 import com.fivegmag.dvbiclient.servicelist.ServiceInstance
+import com.fivegmag.dvbiclient.servicelist.ServiceListRules
 import com.fivegmag.dvbiclient.servicelist.ServiceSelection
 
 const val TAG_PLAYER = "DVB-I Player"
@@ -53,6 +58,9 @@ class PlayerActivity : AppCompatActivity() {
     private var current: Int? = null
     private val handler = Handler(Looper.getMainLooper())
     private val reevaluate = Runnable { onScheduledHoursChanged() }
+    private lateinit var settings: Settings
+    private var serviceAge: Int? = null
+    private var programmeAge: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,6 +79,52 @@ class PlayerActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.serviceTitle).text = service.name
         showFiveG(service)
         selection = ServiceSelection(service, DeviceCapabilities.current(clientPackages()))
+        settings = Settings(this)
+        serviceAge = ServiceListRules.minimumAgeFor(service.ratings, settings.country.ifEmpty { null })
+        if (service.guide != null) {
+            findViewById<Button>(R.id.scheduleButton).also {
+                it.visibility = View.VISIBLE
+                it.setOnClickListener { startActivity(ScheduleActivity.intent(this, service.uid)) }
+            }
+        }
+    }
+
+    // Clause 5.5.28: the content guide's rating of the programme on air takes precedence over the
+    // service's ParentalRating; until it is known the service's applies.
+    private fun parentalAllows(): Boolean = !ServiceListRules.restricted(settings.parentalThreshold, serviceAge, programmeAge)
+
+    private fun showParental() {
+        val text = findViewById<TextView>(R.id.parentalText)
+        if (parentalAllows()) {
+            text.visibility = View.GONE
+        } else {
+            text.visibility = View.VISIBLE
+            text.text = "${getString(R.string.restricted)}: rated ${programmeAge ?: serviceAge}+" +
+                (if (programmeAge != null) " (programme rating)" else " (service rating)")
+        }
+    }
+
+    // Now/next of clause 6.5.3.1, which also gives the programme's rating.
+    private fun loadNowNext(service: Service) {
+        if (service.guide == null) return
+        DvbiRepository.background({ DvbiRepository.guide.nowNext(service) }) { r ->
+            val events = r.value ?: return@background
+            val (now, next) = GuideParser.nowNext(events, System.currentTimeMillis())
+            val fmt = DateFormat.getTimeInstance(DateFormat.SHORT)
+            findViewById<TextView>(R.id.nowNextText).text = listOfNotNull(
+                now?.let { "Now: ${it.title} (${fmt.format(Date(it.start))} to ${fmt.format(Date(it.end))})" },
+                next?.let { "Next: ${it.title} at ${fmt.format(Date(it.start))}" },
+            ).joinToString("\n")
+            val wasAllowed = parentalAllows()
+            programmeAge = now?.info?.let { ServiceListRules.minimumAgeFor(it.ratings, settings.country.ifEmpty { null }) }
+            showParental()
+            val sel = selection ?: return@background
+            if (wasAllowed && !parentalAllows()) {
+                player?.stop()
+            } else if (!wasAllowed && parentalAllows()) {
+                play(sel.select(System.currentTimeMillis()))
+            }
+        }
     }
 
     /** Subscription packages the user associated this client with; none until settings set them. */
@@ -87,7 +141,9 @@ class PlayerActivity : AppCompatActivity() {
         })
         playerView.player = exo
         player = exo
-        play(sel.select(System.currentTimeMillis()))
+        showParental()
+        if (parentalAllows()) play(sel.select(System.currentTimeMillis()))
+        loadNowNext(sel.service)
     }
 
     override fun onStop() {
