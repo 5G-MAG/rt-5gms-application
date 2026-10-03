@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+License: 5G-MAG Public License (v1.0)
+Author: Jordi J. Gimenez (5G-MAG)
+Copyright: (C) 2026 5G-MAG Association
+For full license terms please see the LICENSE file distributed with this
+program. If this file is missing then the license can be retrieved from
+https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
+
+A now/next response (clauses 6.5.3.1 and 6.5.4.4) in the form rt-dvb-i-application-provider
+answers: the later programme is listed first, so the order must come from the structural CRIDs.
+-->
+<TVAMain xmlns="urn:tva:metadata:2024" xmlns:mpeg7="urn:tva:mpeg7:2008" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en">
+  <ProgramDescription>
+    <ProgramInformationTable>
+      <ProgramInformation programId="crid://example.com/prog/later">
+        <BasicDescription>
+          <Title type="main">Showcase Highlights</Title>
+          <Synopsis length="short">Short.</Synopsis>
+          <Synopsis length="medium">The shortest tour of the stand, end to end.</Synopsis>
+          <ParentalGuidance><mpeg7:MinimumAge>0</mpeg7:MinimumAge></ParentalGuidance>
+        </BasicDescription>
+        <MemberOf xsi:type="MemberOfType" crid="crid://dvb.org/metadata/schedules/now-next/later" index="1"/>
+      </ProgramInformation>
+      <ProgramInformation programId="crid://example.com/prog/now">
+        <BasicDescription>
+          <Title type="main">Inside the Reference Tools</Title>
+          <Synopsis length="medium">A walk through the open source implementations behind the demos.</Synopsis>
+          <Genre href="urn:tva:metadata:cs:ContentCS:2011:3.1.3"><Name xml:lang="en">Factual</Name></Genre>
+          <ParentalGuidance>
+            <mpeg7:MinimumAge>12</mpeg7:MinimumAge>
+          </ParentalGuidance>
+          <ParentalGuidance>
+            <mpeg7:MinimumAge>16</mpeg7:MinimumAge>
+            <CountryCodes>DEU,AUT</CountryCodes>
+          </ParentalGuidance>
+          <RelatedMaterial>
+            <HowRelated href="urn:tva:metadata:cs:HowRelatedCS:2012:19"/>
+            <MediaLocator><MediaUri contentType="image/png">http://192.168.1.202:4000/logos/now.png</MediaUri></MediaLocator>
+          </RelatedMaterial>
+        </BasicDescription>
+        <MemberOf xsi:type="MemberOfType" crid="crid://dvb.org/metadata/schedules/now-next/now" index="1"/>
+        <MemberOf xsi:type="MemberOfType" crid="crid://example.com/series/1" index="2"/>
+      </ProgramInformation>
+    </ProgramInformationTable>
+    <GroupInformationTable>
+      <GroupInformation groupId="crid://dvb.org/metadata/schedules/now-next/now" ordered="true" numOfItems="1">
+        <GroupType xsi:type="ProgramGroupTypeType" value="otherCollection"/>
+        <BasicDescription/>
+      </GroupInformation>
+      <GroupInformation groupId="crid://dvb.org/metadata/schedules/now-next/later" ordered="true" numOfItems="1">
+        <GroupType xsi:type="ProgramGroupTypeType" value="otherCollection"/>
+        <BasicDescription/>
+      </GroupInformation>
+    </GroupInformationTable>
+    <ProgramLocationTable>
+      <Schedule serviceIDRef="tag:sample,2024:service:a" start="2026-10-02T21:30:00Z" end="2026-10-02T23:00:00Z">
+        <ScheduleEvent>
+          <Program crid="crid://example.com/prog/later"/>
+          <PublishedStartTime>2026-10-02T22:15:00Z</PublishedStartTime>
+          <PublishedDuration>PT45M</PublishedDuration>
+        </ScheduleEvent>
+        <ScheduleEvent>
+          <Program crid="crid://example.com/prog/now"/>
+          <PublishedStartTime>2026-10-02T21:30:00Z</PublishedStartTime>
+          <PublishedDuration>PT45M</PublishedDuration>
+          <ActualStartTime>2026-10-02T21:32:00Z</ActualStartTime>
+          <ActualEndTime>2026-10-02T22:16:00Z</ActualEndTime>
+        </ScheduleEvent>
+      </Schedule>
+    </ProgramLocationTable>
+  </ProgramDescription>
+</TVAMain>

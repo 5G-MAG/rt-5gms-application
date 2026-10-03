@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+License: 5G-MAG Public License (v1.0)
+Author: Jordi J. Gimenez (5G-MAG)
+Copyright: (C) 2026 5G-MAG Association
+For full license terms please see the LICENSE file distributed with this
+program. If this file is missing then the license can be retrieved from
+https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
+
+Copied from rt-dvb-i-application test/fixtures/service-list.xml.
+-->
+<ServiceList
+  xmlns="urn:dvb:metadata:servicediscovery:2024"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:hls="vnd:apple:mpegurl"
+  xmlns:tva="urn:tva:metadata:2024"
+  xmlns:dvbisd-t="urn:dvb:metadata:servicediscovery-types:2023"
+  id="tag:dvbi.example,2024:servicelist:default"
+  version="42" xml:lang="en">
+
+  <Name>Compliance Sample List</Name>
+  <ProviderName>Sample Provider</ProviderName>
+  <LanguageList>
+    <Language>en</Language>
+    <Language>fr</Language>
+  </LanguageList>
+  <RegionList version="42">
+    <Region regionID="GBR-ENG" countryCodes="GBR" xml:lang="en">
+      <RegionName>GBR-ENG</RegionName>
+    </Region>
+  </RegionList>
+
+  <LCNTableList>
+    <LCNTable>
+      <TargetRegion>GBR-ENG</TargetRegion>
+      <LCN channelNumber="1" serviceRef="tag:sample,2024:service:a"/>
+    </LCNTable>
+    <LCNTable>
+      <LCN channelNumber="2" serviceRef="tag:sample,2024:service:b"/>
+    </LCNTable>
+  </LCNTableList>
+
+  <ContentGuideSourceList>
+    <ContentGuideSource CGSID="sample-epg">
+      <ProviderName>Sample EPG</ProviderName>
+      <ScheduleInfoEndpoint contentType="application/xml">
+        <dvbisd-t:URI>https://example.com/epg/schedule</dvbisd-t:URI>
+      </ScheduleInfoEndpoint>
+      <ProgramInfoEndpoint contentType="application/xml">
+        <dvbisd-t:URI>https://example.com/epg/nownext</dvbisd-t:URI>
+      </ProgramInfoEndpoint>
+    </ContentGuideSource>
+    <ContentGuideSource CGSID="epg-svc-b">
+      <ProviderName>Beta Media</ProviderName>
+      <ScheduleInfoEndpoint contentType="application/xml">
+        <dvbisd-t:URI>https://epg.example.com/beta</dvbisd-t:URI>
+      </ScheduleInfoEndpoint>
+    </ContentGuideSource>
+  </ContentGuideSourceList>
+
+  <!-- Alpha One -->
+  <Service version="3">
+    <UniqueIdentifier>tag:sample,2024:service:a</UniqueIdentifier>
+    <ServiceInstance priority="1">
+      <DisplayName>Alpha DASH multi-DRM</DisplayName>
+      <ContentProtection>
+        <DRMSystemId encryptionScheme="cenc">urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed</DRMSystemId>
+      </ContentProtection>
+      <ContentProtection>
+        <DRMSystemId encryptionScheme="cenc">urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95</DRMSystemId>
+      </ContentProtection>
+      <ContentAttributes>
+        <AccessibilityAttributes>
+          <tva:SubtitleAttributes>
+            <tva:Carriage href="urn:tva:metadata:cs:SubtitleCarriageCS:2023:3"/>
+            <tva:Coding href="urn:tva:metadata:cs:SubtitleCodingFormatCS:2023:2.1.3"/>
+            <tva:SubtitleLanguage>en</tva:SubtitleLanguage>
+            <tva:Purpose href="urn:tva:metadata:cs:SubtitlePurposeCS:2023:2"/>
+            <tva:SuitableForTTS>false</tva:SuitableForTTS>
+          </tva:SubtitleAttributes>
+          <tva:AudioDescriptionAttributes><tva:AudioAttributes/></tva:AudioDescriptionAttributes>
+        </AccessibilityAttributes>
+      </ContentAttributes>
+      <Availability>
+        <Period validFrom="2026-01-01T00:00:00Z" validTo="2026-12-31T23:59:59Z"/>
+      </Availability>
+      <SubscriptionPackage>Premium</SubscriptionPackage>
+      <DASHDeliveryParameters>
+        <UriBasedLocation contentType="application/dash+xml">
+          <dvbisd-t:URI>https://cdn.example.com/alpha/manifest.mpd</dvbisd-t:URI>
+        </UriBasedLocation>
+      </DASHDeliveryParameters>
+    </ServiceInstance>
+    <ServiceInstance priority="2">
+      <DisplayName>Alpha HLS</DisplayName>
+      <ContentProtection>
+        <DRMSystemId encryptionScheme="cbcs">urn:uuid:94ce86fb-07ff-4f43-adb8-93d2fa968ca2</DRMSystemId>
+      </ContentProtection>
+      <ContentAttributes>
+        <AccessibilityAttributes>
+          <tva:SubtitleAttributes>
+            <tva:Carriage href="urn:tva:metadata:cs:SubtitleCarriageCS:2023:1"/>
+            <tva:Coding href="urn:tva:metadata:cs:SubtitleCodingFormatCS:2023:2.1.3"/>
+            <tva:SubtitleLanguage>en</tva:SubtitleLanguage>
+            <tva:Purpose href="urn:tva:metadata:cs:SubtitlePurposeCS:2023:2"/>
+            <tva:SuitableForTTS>false</tva:SuitableForTTS>
+          </tva:SubtitleAttributes>
+        </AccessibilityAttributes>
+      </ContentAttributes>
+      <Availability>
+        <Period validFrom="2026-01-01T00:00:00Z" validTo="2026-12-31T23:59:59Z"/>
+      </Availability>
+      <SubscriptionPackage>Premium</SubscriptionPackage>
+      <OtherDeliveryParameters extensionName="vnd.apple.mpegurl" xsi:type="hls:m3u8RefType">
+        <hls:UriBasedLocation contentType="application/vnd.apple.mpegurl">
+          <dvbisd-t:URI>https://cdn.example.com/alpha/master.m3u8</dvbisd-t:URI>
+        </hls:UriBasedLocation>
+      </OtherDeliveryParameters>
+    </ServiceInstance>
+    <TargetRegion>GBR-ENG</TargetRegion>
+    <ServiceName xml:lang="en">Alpha One</ServiceName>
+    <ServiceName xml:lang="fr">Alpha Un</ServiceName>
+    <ProviderName>Alpha Media</ProviderName>
+    <RelatedMaterial>
+      <tva:HowRelated href="urn:dvb:metadata:cs:HowRelatedCS:2021:1001.2"/>
+      <tva:MediaLocator>
+        <tva:MediaUri contentType="image/svg+xml">https://example.com/logos/svc-a</tva:MediaUri>
+      </tva:MediaLocator>
+    </RelatedMaterial>
+    <RelatedMaterial>
+      <tva:HowRelated href="urn:dvb:metadata:cs:LinkedApplicationCS:2019:1.1"/>
+      <tva:MediaLocator>
+        <tva:MediaUri contentType="application/vnd.dvb.ait+xml">https://app.example.com/alpha</tva:MediaUri>
+      </tva:MediaLocator>
+    </RelatedMaterial>
+    <ServiceGenre href="urn:tva:metadata:cs:ContentCS:2011:3.1.1">
+      <tva:Name xml:lang="en">News</tva:Name>
+    </ServiceGenre>
+    <ServiceType href="urn:dvb:metadata:cs:ServiceTypeCS:2019:linear"/>
+    <ContentGuideSourceRef>sample-epg</ContentGuideSourceRef>
+    <ContentGuideServiceRef>sample-epg</ContentGuideServiceRef>
+    <ParentalRating>
+      <MinimumAge>12</MinimumAge>
+    </ParentalRating>
+  </Service>
+  <!-- Beta Radio -->
+  <Service version="1">
+    <UniqueIdentifier>tag:sample,2024:service:b</UniqueIdentifier>
+    <ServiceInstance priority="1">
+      <DisplayName>Beta multicast</DisplayName>
+      <MulticastTSDeliveryParameters>
+        <IPMulticastAddress Address="239.0.0.1" Port="5004"/>
+      </MulticastTSDeliveryParameters>
+    </ServiceInstance>
+    <ServiceInstance priority="2">
+      <DisplayName>Beta HLS</DisplayName>
+      <OtherDeliveryParameters extensionName="vnd.apple.mpegurl" xsi:type="hls:m3u8RefType">
+        <hls:UriBasedLocation contentType="application/vnd.apple.mpegurl">
+          <dvbisd-t:URI>https://cdn.example.com/beta/master.m3u8</dvbisd-t:URI>
+        </hls:UriBasedLocation>
+      </OtherDeliveryParameters>
+    </ServiceInstance>
+    <ServiceName>Beta Radio</ServiceName>
+    <ProviderName>Beta Media</ProviderName>
+    <RelatedMaterial>
+      <tva:HowRelated href="urn:dvb:metadata:cs:HowRelatedCS:2021:1001.2"/>
+      <tva:MediaLocator>
+        <tva:MediaUri contentType="image/svg+xml">https://example.com/logos/svc-b</tva:MediaUri>
+      </tva:MediaLocator>
+    </RelatedMaterial>
+    <ServiceGenre href="urn:tva:metadata:cs:ContentCS:2011:3.6">
+      <tva:Name xml:lang="en">Music</tva:Name>
+    </ServiceGenre>
+    <ServiceType href="urn:dvb:metadata:cs:ServiceTypeCS:2019:linear-radio"/>
+    <ContentGuideSourceRef>epg-svc-b</ContentGuideSourceRef>
+    <ContentGuideServiceRef>epg-svc-b</ContentGuideServiceRef>
+  </Service>
+  <!-- Gamma TV: broadcast-only, no IP delivery -->
+  <Service version="1">
+    <UniqueIdentifier>tag:sample,2024:service:c</UniqueIdentifier>
+    <ServiceInstance priority="1">
+      <DisplayName>Gamma DVB-T</DisplayName>
+      <DVBTDeliveryParameters>
+        <DVBTriplet origNetId="1" tsId="2" serviceId="3"/>
+      </DVBTDeliveryParameters>
+    </ServiceInstance>
+    <ServiceName>Gamma TV</ServiceName>
+    <ProviderName>Gamma Media</ProviderName>
+    <ServiceType href="urn:dvb:metadata:cs:ServiceTypeCS:2019:linear"/>
+  </Service>
+
+</ServiceList>
