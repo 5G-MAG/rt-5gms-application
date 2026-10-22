@@ -130,16 +130,23 @@ reference point M8 using an application-specific format.
 
 ### M8 endpoint configuration
 
-The URL to the M8 endpoints can be configured in `src/main/assets/m8config.properties`:
+The URL to the M8 endpoints can be configured in `src/main/assets/app_config.json`:
 
 ```` 
-<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
-<properties>
-   <entry key="m8LocalSingleMedia">m8/config_single_media.json</entry>
-   <entry key="m8LocalMultiMedia">m8/config_multi_media.json</entry>
-   <entry key="m85GMAGHost">https://rt.5g-mag.com/</entry>
-   <entry key="m8LocalDummyHost">http://10.147.67.179:3003/m8/</entry>
-</properties>
+{
+  "sources": [
+    {
+      "name": "5G-MAG online reference",
+      "m8Url": "https://rt.5g-mag.com/m8.json",
+      "metadataUrl": "https://rt.5g-mag.com/metadata.json"
+    },
+    {
+      "name": "Docker",
+      "m8Url": "http://<YOUR_IP_HERE>:8000/m8.json",
+      "metadataUrl": "http://<YOUR_IP_HERE>:3344/metadata.json"
+    }
+  ]
+}
 ````
 
 Each entry needs to have a unique `key` that is used to populate the selection spinner in the Main
