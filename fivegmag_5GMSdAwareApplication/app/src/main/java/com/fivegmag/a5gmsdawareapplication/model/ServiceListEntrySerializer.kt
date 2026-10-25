@@ -40,7 +40,7 @@ object ServiceListEntrySerializer {
         }
 
         val jsonObject = buildJsonObject {
-            put("provisioningSessionId", entry.provisioningSessionId)
+            put("externalServiceId", entry.externalServiceId)
             put("name", entry.name)
             put("entryPoints", entryPoints)
         }

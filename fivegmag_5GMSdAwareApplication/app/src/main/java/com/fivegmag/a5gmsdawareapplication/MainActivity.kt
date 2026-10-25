@@ -559,8 +559,8 @@ class MainActivity : AppCompatActivity() {
             val itemAsJsonObject = Json.parseToJsonElement(serviceListEntry.toString()).jsonObject
             val name: String =
                 replaceDoubleTicks(itemAsJsonObject["name"].toString())
-            val provisioningSessionId =
-                replaceDoubleTicks(itemAsJsonObject["provisioningSessionId"].toString())
+            val externalServiceId =
+                replaceDoubleTicks(itemAsJsonObject["externalServiceId"].toString())
 
             val entryPoints = ArrayList<EntryPoint>()
             val entryPointList = itemAsJsonObject["entryPoints"]?.jsonArray
@@ -589,7 +589,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             val entry = ServiceListEntry(
-                provisioningSessionId,
+                externalServiceId,
                 name,
                 entryPoints
             )

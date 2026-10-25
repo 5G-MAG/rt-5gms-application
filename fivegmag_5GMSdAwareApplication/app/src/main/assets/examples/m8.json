@@ -1,8 +1,8 @@
 {
-  "m5BaseUrl": "http://192.168.178.56:7778/3gpp-m5/v2/",
+  "m5BaseUrl": "http://192.168.178.56:7778/3gpp-maf-session-handling/v1/",
   "serviceList": [
     {
-      "provisioningSessionId": "916a8140-4abe-41f1-a03b-7dc231beba20",
+      "externalServiceId": "916a8140-4abe-41f1-a03b-7dc231beba20",
       "name": "VoD: BBC - Big Buck Bunny",
       "entryPoints": [
         {
@@ -15,7 +15,7 @@
       ]
     },
     {
-      "provisioningSessionId": "916c90de-4abe-41f1-a03b-7dc231beba20",
+      "externalServiceId": "916c90de-4abe-41f1-a03b-7dc231beba20",
       "name": "VoD: Axinom - Tears of Steel",
       "entryPoints": [
         {
@@ -28,7 +28,7 @@
       ]
     },
     {
-      "provisioningSessionId": "916e88c6-4abe-41f1-a03b-7dc231beba20",
+      "externalServiceId": "916e88c6-4abe-41f1-a03b-7dc231beba20",
       "name": "Live: 5G-MAG LiveSim2",
       "entryPoints": [
         {

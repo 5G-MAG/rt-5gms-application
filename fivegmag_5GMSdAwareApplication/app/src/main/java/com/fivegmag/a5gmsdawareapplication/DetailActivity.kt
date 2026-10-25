@@ -10,6 +10,7 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 package com.fivegmag.a5gmsdawareapplication
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -20,7 +21,10 @@ import androidx.media3.ui.PlayerView
 import coil.load
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
+import com.fivegmag.a5gmscommonlibrary.helpers.SessionHandlerBundleKeys
+import com.fivegmag.a5gmscommonlibrary.helpers.SessionHandlerEvents
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
+import com.fivegmag.a5gmsmediastreamhandler.service.GeneralSessionListener
 import com.fivegmag.a5gmsmediastreamhandler.player.exoplayer.ExoPlayerAdapter
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.serialization.json.*
@@ -41,6 +45,10 @@ class DetailActivity : AppCompatActivity() {
         const val EXTRA_MEDIA_TYPE = "detail_media_type"
         const val EXTRA_SERVICE_LIST_ENTRY_JSON = "detail_service_list_entry_json"
         const val EXTRA_M5_BASE_URL = "detail_m5_base_url"
+        const val EXTRA_USE_CREATE_MEDIA_DELIVERY_SESSION = "detail_use_create_media_delivery_session"
+        const val EXTRA_ACCESS_TOKEN = "detail_access_token"
+        const val EXTRA_SECOND_SERVICE_ID = "detail_second_service_id"
+        const val EXTRA_SECOND_PLAYS = "detail_second_plays"
     }
 
     private lateinit var posterImage: ImageView
@@ -163,15 +171,105 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
+    // The answers and notification events of the general client API (TS 26.510 V19.2.0 clause 11.2)
+    private var mediaDeliverySessionIdentifier: String? = null
+    private val generalSessionListener = object : GeneralSessionListener {
+        override fun onMediaDeliverySessionCreated(mediaDeliverySessionIdentifier: String?, sessionHandlingState: String?) {
+            Log.i("5GMS-App", "createMediaDeliverySession: [$mediaDeliverySessionIdentifier] $sessionHandlingState")
+        }
+
+        override fun onSessionStatus(mediaDeliverySessionIdentifier: String?, contentIdentifier: String?, sessionHandlingState: String?) {
+            Log.i("5GMS-App", "status of [$mediaDeliverySessionIdentifier]: content [$contentIdentifier] $sessionHandlingState")
+        }
+
+        override fun onConsumptionReportingStatus(mediaDeliverySessionIdentifier: String?, consumptionReport: String?) {
+            Log.i("5GMS-App", "consumption report of [$mediaDeliverySessionIdentifier]: $consumptionReport")
+        }
+
+        override fun onMetricsReportingStatus(
+            mediaDeliverySessionIdentifier: String?,
+            provisioningSessionId: String?,
+            metricsReportingConfigurationId: String?,
+            scheme: String?,
+            metricsReport: String?
+        ) {
+            Log.i("5GMS-App", "last metrics report of [$mediaDeliverySessionIdentifier]: $provisioningSessionId $metricsReportingConfigurationId $scheme ${metricsReport?.length}")
+        }
+
+        override fun onNotification(event: String, payload: Bundle) {
+            val id = payload.getString(SessionHandlerBundleKeys.MEDIA_DELIVERY_SESSION_IDENTIFIER)
+            Log.i("5GMS-App", "notification $event [$id] " + payload.keySet().filter { it != SessionHandlerBundleKeys.EVENT && it != SessionHandlerBundleKeys.MEDIA_DELIVERY_SESSION_IDENTIFIER }.joinToString { k -> k + "=" + payload.get(k) })
+            if (event == SessionHandlerEvents.ConsumptionReporting.NEW_CONSUMPTION_REPORT && id != null) {
+                mediaSessionHandlerAdapter?.getConsumptionReportingStatus(id)
+            }
+            if (event == SessionHandlerEvents.MetricsReporting.NEW_METRICS_REPORT && id != null) {
+                mediaSessionHandlerAdapter?.getMetricsReportingStatus(id)
+            }
+            if (event == SessionHandlerEvents.Notification.SESSION_HANDLING_ACTIVATED && id != null) {
+                mediaDeliverySessionIdentifier = id
+                mediaSessionHandlerAdapter?.getSessionStatus(id)
+            }
+        }
+    }
+
+    // A second media delivery session of the same application, with a Media Stream Handler instance of its own (TS 26.510 V19.2.0
+    // clause 11.2.2.1: every call of createMediaDeliverySession() makes a new session)
+    private var secondAdapter: MediaSessionHandlerAdapter? = null
+    private var secondSessionIdentifier: String? = null
+
+    private fun startSecondSession(serviceId: String) {
+        val second = MediaSessionHandlerAdapter()
+        secondAdapter = second
+        second.initialize(this) {
+            second.generalSessionListener = object : GeneralSessionListener {
+                override fun onMediaDeliverySessionCreated(mediaDeliverySessionIdentifier: String?, sessionHandlingState: String?) {
+                    Log.i("5GMS-App2", "second session [$mediaDeliverySessionIdentifier] $sessionHandlingState")
+                    secondSessionIdentifier = mediaDeliverySessionIdentifier
+                }
+
+                override fun onSessionStatus(mediaDeliverySessionIdentifier: String?, contentIdentifier: String?, sessionHandlingState: String?) {
+                    Log.i("5GMS-App2", "status of the second session [$mediaDeliverySessionIdentifier]: $sessionHandlingState")
+                }
+
+                override fun onNotification(event: String, payload: Bundle) {
+                    Log.i("5GMS-App2", "notification $event [" + payload.getString(SessionHandlerBundleKeys.MEDIA_DELIVERY_SESSION_IDENTIFIER) + "]")
+                }
+            }
+            second.setM5Endpoint(m5BaseUrl)
+            if (intent.getBooleanExtra(EXTRA_SECOND_PLAYS, false)) {
+                // a second player in the same process, with a view of its own that is not on the screen
+                second.getExoPlayerAdapter().initialize(androidx.media3.ui.PlayerView(this), this)
+                val locator = deserializeServiceListEntry(serviceListEntryJson).entryPoints?.firstOrNull()?.locator
+                second.createMediaDeliverySession(serviceId, "second", locator)
+            } else {
+                second.createMediaDeliverySession(serviceId)
+            }
+        }
+    }
+
     private fun onConnectionToMediaSessionHandlerEstablished() {
         val adapter = mediaSessionHandlerAdapter ?: return
+        intent.getStringExtra(EXTRA_SECOND_SERVICE_ID)?.let { startSecondSession(it) }
+        adapter.generalSessionListener = generalSessionListener
         val playerAdapter = adapter.getExoPlayerAdapter()
         exoPlayerAdapter = playerAdapter
         playerAdapter.initialize(playerView, this)
 
         val serviceListEntry = deserializeServiceListEntry(serviceListEntryJson)
         adapter.setM5Endpoint(m5BaseUrl)
-        adapter.initializePlaybackByServiceListEntry(serviceListEntry)
+        if (intent.getBooleanExtra(EXTRA_USE_CREATE_MEDIA_DELIVERY_SESSION, false)) {
+            // the explicit method of TS 26.510 V19.2.0 clause 11.2.2.1
+            adapter.createMediaDeliverySession(
+                serviceListEntry.externalServiceId,
+                serviceListEntry.name,
+                serviceListEntry.entryPoints?.firstOrNull()?.locator,
+                null,
+                // the access token that the Media Session Handler presents to the Media AF at M5, if the Media AF asks for one
+                intent.getStringExtra(EXTRA_ACCESS_TOKEN)
+            )
+        } else {
+            adapter.initializePlaybackByServiceListEntry(serviceListEntry)
+        }
     }
 
     override fun onStart() {
@@ -195,6 +293,14 @@ class DetailActivity : AppCompatActivity() {
                 exoPlayerAdapter?.stop()
             } catch (_: Exception) {
             }
+            mediaDeliverySessionIdentifier?.let { mediaSessionHandlerAdapter?.destroyMediaDeliverySession(it) }
+            mediaDeliverySessionIdentifier = null
+            // destroying the first session leaves the second one active; the second is destroyed afterwards
+            secondSessionIdentifier?.let { id ->
+                secondAdapter?.getSessionStatus(id)
+                secondAdapter?.destroyMediaDeliverySession(id)
+            }
+            secondSessionIdentifier = null
             mediaSessionHandlerAdapter?.reset()
             isPlaying = false
         }
@@ -202,8 +308,8 @@ class DetailActivity : AppCompatActivity() {
 
     private fun deserializeServiceListEntry(json: String): ServiceListEntry {
         val jsonObject = Json.parseToJsonElement(json).jsonObject
-        val provisioningSessionId =
-            jsonObject["provisioningSessionId"]?.jsonPrimitive?.content ?: ""
+        val externalServiceId =
+            jsonObject["externalServiceId"]?.jsonPrimitive?.content ?: ""
         val name = jsonObject["name"]?.jsonPrimitive?.content ?: ""
 
         val entryPoints = ArrayList<EntryPoint>()
@@ -224,6 +330,6 @@ class DetailActivity : AppCompatActivity() {
             }
         }
 
-        return ServiceListEntry(provisioningSessionId, name, entryPoints)
+        return ServiceListEntry(externalServiceId, name, entryPoints)
     }
 }
