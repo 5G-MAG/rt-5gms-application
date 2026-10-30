@@ -299,6 +299,16 @@ Version 1.0 Dated 22/07/2021]]></string>
 
     <!-- Player page -->
     <string name="player_title">Now Playing</string>
+    <string name="policy_panel_heading">Policy and network assistance</string>
+    <string name="policy_points">Operation points</string>
+    <string name="policy_bdt">Background transfer</string>
+    <string name="policy_activate">Activate</string>
+    <string name="policy_deactivate">Deactivate</string>
+    <string name="policy_status">Status</string>
+    <string name="policy_recommendation">Bit rate</string>
+    <string name="policy_group_policy">DYNAMIC POLICY</string>
+    <string name="policy_group_assistance">NETWORK ASSISTANCE</string>
+    <string name="policy_boost">Delivery boost</string>
 
     <!-- Settings page -->
     <string name="settings_title">Settings</string>

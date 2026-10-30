@@ -151,6 +151,171 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/descriptionHeading" />
 
+            <!-- The Dynamic Policy and Network Assistance client APIs (TS 26.510 clauses 11.3, 11.4); shown once the media delivery session is active -->
+            <LinearLayout
+                android:id="@+id/policyPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="28dp"
+                android:layout_marginEnd="20dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/detailDescription">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/policy_panel_heading"
+                    android:textColor="@color/fivegmag_blue"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/policy_group_policy"
+                    android:textColor="@color/on_surface_secondary"
+                    android:textSize="12sp" />
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2">
+
+                    <Button
+                        android:id="@+id/policyPointsButton"
+                        style="@style/SettingsButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:letterSpacing="0"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/policy_points"
+                        android:textSize="13sp" />
+                    <Button
+                        android:id="@+id/policyBdtButton"
+                        style="@style/SettingsButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:letterSpacing="0"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/policy_bdt"
+                        android:textSize="13sp" />
+                    <Button
+                        android:id="@+id/policyActivateButton"
+                        style="@style/SettingsButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:letterSpacing="0"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/policy_activate"
+                        android:textSize="13sp" />
+                    <Button
+                        android:id="@+id/policyDeactivateButton"
+                        style="@style/SettingsButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:letterSpacing="0"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/policy_deactivate"
+                        android:textSize="13sp" />
+                    <Button
+                        android:id="@+id/policyStatusButton"
+                        style="@style/SettingsButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:letterSpacing="0"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/policy_status"
+                        android:textSize="13sp" />
+                </GridLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/policy_group_assistance"
+                    android:textColor="@color/on_surface_secondary"
+                    android:textSize="12sp" />
+
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2">
+
+                    <Button
+                        android:id="@+id/policyRecommendationButton"
+                        style="@style/SettingsButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:letterSpacing="0"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/policy_recommendation"
+                        android:textSize="13sp" />
+                    <Button
+                        android:id="@+id/policyBoostButton"
+                        style="@style/SettingsButtonStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_columnWeight="1"
+                        android:layout_gravity="fill"
+                        android:letterSpacing="0"
+                        android:minHeight="48dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/policy_boost"
+                        android:textSize="13sp" />
+                </GridLayout>
+
+                <TextView
+                    android:id="@+id/policyLog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:background="@color/card_dark"
+                    android:fontFamily="monospace"
+                    android:minHeight="72dp"
+                    android:padding="12dp"
+                    android:textColor="@color/on_surface_secondary"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

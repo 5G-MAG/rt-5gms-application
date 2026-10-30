@@ -20,11 +20,20 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import coil.load
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
+import com.fivegmag.a5gmscommonlibrary.models.StreamingAccess
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmscommonlibrary.helpers.SessionHandlerBundleKeys
 import com.fivegmag.a5gmscommonlibrary.helpers.SessionHandlerEvents
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
+import com.fivegmag.a5gmscommonlibrary.models.DynamicPolicyStatus
+import com.fivegmag.a5gmscommonlibrary.models.PolicyTemplateBinding
+import com.fivegmag.a5gmsmediastreamhandler.service.BdtInfoReply
+import com.fivegmag.a5gmsmediastreamhandler.service.BitRateRecommendationReply
+import com.fivegmag.a5gmsmediastreamhandler.service.DeliveryBoostReply
+import com.fivegmag.a5gmsmediastreamhandler.service.DynamicPolicyListener
 import com.fivegmag.a5gmsmediastreamhandler.service.GeneralSessionListener
+import com.fivegmag.a5gmsmediastreamhandler.service.NetworkAssistanceListener
+import com.fivegmag.a5gmsmediastreamhandler.service.PolicyActivationReply
 import com.fivegmag.a5gmsmediastreamhandler.player.exoplayer.ExoPlayerAdapter
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.serialization.json.*
@@ -49,6 +58,13 @@ class DetailActivity : AppCompatActivity() {
         const val EXTRA_ACCESS_TOKEN = "detail_access_token"
         const val EXTRA_SECOND_SERVICE_ID = "detail_second_service_id"
         const val EXTRA_SECOND_PLAYS = "detail_second_plays"
+
+        // The Dynamic Policy and Network Assistance controls (TS 26.510 V19.2.0 clauses 11.3, 11.4): all optional
+        const val EXTRA_SERVICE_OPERATION_POINT = "detail_service_operation_point"
+        const val EXTRA_COMPONENT_REFERENCE = "detail_component_reference"
+        const val EXTRA_ESTIMATED_TRANSFER_VOLUME = "detail_estimated_transfer_volume"
+        const val EXTRA_TARGET_DOWNLINK_BIT_RATE = "detail_target_downlink_bit_rate"
+        const val EXTRA_TARGET_UPLINK_BIT_RATE = "detail_target_uplink_bit_rate"
     }
 
     private lateinit var posterImage: ImageView
@@ -208,8 +224,129 @@ class DetailActivity : AppCompatActivity() {
             if (event == SessionHandlerEvents.Notification.SESSION_HANDLING_ACTIVATED && id != null) {
                 mediaDeliverySessionIdentifier = id
                 mediaSessionHandlerAdapter?.getSessionStatus(id)
+                showPolicyPanel()
+            }
+            if (event == SessionHandlerEvents.Notification.STREAMING_ACCESS_UPDATED && id != null && id == mediaDeliverySessionIdentifier) {
+                // the streaming access has changed: the player is attached to the entry point that the new streaming access offers
+                payload.classLoader = StreamingAccess::class.java.classLoader
+                @Suppress("DEPRECATION")
+                val streamingAccess: StreamingAccess? = payload.getParcelable(SessionHandlerBundleKeys.STREAMING_ACCESS)
+                val next = StreamingAccessUpdate.entryPointToPlay(streamingAccess?.entryPoints)
+                if (next != null && StreamingAccessUpdate.needsReattach(runCatching { exoPlayerAdapter?.getCurrentManifestUri() }.getOrNull(), next)) {
+                    exoPlayerAdapter?.attach(next.locator, next.contentType!!)
+                    exoPlayerAdapter?.preload()
+                    exoPlayerAdapter?.play()
+                }
+            }
+            if (event in policyEvents) {
+                logPolicy(event + " " + payload.keySet().filter { it != SessionHandlerBundleKeys.EVENT && it != SessionHandlerBundleKeys.MEDIA_DELIVERY_SESSION_IDENTIFIER }
+                    .joinToString { k -> k + "=" + payload.get(k) })
             }
         }
+    }
+
+    // The events of tables 11.3.2-2, 11.3.2-3, 11.4.2-2 and 11.4.2-3 are shown in the panel
+    private val policyEvents = setOf(
+        SessionHandlerEvents.DynamicPolicy.POLICY_ACTIVATED,
+        SessionHandlerEvents.DynamicPolicy.POLICY_DEACTIVATED,
+        SessionHandlerEvents.DynamicPolicy.BACKGROUND_DATA_TRANSFER_OPPORTUNITY,
+        SessionHandlerEvents.DynamicPolicy.L4S_ENABLED,
+        SessionHandlerEvents.DynamicPolicy.QOS_MONITORING_ENABLED,
+        SessionHandlerEvents.DynamicPolicy.QOS_MONITORING_RESULTS,
+        SessionHandlerEvents.Error.ERROR_INVALID_SERVICE_OPERATION_POINT,
+        SessionHandlerEvents.Error.ERROR_UNAUTHORISED,
+        SessionHandlerEvents.Error.ERROR_BACKGROUND_DATA_TRANSFER,
+        SessionHandlerEvents.NetworkAssistance.BIT_RATE_RECOMMENDATION,
+        SessionHandlerEvents.Error.ERROR_BIT_RATE_RECOMMENDATION,
+        SessionHandlerEvents.Error.ERROR_DELIVERY_BOOST
+    )
+
+    // The Service Operation Points of the media delivery session; the one that the controls use is that of the intent or the first
+    private var serviceOperationPoints: List<PolicyTemplateBinding> = emptyList()
+    private val policyLines = ArrayDeque<String>()
+
+    private fun selectedServiceOperationPoint(): String? =
+        intent.getStringExtra(EXTRA_SERVICE_OPERATION_POINT) ?: serviceOperationPoints.firstOrNull()?.externalReference
+
+    private fun logPolicy(line: String) {
+        Log.i("5GMS-App", line)
+        policyLines.addLast(line)
+        while (policyLines.size > 14) policyLines.removeFirst()
+        findViewById<TextView>(R.id.policyLog)?.text = policyLines.joinToString("\n")
+    }
+
+    private val dynamicPolicyListener = object : DynamicPolicyListener {
+        override fun onServiceOperationPoints(mediaDeliverySessionId: String?, points: List<PolicyTemplateBinding>) {
+            serviceOperationPoints = points
+            logPolicy("points: " + points.joinToString { "[" + it.externalReference + (if (it.l4SEnablementPreference) " L4S" else "") +
+                (if (it.qoSMonitoringEnablementPreference) " QoSmon" else "") + (if (!it.bdtWindows.isNullOrEmpty()) " BDT" else "") + "]" })
+        }
+
+        override fun onBdtInfo(reply: BdtInfoReply) =
+            logPolicy("getBDTInfo [" + reply.serviceOperationPointReference + "]: " + if (reply.succeeded) "${reply.windowStart} to ${reply.windowEnd}" else "null (" + reply.reason + ")")
+
+        override fun onPolicyActivation(reply: PolicyActivationReply) = logPolicy(
+            "activatePolicy [" + reply.serviceOperationPointReference + "]: " + if (reply.succeeded)
+                "dl ${reply.recommendedDownlinkBitRate} ul ${reply.recommendedUplinkBitRate} windows ${reply.grantedBackgroundDataTransferWindows.size} L4S ${reply.l4SEnabled} QoSmon ${reply.qoSMonitoringEnabled}"
+            else "null (" + reply.reason + ")"
+        )
+
+        override fun onPolicyDeactivation(mediaDeliverySessionId: String?, succeeded: Boolean, reason: String?) {
+            logPolicy("deactivatePolicy: $succeeded" + (reason?.let { " ($it)" } ?: ""))
+            // the policy that the recommendation came with has ended: the player is no longer held to it
+            if (succeeded) limitVideoBitrate(BitRateRecommendationUse.NO_CEILING)
+        }
+
+        override fun onDynamicPolicyStatus(mediaDeliverySessionId: String?, status: DynamicPolicyStatus?) =
+            logPolicy("currentDynamicPolicies: " + (status?.let { "[" + it.serviceOperationPointReference + "] windows ${it.grantedBackgroundDataTransferWindows.size} L4S ${it.l4SEnabled} QoSmon ${it.qoSMonitoringEnabled} results ${it.qoSMonitoringResults}" } ?: "none"))
+    }
+
+    private val networkAssistanceListener = object : NetworkAssistanceListener {
+        override fun onBitRateRecommendation(reply: BitRateRecommendationReply) {
+            logPolicy("requestBitRateRecommendation: " + if (reply.succeeded) "dl ${reply.recommendedDownlinkBitRate} ul ${reply.recommendedUplinkBitRate}" else "null (" + reply.reason + ")")
+            // the player is kept to the representations that fit the recommended bit rate (TS 26.501 clause 4.0.5)
+            val ceiling = if (reply.succeeded) BitRateRecommendationUse.maxVideoBitrate(reply.recommendedDownlinkBitRate) else null
+            if (ceiling != null) limitVideoBitrate(ceiling)
+        }
+
+        override fun onDeliveryBoost(reply: DeliveryBoostReply) =
+            logPolicy("requestDeliveryBoost: ${reply.granted}" + (reply.reason?.let { " ($it)" } ?: ""))
+    }
+
+    private fun limitVideoBitrate(bitsPerSecond: Int) = runOnUiThread {
+        val player = runCatching { exoPlayerAdapter?.getPlayerInstance() }.getOrNull() ?: return@runOnUiThread
+        player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().setMaxVideoBitrate(bitsPerSecond).build()
+        logPolicy(if (bitsPerSecond == BitRateRecommendationUse.NO_CEILING) "player: video bit rate no longer limited" else "player: video bit rate limited to $bitsPerSecond bit/s")
+    }
+
+    private fun showPolicyPanel() {
+        findViewById<View>(R.id.policyPanel).visibility = View.VISIBLE
+        val adapter = mediaSessionHandlerAdapter ?: return
+        val component = { intent.getStringExtra(EXTRA_COMPONENT_REFERENCE) ?: selectedServiceOperationPoint() ?: "" }
+        fun withSession(action: (MediaSessionHandlerAdapter, String) -> Unit) = View.OnClickListener {
+            val id = mediaDeliverySessionIdentifier
+            if (id != null) action(adapter, id)
+        }
+        fun withPoint(action: (MediaSessionHandlerAdapter, String, String) -> Unit) = withSession { a, id ->
+            val point = selectedServiceOperationPoint()
+            if (point == null) logPolicy("no Service Operation Point: press Points first") else action(a, id, point)
+        }
+        findViewById<Button>(R.id.policyPointsButton).setOnClickListener(withSession { a, id -> a.getServiceOperationPoints(id) })
+        findViewById<Button>(R.id.policyBdtButton).setOnClickListener(withPoint { a, id, point -> a.getBDTInfo(id, point) })
+        findViewById<Button>(R.id.policyActivateButton).setOnClickListener(withPoint { a, id, point ->
+            a.activatePolicy(
+                id, point,
+                if (intent.hasExtra(EXTRA_ESTIMATED_TRANSFER_VOLUME)) intent.getLongExtra(EXTRA_ESTIMATED_TRANSFER_VOLUME, 0L) else null,
+                intent.getStringExtra(EXTRA_COMPONENT_REFERENCE),
+                intent.getStringExtra(EXTRA_TARGET_DOWNLINK_BIT_RATE),
+                intent.getStringExtra(EXTRA_TARGET_UPLINK_BIT_RATE)
+            )
+        })
+        findViewById<Button>(R.id.policyDeactivateButton).setOnClickListener(withSession { a, id -> a.deactivatePolicy(id) })
+        findViewById<Button>(R.id.policyStatusButton).setOnClickListener(withSession { a, id -> a.getDynamicPolicyStatus(id) })
+        findViewById<Button>(R.id.policyRecommendationButton).setOnClickListener(withSession { a, id -> a.requestBitRateRecommendation(id, component()) })
+        findViewById<Button>(R.id.policyBoostButton).setOnClickListener(withSession { a, id -> a.requestDeliveryBoost(id, component()) })
+        adapter.getServiceOperationPoints(mediaDeliverySessionIdentifier ?: return)
     }
 
     // A second media delivery session of the same application, with a Media Stream Handler instance of its own (TS 26.510 V19.2.0
@@ -251,6 +388,8 @@ class DetailActivity : AppCompatActivity() {
         val adapter = mediaSessionHandlerAdapter ?: return
         intent.getStringExtra(EXTRA_SECOND_SERVICE_ID)?.let { startSecondSession(it) }
         adapter.generalSessionListener = generalSessionListener
+        adapter.dynamicPolicyListener = dynamicPolicyListener
+        adapter.networkAssistanceListener = networkAssistanceListener
         val playerAdapter = adapter.getExoPlayerAdapter()
         exoPlayerAdapter = playerAdapter
         playerAdapter.initialize(playerView, this)
