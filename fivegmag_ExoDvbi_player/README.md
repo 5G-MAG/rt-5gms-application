@@ -1,7 +1,7 @@
 <h1 align="center">Media Client for 5G Media Streaming / 5G Broadcast</h1>
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Under_Development-yellow" alt="Under Development">
-  <img src="https://img.shields.io/github/v/tag/5G-MAG/rt-5gms-application-provider?label=version" alt="Version">
+  <img src="https://img.shields.io/github/v/tag/5G-MAG/rt-5gms-application?label=version" alt="Version">
   <img src="https://img.shields.io/badge/License-5G--MAG%20Public%20License%20(v1.0)-blue" alt="License">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
 </p>
@@ -29,32 +29,37 @@ The DVB-I Reference Application project consists of a backend and frontend parts
 
 ## Building
 
-Clone the repository, including submodules
+Clone the repository, including submodules (the ExoPlayer sources are a submodule):
 
 ```
-git clone --recurse-submodules git@github.com:5G-MAG/rt-5gms-application.git
+git clone --recurse-submodules https://github.com/5G-MAG/rt-5gms-application.git
 ```
 
-Copy the patch available inside the ```patch``` folder into the Exoplayer project, then apply it:
+Copy the patch available inside the ```patch``` folder into the ExoPlayer project, then apply it:
 ```
-copy rt-5gms-application\fivegmag_ExoDvbi_player\patch\Exoplayer.patch rt-5gms-application\fivegmag_ExoDvbi_player\Exoplayer\
-cd rt-5gms-application\fivegmag_ExoDvbi_player\Exoplayer\
+cp rt-5gms-application/fivegmag_ExoDvbi_player/patch/Exoplayer.patch rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer/
+cd rt-5gms-application/fivegmag_ExoDvbi_player/ExoPlayer/
 git apply Exoplayer.patch
 ```
 
-Build the patched Exoplayer project:
+The commands are for Linux, macOS and Git Bash. In a Windows command prompt, use ```copy``` with backslashes
+in the paths in place of ```cp```; ```git``` is the same. The folder is called ```ExoPlayer``` (capital P), and
+the patch file inside ```patch``` is called ```Exoplayer.patch```: on Linux the case matters.
+
+Build the patched ExoPlayer project:
 ```
 ./gradlew assembleRelease
 ```
 
-Find the built .apk files in the Exoplayer folder:
+Find the built .apk files in the ExoPlayer folder, below the ```demos/main``` module (Gradle's default build folder
+is ```build```):
 ```
-.\Exoplayer\demos\main\buildout\outputs\apk
+ExoPlayer/demos/main/build/outputs/apk
 ```
 
 Pick the desired .apk (Debug/Release version, with/without Decoder Extensions) and install on your target device via e.g. ADB
 
-In case of an error ```SDK location not found```, add a ```local.properties``` file to the Exoplayer directory specifying the path to the Android SDK. For instance, on a MAC: 
+In case of an error ```SDK location not found```, add a ```local.properties``` file to the ExoPlayer directory specifying the path to the Android SDK. For instance, on a MAC: 
 ```
 sdk.dir=/Users/<username>/Library/Android/sdk
 ```
