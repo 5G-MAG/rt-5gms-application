@@ -182,6 +182,14 @@
                     android:textColor="@color/on_surface_secondary"
                     android:textSize="12sp" />
 
+                <Spinner
+                    android:id="@+id/policyPointSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
+                    android:minHeight="48dp" />
+
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

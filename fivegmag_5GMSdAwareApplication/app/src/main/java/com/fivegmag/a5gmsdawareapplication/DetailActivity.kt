@@ -13,13 +13,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import coil.load
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
+import com.fivegmag.a5gmsdawareapplication.model.EntryPointJson
 import com.fivegmag.a5gmscommonlibrary.models.StreamingAccess
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmscommonlibrary.helpers.SessionHandlerBundleKeys
@@ -58,9 +62,13 @@ class DetailActivity : AppCompatActivity() {
         const val EXTRA_ACCESS_TOKEN = "detail_access_token"
         const val EXTRA_SECOND_SERVICE_ID = "detail_second_service_id"
         const val EXTRA_SECOND_PLAYS = "detail_second_plays"
+        // A 3GPP Service URL (TS 26.510 V19.2.0 clause 6): when present, the Media Session Handler launches the session and playback from it
+        const val EXTRA_SERVICE_URL = "detail_service_url"
 
         // The Dynamic Policy and Network Assistance controls (TS 26.510 V19.2.0 clauses 11.3, 11.4): all optional
         const val EXTRA_SERVICE_OPERATION_POINT = "detail_service_operation_point"
+        // The request per Service Operation Point: "Standard=3 Mbps/1 Mbps;Premium=8 Mbps/1 Mbps" (point=downlink/uplink), TS 26.510 clause 5.3.3.2 item 4
+        const val EXTRA_POINT_TARGETS = "detail_point_targets"
         const val EXTRA_COMPONENT_REFERENCE = "detail_component_reference"
         const val EXTRA_ESTIMATED_TRANSFER_VOLUME = "detail_estimated_transfer_volume"
         const val EXTRA_TARGET_DOWNLINK_BIT_RATE = "detail_target_downlink_bit_rate"
@@ -80,6 +88,7 @@ class DetailActivity : AppCompatActivity() {
 
     private var serviceListEntryJson: String = ""
     private var m5BaseUrl: String = ""
+    private val serviceUrl: String? get() = intent.getStringExtra(EXTRA_SERVICE_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -163,7 +172,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun startPlayback() {
-        if (serviceListEntryJson.isEmpty()) return
+        if (serviceListEntryJson.isEmpty() && serviceUrl == null) return
 
         // Swap poster for player
         posterImage.visibility = View.GONE
@@ -196,6 +205,10 @@ class DetailActivity : AppCompatActivity() {
 
         override fun onSessionStatus(mediaDeliverySessionIdentifier: String?, contentIdentifier: String?, sessionHandlingState: String?) {
             Log.i("5GMS-App", "status of [$mediaDeliverySessionIdentifier]: content [$contentIdentifier] $sessionHandlingState")
+        }
+
+        override fun onServiceUrlLaunched(httpStatus: Int) {
+            Log.i("5GMS-App", "launchServiceUrl: HTTP $httpStatus")
         }
 
         override fun onConsumptionReportingStatus(mediaDeliverySessionIdentifier: String?, consumptionReport: String?) {
@@ -238,6 +251,11 @@ class DetailActivity : AppCompatActivity() {
                     exoPlayerAdapter?.play()
                 }
             }
+            if (event == SessionHandlerEvents.NetworkAssistance.BIT_RATE_RECOMMENDATION) {
+                // a recommendation that the Media AF pushed: the player is kept to the representations that fit it, as for a requested one
+                BitRateRecommendationUse.ceilingOfNotification(id, mediaDeliverySessionIdentifier, payload.getString(SessionHandlerBundleKeys.RECOMMENDED_DOWNLINK_BIT_RATE))
+                    ?.let { limitVideoBitrate(it) }
+            }
             if (event in policyEvents) {
                 logPolicy(event + " " + payload.keySet().filter { it != SessionHandlerBundleKeys.EVENT && it != SessionHandlerBundleKeys.MEDIA_DELIVERY_SESSION_IDENTIFIER }
                     .joinToString { k -> k + "=" + payload.get(k) })
@@ -265,8 +283,32 @@ class DetailActivity : AppCompatActivity() {
     private var serviceOperationPoints: List<PolicyTemplateBinding> = emptyList()
     private val policyLines = ArrayDeque<String>()
 
+    // The point chosen in the selector wins over the one of the intent, which wins over the first point
+    private var chosenServiceOperationPoint: String? = null
+
+    // The bit rates (downlink, uplink) that the launch extra gives for a point, or null
+    private fun pointTarget(point: String): Pair<String?, String?>? =
+        intent.getStringExtra(EXTRA_POINT_TARGETS)?.split(';')?.map { it.trim() }
+            ?.firstOrNull { it.substringBefore('=').trim() == point }
+            ?.substringAfter('=', "")?.split('/')
+            ?.let { it.getOrNull(0)?.trim()?.ifEmpty { null } to it.getOrNull(1)?.trim()?.ifEmpty { null } }
+
     private fun selectedServiceOperationPoint(): String? =
-        intent.getStringExtra(EXTRA_SERVICE_OPERATION_POINT) ?: serviceOperationPoints.firstOrNull()?.externalReference
+        chosenServiceOperationPoint ?: intent.getStringExtra(EXTRA_SERVICE_OPERATION_POINT) ?: serviceOperationPoints.firstOrNull()?.externalReference
+
+    private fun fillPointSelector(points: List<PolicyTemplateBinding>) {
+        val spinner = findViewById<Spinner>(R.id.policyPointSpinner) ?: return
+        val names = points.map { it.externalReference }
+        spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, names)
+        val current = selectedServiceOperationPoint()
+        names.indexOf(current).takeIf { it >= 0 }?.let { spinner.setSelection(it) }
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                chosenServiceOperationPoint = names.getOrNull(position)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
 
     private fun logPolicy(line: String) {
         Log.i("5GMS-App", line)
@@ -278,6 +320,7 @@ class DetailActivity : AppCompatActivity() {
     private val dynamicPolicyListener = object : DynamicPolicyListener {
         override fun onServiceOperationPoints(mediaDeliverySessionId: String?, points: List<PolicyTemplateBinding>) {
             serviceOperationPoints = points
+            fillPointSelector(points)
             logPolicy("points: " + points.joinToString { "[" + it.externalReference + (if (it.l4SEnablementPreference) " L4S" else "") +
                 (if (it.qoSMonitoringEnablementPreference) " QoSmon" else "") + (if (!it.bdtWindows.isNullOrEmpty()) " BDT" else "") + "]" })
         }
@@ -338,8 +381,8 @@ class DetailActivity : AppCompatActivity() {
                 id, point,
                 if (intent.hasExtra(EXTRA_ESTIMATED_TRANSFER_VOLUME)) intent.getLongExtra(EXTRA_ESTIMATED_TRANSFER_VOLUME, 0L) else null,
                 intent.getStringExtra(EXTRA_COMPONENT_REFERENCE),
-                intent.getStringExtra(EXTRA_TARGET_DOWNLINK_BIT_RATE),
-                intent.getStringExtra(EXTRA_TARGET_UPLINK_BIT_RATE)
+                pointTarget(point)?.first ?: intent.getStringExtra(EXTRA_TARGET_DOWNLINK_BIT_RATE),
+                pointTarget(point)?.second ?: intent.getStringExtra(EXTRA_TARGET_UPLINK_BIT_RATE)
             )
         })
         findViewById<Button>(R.id.policyDeactivateButton).setOnClickListener(withSession { a, id -> a.deactivatePolicy(id) })
@@ -394,6 +437,10 @@ class DetailActivity : AppCompatActivity() {
         exoPlayerAdapter = playerAdapter
         playerAdapter.initialize(playerView, this)
 
+        serviceUrl?.let {
+            adapter.launchServiceUrl(it)
+            return
+        }
         val serviceListEntry = deserializeServiceListEntry(serviceListEntryJson)
         adapter.setM5Endpoint(m5BaseUrl)
         if (intent.getBooleanExtra(EXTRA_USE_CREATE_MEDIA_DELIVERY_SESSION, false)) {
@@ -455,17 +502,7 @@ class DetailActivity : AppCompatActivity() {
         val entryPointsArray = jsonObject["entryPoints"]?.jsonArray
         if (entryPointsArray != null) {
             for (ep in entryPointsArray) {
-                val epObj = ep.jsonObject
-                val locator = epObj["locator"]?.jsonPrimitive?.content ?: ""
-                val contentType = epObj["contentType"]?.jsonPrimitive?.content ?: ""
-                val profiles = ArrayList<String>()
-                val profilesArray = epObj["profiles"]?.jsonArray
-                if (profilesArray != null) {
-                    for (profile in profilesArray) {
-                        profiles.add(profile.jsonPrimitive.content)
-                    }
-                }
-                entryPoints.add(EntryPoint(locator, contentType, profiles))
+                entryPoints.add(EntryPointJson.fromJson(ep.jsonObject))
             }
         }
 

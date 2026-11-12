@@ -32,4 +32,18 @@ class BitRateRecommendationUseTest {
     fun aRateAboveWhatThePlayerTakesGivesNoCeiling() {
         assertNull(BitRateRecommendationUse.maxVideoBitrate("3 Gbps"))
     }
+
+    @Test
+    fun aNotificationOfTheShownSessionGivesItsCeiling() {
+        assertEquals(3_000_000, BitRateRecommendationUse.ceilingOfNotification("s1", "s1", "3 Mbps"))
+    }
+
+    @Test
+    fun aNotificationOfAnotherSessionOrWithoutARateGivesNoCeiling() {
+        assertNull(BitRateRecommendationUse.ceilingOfNotification("s2", "s1", "3 Mbps"))
+        assertNull(BitRateRecommendationUse.ceilingOfNotification(null, "s1", "3 Mbps"))
+        assertNull(BitRateRecommendationUse.ceilingOfNotification("s1", null, "3 Mbps"))
+        assertNull(BitRateRecommendationUse.ceilingOfNotification("s1", "s1", null))
+        assertNull(BitRateRecommendationUse.ceilingOfNotification("s1", "s1", "fast"))
+    }
 }

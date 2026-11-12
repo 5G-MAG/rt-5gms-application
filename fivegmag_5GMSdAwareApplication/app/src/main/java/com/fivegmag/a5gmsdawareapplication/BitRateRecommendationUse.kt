@@ -17,4 +17,11 @@ object BitRateRecommendationUse {
         val bps = match.groupValues[1].toDouble() * factors.getValue(match.groupValues[2])
         return if (bps >= 1 && bps <= Int.MAX_VALUE) bps.toInt() else null
     }
+
+    /**
+     * The ceiling that a BIT_RATE_RECOMMENDATION notification (TS 26.510 table 11.4.2-2) sets for the media delivery session shown; null when the
+     * notification is for another session or has no usable downlink rate. Using it is optional (clause 5.4.4: the Media Access Function "may" modify the bit rate).
+     */
+    fun ceilingOfNotification(notifiedSession: String?, shownSession: String?, recommendedDownlink: String?): Int? =
+        if (notifiedSession != null && notifiedSession == shownSession) maxVideoBitrate(recommendedDownlink) else null
 }

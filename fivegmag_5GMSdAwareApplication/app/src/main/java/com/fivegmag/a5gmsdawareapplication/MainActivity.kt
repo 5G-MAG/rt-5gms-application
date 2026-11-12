@@ -37,6 +37,7 @@ import com.facebook.shimmer.ShimmerFrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
+import com.fivegmag.a5gmsdawareapplication.model.EntryPointJson
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmsdawareapplication.adapter.CategoryRowAdapter
@@ -567,25 +568,7 @@ class MainActivity : AppCompatActivity() {
 
             if (entryPointList != null) {
                 for (entryPoint in entryPointList) {
-                    val entryPointAsJsonObject =
-                        Json.parseToJsonElement(entryPoint.toString()).jsonObject
-                    val locator = replaceDoubleTicks(entryPointAsJsonObject["locator"].toString())
-                    val contentType =
-                        replaceDoubleTicks(entryPointAsJsonObject["contentType"].toString())
-                    val profiles = ArrayList<String>()
-                    val profileList = entryPointAsJsonObject["profiles"]?.jsonArray
-                    if (profileList != null) {
-                        for (profileEntry in profileList) {
-                            profiles.add(profileEntry.toString())
-                        }
-                    }
-                    entryPoints.add(
-                        EntryPoint(
-                            locator,
-                            contentType,
-                            profiles
-                        )
-                    )
+                    entryPoints.add(EntryPointJson.fromJson(entryPoint.jsonObject))
                 }
             }
             val entry = ServiceListEntry(
