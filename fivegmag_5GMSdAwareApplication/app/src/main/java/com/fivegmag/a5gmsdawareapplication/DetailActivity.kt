@@ -73,6 +73,10 @@ class DetailActivity : AppCompatActivity() {
         const val EXTRA_ESTIMATED_TRANSFER_VOLUME = "detail_estimated_transfer_volume"
         const val EXTRA_TARGET_DOWNLINK_BIT_RATE = "detail_target_downlink_bit_rate"
         const val EXTRA_TARGET_UPLINK_BIT_RATE = "detail_target_uplink_bit_rate"
+
+        // The Media Player capabilities (TS 26.512 V19.3.0 table 13.2.4-2): the sample player declares none unless an extra says so
+        const val EXTRA_L4S_CAPABLE = "detail_l4s_capable"
+        const val EXTRA_QOS_MONITORING = "detail_qos_monitoring"
     }
 
     private lateinit var posterImage: ImageView
@@ -191,6 +195,10 @@ class DetailActivity : AppCompatActivity() {
         // Initialize MediaSessionHandler and start playback
         val adapter = MediaSessionHandlerAdapter()
         mediaSessionHandlerAdapter = adapter
+        adapter.setL4sTransportStackPresent(intent.getBooleanExtra(EXTRA_L4S_CAPABLE, false))
+        if (intent.getBooleanExtra(EXTRA_QOS_MONITORING, false)) {
+            adapter.setQosMonitoringResultsConsumer { id, results -> Log.i("5GMS-App", "QoS monitoring results of [$id]: $results") }
+        }
         adapter.initialize(this) {
             onConnectionToMediaSessionHandlerEstablished()
         }
