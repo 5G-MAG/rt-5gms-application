@@ -18,6 +18,7 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
@@ -28,6 +29,7 @@ import com.fivegmag.a5gmscommonlibrary.models.StreamingAccess
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmscommonlibrary.helpers.SessionHandlerBundleKeys
 import com.fivegmag.a5gmscommonlibrary.helpers.SessionHandlerEvents
+import com.fivegmag.a5gmsmediastreamhandler.service.ServiceUrlIntents
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
 import com.fivegmag.a5gmscommonlibrary.models.DynamicPolicyStatus
 import com.fivegmag.a5gmscommonlibrary.models.PolicyTemplateBinding
@@ -64,6 +66,8 @@ class DetailActivity : AppCompatActivity() {
         const val EXTRA_SECOND_PLAYS = "detail_second_plays"
         // A 3GPP Service URL (TS 26.510 V19.2.0 clause 6): when present, the Media Session Handler launches the session and playback from it
         const val EXTRA_SERVICE_URL = "detail_service_url"
+        // the Service URL is requested by the URL handler of the Media Session Handler (TS 26.512 V19.3.0 clause 4.8.3.1) instead of by a message
+        const val EXTRA_SERVICE_URL_BY_INTENT = "detail_service_url_by_intent"
 
         // The Dynamic Policy and Network Assistance controls (TS 26.510 V19.2.0 clauses 11.3, 11.4): all optional
         const val EXTRA_SERVICE_OPERATION_POINT = "detail_service_operation_point"
@@ -93,6 +97,11 @@ class DetailActivity : AppCompatActivity() {
     private var serviceListEntryJson: String = ""
     private var m5BaseUrl: String = ""
     private val serviceUrl: String? get() = intent.getStringExtra(EXTRA_SERVICE_URL)
+
+    // the HTTP status of the launch by the URL handler (TS 26.512 V19.3.0 clause 4.8.3.4) is the extra of the activity result
+    private val serviceUrlResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.i("5GMS-App", "launchServiceUrl by intent: HTTP ${ServiceUrlIntents.statusOf(result.data)}")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -446,7 +455,11 @@ class DetailActivity : AppCompatActivity() {
         playerAdapter.initialize(playerView, this)
 
         serviceUrl?.let {
-            adapter.launchServiceUrl(it)
+            if (intent.getBooleanExtra(EXTRA_SERVICE_URL_BY_INTENT, false)) {
+                serviceUrlResult.launch(adapter.serviceUrlIntent(it))
+            } else {
+                adapter.launchServiceUrl(it)
+            }
             return
         }
         val serviceListEntry = deserializeServiceListEntry(serviceListEntryJson)
