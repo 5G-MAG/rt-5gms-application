@@ -14,7 +14,10 @@ import android.util.Log
 import com.fivegmag.a5gmsdawareapplication.model.AppConfig
 import com.fivegmag.a5gmsdawareapplication.model.M8Source
 import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -32,32 +35,23 @@ class ConfigProvider {
     /**
      * Loads app_config.json from the local assets directory.
      */
-    fun loadFromAssets(assets: AssetManager): AppConfig {
-        return try {
-            val inputStream = assets.open(DEFAULT_CONFIG_FILE)
-            val json = inputStream.bufferedReader().use { it.readText() }
-            parseConfigJson(json)
-        } catch (e: Exception) {
-            Log.e(TAG_CONFIG_PROVIDER, "Failed to load local config: ${e.message}")
-            AppConfig(emptyList())
-        }
+    fun loadFromAssets(assets: AssetManager): AppConfig = try {
+        val inputStream = assets.open(DEFAULT_CONFIG_FILE)
+        val json = inputStream.bufferedReader().use { it.readText() }
+        parseConfigJson(json)
+    } catch (e: Exception) {
+        Log.e(TAG_CONFIG_PROVIDER, "Failed to load local config: ${e.message}")
+        AppConfig(emptyList())
     }
 
     /**
      * Loads app_config.json from a remote URL.
      */
-    fun loadFromEndpoint(
-        configUrl: String,
-        iConfigApi: IConfigApi,
-        callback: (AppConfig) -> Unit
-    ) {
+    fun loadFromEndpoint(configUrl: String, iConfigApi: IConfigApi, callback: (AppConfig) -> Unit) {
         try {
             val call: Call<ResponseBody>? = iConfigApi.fetchConfiguration(configUrl)
             call?.enqueue(object : Callback<ResponseBody?> {
-                override fun onResponse(
-                    call: Call<ResponseBody?>,
-                    response: Response<ResponseBody?>
-                ) {
+                override fun onResponse(call: Call<ResponseBody?>, response: Response<ResponseBody?>) {
                     val resource: String? = response.body()?.string()
                     if (resource != null) {
                         try {

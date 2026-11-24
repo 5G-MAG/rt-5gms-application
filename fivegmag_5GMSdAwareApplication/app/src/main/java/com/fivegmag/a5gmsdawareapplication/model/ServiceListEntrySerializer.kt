@@ -10,7 +10,10 @@ https://drive.google.com/file/d/1cinCiA778IErENZ3JN52VFW-1ffHpx7Z/view
 package com.fivegmag.a5gmsdawareapplication.model
 
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /**
  * Serializes a ServiceListEntry to a JSON string for passing via Intent extras.
@@ -23,18 +26,23 @@ object ServiceListEntrySerializer {
             val eps = entry.entryPoints
             if (eps != null) {
                 for (ep in eps) {
-                    add(buildJsonObject {
-                        put("locator", ep.locator)
-                        put("contentType", ep.contentType)
-                        val profs = ep.profiles
-                        put("profiles", buildJsonArray {
-                            if (profs != null) {
-                                for (profile in profs) {
-                                    add(profile)
+                    add(
+                        buildJsonObject {
+                            put("locator", ep.locator)
+                            put("contentType", ep.contentType)
+                            val profs = ep.profiles
+                            put(
+                                "profiles",
+                                buildJsonArray {
+                                    if (profs != null) {
+                                        for (profile in profs) {
+                                            add(profile)
+                                        }
+                                    }
                                 }
-                            }
-                        })
-                    })
+                            )
+                        }
+                    )
                 }
             }
         }

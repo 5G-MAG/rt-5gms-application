@@ -16,16 +16,10 @@ package com.fivegmag.a5gmsdawareapplication.model
  * @param m8Url Either a full URL (http://...) for remote, or a relative path (m8/...) for local assets
  * @param metadataUrl Optional explicit metadata location. null = derive from m8Url, "" = no metadata
  */
-data class M8Source(
-    val name: String,
-    val m8Url: String,
-    val metadataUrl: String? = null
-)
+data class M8Source(val name: String, val m8Url: String, val metadataUrl: String? = null)
 
 /**
  * Top-level application configuration loaded from app_config.json.
  * Contains the list of available M8 data sources.
  */
-data class AppConfig(
-    val sources: List<M8Source>
-)
+data class AppConfig(val sources: List<M8Source>)

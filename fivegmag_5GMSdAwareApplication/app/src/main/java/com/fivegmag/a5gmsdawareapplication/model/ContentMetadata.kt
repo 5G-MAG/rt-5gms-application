@@ -13,9 +13,4 @@ package com.fivegmag.a5gmsdawareapplication.model
  * Holds display metadata for a content item, loaded from a metadata JSON file.
  * The metadata is mapped to M8 service list entries via the entry name.
  */
-data class ContentMetadata(
-    val title: String,
-    val description: String,
-    val posterUrl: String,
-    val mediaType: String
-)
+data class ContentMetadata(val title: String, val description: String, val posterUrl: String, val mediaType: String)
