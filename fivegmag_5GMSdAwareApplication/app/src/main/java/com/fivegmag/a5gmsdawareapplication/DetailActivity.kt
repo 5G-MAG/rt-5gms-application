@@ -171,7 +171,8 @@ class DetailActivity : AppCompatActivity() {
 
         val serviceListEntry = deserializeServiceListEntry(serviceListEntryJson)
         adapter.setM5Endpoint(m5BaseUrl)
-        adapter.initializePlaybackByServiceListEntry(serviceListEntry)
+        // Each detail screen plays a single item, so it always starts a new media delivery session.
+        adapter.initializePlaybackByServiceListEntry(serviceListEntry, newMediaDeliverySession = true)
     }
 
     override fun onStart() {
