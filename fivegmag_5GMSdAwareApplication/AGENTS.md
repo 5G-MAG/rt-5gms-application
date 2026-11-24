@@ -70,10 +70,17 @@ Currently only placeholder tests exist.
 
 ## Lint
 
-No dedicated linting tools (ktlint, detekt, spotless) are configured. Android Lint
-is available via Gradle:
+Kotlin code style is enforced with **ktlint** (`org.jlleitschuh.gradle.ktlint`), using
+the rules in `.editorconfig` (Android Studio code style, 4-space indentation,
+120-character line limit). CI runs `ktlintCheck` on every pull request.
 
 ```bash
+# Check Kotlin code style
+./gradlew ktlintCheck
+
+# Auto-fix Kotlin code style
+./gradlew ktlintFormat
+
 # Run Android Lint
 ./gradlew lint
 ./gradlew lintDebug
@@ -103,9 +110,8 @@ is available via Gradle:
 
 ### Imports
 
-- Prefer explicit single-class imports over wildcards.
-- Wildcards (`*`) are acceptable for `kotlinx.serialization.json.*` and `java.util.*`.
-- No enforced grouping or blank-line separation between import groups.
+- Use explicit single-symbol imports; ktlint rejects wildcard (`*`) imports.
+- Imports are sorted lexicographically without blank lines (`ktlintFormat` fixes this).
 - Do not leave unused imports.
 
 ### Naming Conventions

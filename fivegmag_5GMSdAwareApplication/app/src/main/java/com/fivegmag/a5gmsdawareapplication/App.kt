@@ -22,7 +22,9 @@ import okhttp3.OkHttpClient
  * User-Agent string. Setting a descriptive User-Agent avoids HTTP 403
  * responses when loading poster images.
  */
-class App : Application(), ImageLoaderFactory {
+class App :
+    Application(),
+    ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
         val client = OkHttpClient.Builder()
@@ -31,7 +33,7 @@ class App : Application(), ImageLoaderFactory {
                     .header(
                         "User-Agent",
                         "5G-MAGflix/${BuildConfig.VERSION_NAME} " +
-                                "(Android; coil-kt; +https://www.5g-mag.com)"
+                            "(Android; coil-kt; +https://www.5g-mag.com)"
                     )
                     .build()
                 chain.proceed(request)

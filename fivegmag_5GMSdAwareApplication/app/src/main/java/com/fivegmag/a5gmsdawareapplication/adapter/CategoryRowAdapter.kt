@@ -28,9 +28,8 @@ import com.fivegmag.a5gmsdawareapplication.model.ContentItem
  * - Hero banner (position 0 when a featured item is set)
  * - Category rows (horizontal carousels of content cards)
  */
-class CategoryRowAdapter(
-    private val onItemClick: (ContentItem) -> Unit
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class CategoryRowAdapter(private val onItemClick: (ContentItem) -> Unit) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val VIEW_TYPE_HERO = 0
@@ -59,9 +58,8 @@ class CategoryRowAdapter(
 
     private fun heroOffset(): Int = if (hasHero()) 1 else 0
 
-    override fun getItemViewType(position: Int): Int {
-        return if (hasHero() && position == 0) VIEW_TYPE_HERO else VIEW_TYPE_CATEGORY
-    }
+    override fun getItemViewType(position: Int): Int =
+        if (hasHero() && position == 0) VIEW_TYPE_HERO else VIEW_TYPE_CATEGORY
 
     override fun getItemCount(): Int = categories.size + heroOffset()
 
@@ -72,6 +70,7 @@ class CategoryRowAdapter(
                 val view = inflater.inflate(R.layout.item_hero_banner, parent, false)
                 HeroViewHolder(view)
             }
+
             else -> {
                 val view = inflater.inflate(R.layout.item_category_row, parent, false)
                 CategoryViewHolder(view)
@@ -84,6 +83,7 @@ class CategoryRowAdapter(
             is HeroViewHolder -> {
                 heroItem?.let { holder.bind(it) }
             }
+
             is CategoryViewHolder -> {
                 val categoryIndex = position - heroOffset()
                 holder.bind(categories[categoryIndex])
@@ -135,7 +135,9 @@ class CategoryRowAdapter(
 
             val horizontalAdapter = ContentCardAdapter(onItemClick)
             categoryRecyclerView.layoutManager = LinearLayoutManager(
-                itemView.context, LinearLayoutManager.HORIZONTAL, false
+                itemView.context,
+                LinearLayoutManager.HORIZONTAL,
+                false
             )
             categoryRecyclerView.adapter = horizontalAdapter
             categoryRecyclerView.setRecycledViewPool(viewPool)

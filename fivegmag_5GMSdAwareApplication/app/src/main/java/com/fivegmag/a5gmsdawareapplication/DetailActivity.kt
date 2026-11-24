@@ -23,7 +23,10 @@ import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
 import com.fivegmag.a5gmsmediastreamhandler.MediaSessionHandlerAdapter
 import com.fivegmag.a5gmsmediastreamhandler.player.exoplayer.ExoPlayerAdapter
 import com.google.android.material.appbar.MaterialToolbar
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.greenrobot.eventbus.EventBus
 
 /**
@@ -93,12 +96,7 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun displayContent(
-        title: String,
-        description: String,
-        posterUrl: String,
-        mediaType: String
-    ) {
+    private fun displayContent(title: String, description: String, posterUrl: String, mediaType: String) {
         val titleView = findViewById<TextView>(R.id.detailTitle)
         val descriptionView = findViewById<TextView>(R.id.detailDescription)
         val mediaTypeBadge = findViewById<TextView>(R.id.detailMediaTypeBadge)

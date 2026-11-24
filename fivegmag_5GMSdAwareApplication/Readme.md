@@ -169,6 +169,19 @@ the [Github discussion](https://github.com/5G-MAG/rt-5gms-application/discussion
 
 ## Development
 
+### Code style
+
+Kotlin code is checked with [ktlint](https://pinterest.github.io/ktlint/), using the rules in
+`.editorconfig`. The CI workflow runs the check on every pull request. To check and auto-fix
+locally, run:
+
+````
+./gradlew ktlintCheck
+./gradlew ktlintFormat
+````
+
+### Branches
+
 This project follows
 the [Gitflow workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
 . The `development`

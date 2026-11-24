@@ -25,9 +25,8 @@ import com.fivegmag.a5gmsdawareapplication.model.ContentItem
  * Each card shows a poster image with a title overlay.
  * Used as the inner adapter inside each category row.
  */
-class ContentCardAdapter(
-    private val onItemClick: (ContentItem) -> Unit
-) : RecyclerView.Adapter<ContentCardAdapter.ContentViewHolder>() {
+class ContentCardAdapter(private val onItemClick: (ContentItem) -> Unit) :
+    RecyclerView.Adapter<ContentCardAdapter.ContentViewHolder>() {
 
     private val items: ArrayList<ContentItem> = ArrayList()
 

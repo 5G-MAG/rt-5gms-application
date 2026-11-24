@@ -15,10 +15,7 @@ import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
  * Combines a ServiceListEntry from the M8 data with optional display metadata.
  * Used as the UI model for the content grid on the landing page.
  */
-data class ContentItem(
-    val serviceListEntry: ServiceListEntry,
-    val metadata: ContentMetadata?
-) {
+data class ContentItem(val serviceListEntry: ServiceListEntry, val metadata: ContentMetadata?) {
 
     val title: String
         get() = metadata?.title ?: serviceListEntry.name

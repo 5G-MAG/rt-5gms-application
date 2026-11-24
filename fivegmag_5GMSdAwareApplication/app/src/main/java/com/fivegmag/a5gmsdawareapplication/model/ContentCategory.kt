@@ -14,8 +14,4 @@ package com.fivegmag.a5gmsdawareapplication.model
  * Each category groups content items of the same media type
  * into a horizontally scrollable carousel.
  */
-data class ContentCategory(
-    val label: String,
-    val mediaType: String,
-    val items: List<ContentItem>
-)
+data class ContentCategory(val label: String, val mediaType: String, val items: List<ContentItem>)

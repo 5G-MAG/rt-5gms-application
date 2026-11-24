@@ -30,12 +30,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.media3.common.util.UnstableApi
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.facebook.shimmer.ShimmerFrameLayout
+import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.facebook.shimmer.ShimmerFrameLayout
 import com.fivegmag.a5gmscommonlibrary.models.EntryPoint
 import com.fivegmag.a5gmscommonlibrary.models.M8Model
 import com.fivegmag.a5gmscommonlibrary.models.ServiceListEntry
@@ -47,15 +47,19 @@ import com.fivegmag.a5gmsdawareapplication.model.M8Source
 import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.google.android.material.appbar.MaterialToolbar
-import kotlinx.serialization.json.*
+import java.io.InputStream
+import java.net.URI
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
-import java.io.InputStream
-import java.net.URI
 
 const val TAG_AWARE_APPLICATION = "5GMS Aware Application"
 
@@ -132,11 +136,15 @@ class MainActivity : AppCompatActivity() {
         val spannable = SpannableString(full)
         spannable.setSpan(
             ForegroundColorSpan(getColor(R.color.fivegmag_blue)),
-            0, part1.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            0,
+            part1.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         spannable.setSpan(
             ForegroundColorSpan(getColor(R.color.flix_red)),
-            part1.length, full.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            part1.length,
+            full.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         logoText.text = spannable
     }
@@ -315,7 +323,8 @@ class MainActivity : AppCompatActivity() {
             initializeRetrofitForConfigInterfaceApi()
 
             val prefs = getSharedPreferences(
-                SettingsActivity.PREFS_NAME, Context.MODE_PRIVATE
+                SettingsActivity.PREFS_NAME,
+                Context.MODE_PRIVATE
             )
             val persistedUrl = prefs.getString(SettingsActivity.PREF_CONFIG_URL, null)
 
@@ -327,7 +336,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             val persistedSourceName = prefs.getString(
-                SettingsActivity.PREF_SELECTED_SOURCE_NAME, null
+                SettingsActivity.PREF_SELECTED_SOURCE_NAME,
+                null
             )
             loadAppConfig(persistedSourceName)
             printDependenciesVersionNumbers()
@@ -487,10 +497,7 @@ class MainActivity : AppCompatActivity() {
             val call: Call<ResponseBody>? =
                 iConfigApi.fetchConfiguration(m8HostingEndpoint)
             call?.enqueue(object : Callback<ResponseBody?> {
-                override fun onResponse(
-                    call: Call<ResponseBody?>,
-                    response: Response<ResponseBody?>
-                ) {
+                override fun onResponse(call: Call<ResponseBody?>, response: Response<ResponseBody?>) {
                     val resource: String? = response.body()?.string()
                     if (resource != null) {
                         try {
@@ -548,9 +555,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun replaceDoubleTicks(value: String): String {
-        return value.replace("\"", "")
-    }
+    private fun replaceDoubleTicks(value: String): String = value.replace("\"", "")
 
     private fun createM8Model(m5BaseUrl: String, jsonServiceList: JsonArray): M8Model {
         val serviceList = ArrayList<ServiceListEntry>()

@@ -7,12 +7,12 @@ import com.fivegmag.a5gmscommonlibrary.eventbus.DownstreamFormatChangedEvent
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 
-@UnstableApi
 /**
  * This class handles messages that are dispatched by the Media Stream Handler.
  * Implements a pub/sub pattern using the eventbus library.
  *
  */
+@UnstableApi
 class MediaStreamHandlerEventHandler {
 
     private lateinit var representationInfoTextView: TextView

@@ -13,12 +13,15 @@ import android.content.res.AssetManager
 import android.util.Log
 import com.fivegmag.a5gmsdawareapplication.model.ContentMetadata
 import com.fivegmag.a5gmsdawareapplication.network.IConfigApi
-import kotlinx.serialization.json.*
+import java.net.URI
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.net.URI
 
 const val TAG_METADATA_PROVIDER = "MetadataProvider"
 
@@ -81,9 +84,7 @@ class MetadataProvider {
         }
     }
 
-    fun getMetadataForEntry(entryName: String): ContentMetadata? {
-        return metadataMap[entryName]
-    }
+    fun getMetadataForEntry(entryName: String): ContentMetadata? = metadataMap[entryName]
 
     private fun loadFromAssets(assets: AssetManager, metadataPath: String) {
         try {
@@ -96,19 +97,12 @@ class MetadataProvider {
         }
     }
 
-    private fun loadFromEndpoint(
-        metadataUrl: String,
-        iConfigApi: IConfigApi,
-        callback: () -> Unit
-    ) {
+    private fun loadFromEndpoint(metadataUrl: String, iConfigApi: IConfigApi, callback: () -> Unit) {
         try {
             val call: Call<ResponseBody>? = iConfigApi.fetchConfiguration(metadataUrl)
             if (call != null) {
                 call.enqueue(object : Callback<ResponseBody?> {
-                    override fun onResponse(
-                        call: Call<ResponseBody?>,
-                        response: Response<ResponseBody?>
-                    ) {
+                    override fun onResponse(call: Call<ResponseBody?>, response: Response<ResponseBody?>) {
                         val resource: String? = response.body()?.string()
                         if (resource != null) {
                             try {
@@ -215,19 +209,17 @@ class MetadataProvider {
      * - Remote: http://host/path/m8.json -> http://host/path/metadata.json
      * - Local: m8/config_multi_media.json -> metadata/config_multi_media_metadata.json
      */
-    private fun deriveMetadataUrl(m8Url: String): String {
-        return try {
-            val uri = URI(m8Url)
-            if (uri.isAbsolute) {
-                // Remote: replace filename with metadata.json
-                m8Url.substringBeforeLast('/') + "/metadata.json"
-            } else {
-                // Local: m8/<key>.json -> metadata/<key>_metadata.json
-                val filename = m8Url.substringAfterLast("/").substringBeforeLast(".")
-                "metadata/${filename}_metadata.json"
-            }
-        } catch (_: Exception) {
-            ""
+    private fun deriveMetadataUrl(m8Url: String): String = try {
+        val uri = URI(m8Url)
+        if (uri.isAbsolute) {
+            // Remote: replace filename with metadata.json
+            m8Url.substringBeforeLast('/') + "/metadata.json"
+        } else {
+            // Local: m8/<key>.json -> metadata/<key>_metadata.json
+            val filename = m8Url.substringAfterLast("/").substringBeforeLast(".")
+            "metadata/${filename}_metadata.json"
         }
+    } catch (_: Exception) {
+        ""
     }
 }

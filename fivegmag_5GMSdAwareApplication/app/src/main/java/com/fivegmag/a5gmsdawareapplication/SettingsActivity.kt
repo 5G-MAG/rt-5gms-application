@@ -96,11 +96,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupBackNavigation() {
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                returnResultAndFinish()
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    returnResultAndFinish()
+                }
             }
-        })
+        )
     }
 
     private fun setupLogo() {
@@ -111,11 +114,15 @@ class SettingsActivity : AppCompatActivity() {
         val spannable = SpannableString(full)
         spannable.setSpan(
             ForegroundColorSpan(getColor(R.color.fivegmag_blue)),
-            0, part1.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            0,
+            part1.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         spannable.setSpan(
             ForegroundColorSpan(getColor(R.color.flix_red)),
-            part1.length, full.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            part1.length,
+            full.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         logoText.text = spannable
     }
@@ -177,7 +184,8 @@ class SettingsActivity : AppCompatActivity() {
 
             val adapter = ArrayAdapter<String>(
                 this,
-                android.R.layout.simple_spinner_item, spinnerOptions
+                android.R.layout.simple_spinner_item,
+                spinnerOptions
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             m8Spinner.adapter = adapter
